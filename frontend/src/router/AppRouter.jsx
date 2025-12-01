@@ -1,0 +1,17 @@
+import { Routes, Route } from "react-router-dom";
+import Login from "../pages/auth/Login";
+// import ChangePassword from "../pages/auth/ChangePassword";
+// import NotFoundPage from "../pages/auth/NotFoundPage";
+
+// import adminRoutes from "./roles/adminRoutes";
+// import managerRoutes from "./roles/managerRoutes";
+// import employeeRoutes from "./roles/employeeRoutes";
+
+export default function AppRouter() {
+  return (
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/login" element={<Login />} />
+    </Routes>
+  );
+}
