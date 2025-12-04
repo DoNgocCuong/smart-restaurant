@@ -21,7 +21,7 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer accountId;
-    String email;
+    String username;
     String password;
     boolean is_email_verify;
     @CreationTimestamp
