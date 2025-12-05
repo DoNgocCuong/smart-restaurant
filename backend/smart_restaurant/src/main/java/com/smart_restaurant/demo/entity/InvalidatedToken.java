@@ -25,7 +25,7 @@ public class InvalidatedToken {
     @Column(name = "expire_time", nullable = false)
     private Date expireTime;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 }

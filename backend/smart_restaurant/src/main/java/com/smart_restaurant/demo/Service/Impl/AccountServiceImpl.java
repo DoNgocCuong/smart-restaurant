@@ -7,11 +7,14 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.smart_restaurant.demo.Repository.AccountRepository;
+import com.smart_restaurant.demo.Repository.RoleRepository;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.dto.Request.SignupRequest;
 import com.smart_restaurant.demo.dto.Response.ConfirmEmailResponse;
 import com.smart_restaurant.demo.dto.Response.SignupResponse;
 import com.smart_restaurant.demo.entity.Account;
+import com.smart_restaurant.demo.entity.Role;
+import com.smart_restaurant.demo.enums.Roles;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.smart_restaurant.demo.mapper.AccountMapper;
@@ -32,6 +35,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -49,13 +53,21 @@ public class AccountServiceImpl implements AccountService {
     AccountMapper accountMapper;
     AccountRepository accountRepository;
     JavaMailSender mailSender;
+    RoleRepository roleRepository;
     @Override
-    public SignupResponse createAccount(SignupRequest signupRequest) throws JOSEException, MessagingException {
-        if(accountRepository.existsByUsername(signupRequest.getUsename()))
+    public SignupResponse createAccount(SignupRequest signupRequest) throws JOSEException {
+        if(accountRepository.existsByUsername(signupRequest.getUsername()))
             throw new AppException(ErrorCode.ACCOUNT_EXISTED);
         Account newAccount=accountMapper.toAccount(signupRequest);
+
+        newAccount.setRoles(roleRepository.findAllByName(Roles.TENANT_ADMIN.toString()));
         String token=generateEmailToken(newAccount);
-        sendQrEmail(newAccount.getUsername(),token);
+        try {
+            sendQrEmail(newAccount.getUsername(),token);
+        } catch (MessagingException e) {
+            System.out.println("email loi ");
+            throw new AppException(ErrorCode.JWT_ERROR);
+        }
         return accountMapper.toSignupResponse(accountRepository.save(newAccount));
     }
 
@@ -72,7 +84,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private void sendQrEmail(String toEmail, String token) throws MessagingException {
-        String confirmUrl = "http://localhost:8080/auth/verify-email?token=" + token;
+        String confirmUrl = "http://localhost:8080/api/auth/verify-email?token=" + token;
 
         String htmlMsg = "<h3>Chào mừng bạn!</h3>"
                 + "<p>Bạn vừa đăng ký web quản lý nhà hàng của mình.</p>"

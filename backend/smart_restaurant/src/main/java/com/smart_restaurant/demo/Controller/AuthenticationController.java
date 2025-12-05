@@ -48,7 +48,7 @@ public class AuthenticationController {
                 .build();
     }
     @PostMapping("/signup")
-    ApiResponse<SignupResponse> signup(@RequestBody SignupRequest request) throws MessagingException, JOSEException {
+    ApiResponse<SignupResponse> signup(@RequestBody @Valid SignupRequest request) throws MessagingException, JOSEException {
         return ApiResponse.<SignupResponse>builder()
                 .message("sign up successfully")
                 .result(accountService.createAccount(request))

@@ -11,8 +11,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class SignupRequest {
-    @Email(message = "Username must be a valid email address")
-    String usename;
-    @Size(min=6,message = "password must contain 6 keys")
+    @Email(message = "NOT_EMAIL")
+    String username;
+    @Size(min=6,message = "NOT_ENOUGHT_CHARACTER_PASSWORD")
     String password;
 }
