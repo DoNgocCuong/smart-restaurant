@@ -26,7 +26,7 @@ public class Item {
     String imageUrl;
     boolean status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
