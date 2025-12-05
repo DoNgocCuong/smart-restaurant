@@ -38,10 +38,10 @@ public class ApplicationInitConfig {
         return args -> {
             if(accountRepository.findByUsername("admin").isEmpty()){
                 var roles = new ArrayList<Role>();
-                Optional<Role> role=roleRepository.findByName(Roles.ADMIN.toString());
+                Optional<Role> role=roleRepository.findByName(Roles.TENANT_ADMIN.toString());
                 if((role.isEmpty())){
                     Role adminRole = roleRepository.save(Role.builder()
-                            .name(Roles.ADMIN.toString())
+                            .name(Roles.TENANT_ADMIN.toString())
                             .build());
                     roles.add(adminRole);
                 }else{
