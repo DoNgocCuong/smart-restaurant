@@ -9,6 +9,8 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.ParseException;
 
 public interface AccountService {
+    public Integer getTenantIdByUsername(String username);
+
     SignupResponse createAccount(SignupRequest signupRequest) throws JOSEException, MessagingException;
     ConfirmEmailResponse verifyEmail(String token) throws ParseException, java.text.ParseException, JOSEException;
 }

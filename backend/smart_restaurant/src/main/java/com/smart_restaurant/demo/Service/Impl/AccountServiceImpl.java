@@ -1,6 +1,10 @@
 package com.smart_restaurant.demo.Service.Impl;
 
 
+import com.smart_restaurant.demo.Repository.AccountRepository;
+import com.smart_restaurant.demo.Service.AccountService;
+import com.smart_restaurant.demo.exception.AppException;
+import com.smart_restaurant.demo.exception.ErrorCode;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -130,5 +134,10 @@ public class AccountServiceImpl implements AccountService {
         if (jwt.getJWTClaimsSet().getExpirationTime().before(new Date()))
             throw new AppException(ErrorCode.OUT_OF_TIME);
         return true;
+    }
+    @Override
+    public Integer getTenantIdByUsername(String username) {
+        return accountRepository.findTenantIdByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
     }
 }

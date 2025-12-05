@@ -11,6 +11,10 @@ import org.springframework.http.HttpStatusCode;
 public enum ErrorCode {
     UNAUTHENTICATED ("1001","UNAUTHENTICATED", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED("1002", "You do not have permission", HttpStatus.FORBIDDEN),
+    ACCOUNT_NOT_EXITS("1003","user not exist", HttpStatus.BAD_REQUEST),
+    TENANT_NOT_FOUND("1012", "User does not belong to any tenant", HttpStatus.FORBIDDEN),
+    CATEGORY_ALREADY_EXISTS_FOR_TENANT("1013", "Category already exists for this tenant", HttpStatus.CONFLICT);
+
     ACCOUNT_NOT_EXITS("1003","account not exist", HttpStatus.BAD_REQUEST),
     ACCOUNT_EXISTED("1004","email existed", HttpStatus.BAD_REQUEST),
     OUT_OF_TIME("1005","Timed out to confirm email", HttpStatus.BAD_REQUEST),
