@@ -41,7 +41,4 @@ public class Account {
             inverseJoinColumns=@JoinColumn(name="role_id")
     )
     List<Role>roles;
-    @OneToOne
-    @JoinColumn(name="user_id")
-    User user;
 }

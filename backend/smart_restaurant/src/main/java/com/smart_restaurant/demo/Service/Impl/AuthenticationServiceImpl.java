@@ -74,9 +74,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String accessToken=generalToken(account);
         String refreshToken=generateRefreshToken(account);
         setRefreshCookie(response,refreshToken);
-        return AuthenticationResponse.builder()
+        AuthenticationResponse authenticationResponse= AuthenticationResponse.builder()
+                .is_first_activity(account.is_first_activity())
                 .acessToken(accessToken)
                 .build();
+        account.set_first_activity(false);
+        return  authenticationResponse;
     }
     private void setRefreshCookie(HttpServletResponse response, String refreshToken) {
         Cookie cookie = new Cookie("refresh_token", refreshToken);
@@ -90,7 +93,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private void clearRefreshCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie("refresh_token", "");
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(false);
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
@@ -229,7 +232,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Date expiryTime=signedJWT.getJWTClaimsSet().getExpirationTime();
         String nameUser=signedJWT.getJWTClaimsSet().getSubject();
         Account account=accountRepository.findByUsername(nameUser).orElseThrow(()->new AppException(ErrorCode.ACCOUNT_NOT_EXITS));
-        InvalidatedToken invalidatedToken= InvalidatedToken.builder()
+        InvalidatedToken invalidatedToken=InvalidatedToken.builder()
                 .id(jit)
                 .expireTime(expiryTime)
                 .token(refreshToken)

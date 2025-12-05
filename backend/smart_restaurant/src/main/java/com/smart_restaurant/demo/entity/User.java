@@ -18,4 +18,7 @@ public class User {
     Integer userId;
     String name;
     String phone;
+    @OneToOne
+    @JoinColumn(name="account_id")
+    Account account;
 }

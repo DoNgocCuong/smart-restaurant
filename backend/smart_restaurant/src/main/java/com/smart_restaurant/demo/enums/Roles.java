@@ -1,5 +1,5 @@
 package com.smart_restaurant.demo.enums;
 
 public enum Roles {
-    ADMIN,USER
+    TENANT_ADMIN,SUPPER_ADMIN,STAFF,CUSTOMER
 }

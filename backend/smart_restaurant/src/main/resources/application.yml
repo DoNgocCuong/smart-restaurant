@@ -38,10 +38,9 @@ spring:
 
 jwt:
   secret: ${SECRET_KEY}
-  EMAIL-KEY: ${EMAIL_KEY}
+  EMAIL_KEY: ${EMAIL_KEY}
   QR-KEY: ${QR_KEY}
   access-token-validity-seconds: ${ACCESS_TOKEN}
   refresh-token-validity-seconds: ${REFRESH_TOKEN}
   email-token-validity-seconds: ${EMAIL_TOKEN}
   qr-token-validity-seconds: ${QR_TOKEN}
-
