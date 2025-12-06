@@ -28,4 +28,7 @@ public class ModifierGroup {
 
     @OneToMany(mappedBy = "modifierGroup",cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ModifierOption> options;
+    @ManyToOne
+    @JoinColumn(name="tenant_id")
+    Tenant tenant;
 }

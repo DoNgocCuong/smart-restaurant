@@ -13,7 +13,6 @@ import java.time.LocalTime;
 import java.util.List;
 
 @Entity
-@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -44,4 +43,6 @@ public class Tenant {
     List<RestaurantTable> table;
     @OneToMany(mappedBy = "tenant",cascade = CascadeType.REMOVE, orphanRemoval = true)
     List<Account> account;
+    @OneToMany(mappedBy = "tenant",cascade = CascadeType.REMOVE, orphanRemoval = true)
+    List<ModifierGroup> modifierGroups ;
 }

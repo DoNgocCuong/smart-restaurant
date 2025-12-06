@@ -27,8 +27,12 @@ public class Item {
     boolean status;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @JoinTable(
+            name = "item_category",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "item_id")
+    )
+    private List<Category> category;
 
 
     @ManyToMany(fetch = FetchType.LAZY)
