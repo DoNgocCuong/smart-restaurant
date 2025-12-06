@@ -1,16 +1,17 @@
-package com.smart_restaurant.demo.dto.Request;
+package com.smart_restaurant.demo.dto.Response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class TenantRequest {
-
+public class TenantResponse {
+    Integer tenantId;
     String nameTenant;
     String logoUrl;
     String phone;
