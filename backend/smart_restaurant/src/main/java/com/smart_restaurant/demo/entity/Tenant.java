@@ -1,10 +1,7 @@
 package com.smart_restaurant.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -39,10 +36,13 @@ public class Tenant {
     @UpdateTimestamp
     @Column(name = "update_at")
     private LocalDateTime updateAt;
+    @ToString.Exclude
     @OneToMany(mappedBy = "tenant" ,cascade = CascadeType.REMOVE, orphanRemoval = true)
     List<RestaurantTable> table;
+    @ToString.Exclude
     @OneToMany(mappedBy = "tenant",cascade = CascadeType.REMOVE, orphanRemoval = true)
     List<Account> account;
+    @ToString.Exclude
     @OneToMany(mappedBy = "tenant",cascade = CascadeType.REMOVE, orphanRemoval = true)
     List<ModifierGroup> modifierGroups ;
 }
