@@ -5,6 +5,7 @@ import com.smart_restaurant.demo.Repository.CategoryRepository;
 import com.smart_restaurant.demo.Repository.TenantRepository;
 import com.smart_restaurant.demo.Service.CategoryService;
 import com.smart_restaurant.demo.dto.Request.CategoryRequest;
+import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.CategoryResponse;
 import com.smart_restaurant.demo.entity.Category;
 import com.smart_restaurant.demo.entity.Tenant;
@@ -56,15 +57,24 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryResponse> getAllCategories(Integer tenant_id) {
-        // Kiem tra có tenant-id ko
-        Tenant tenant = tenantRepository.findById(tenant_id)
+
+        // Kiểm tra tenant tồn tại
+        tenantRepository.findById(tenant_id)
                 .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
 
+        // Lấy danh sách category theo tenant-id
         var categories = categoryRepository.findAllByTenant_TenantId(tenant_id);
-        return categories
-                .stream()
-                .map(categoryMapper::toCategoryResponse) // map sang DTO
-                .toList();
 
+        // Map thủ công sang DTO
+        return categories.stream()
+                .map(cat -> {
+                    CategoryResponse dto = new CategoryResponse();
+                    dto.setCategoryName(cat.getCategoryName());
+                    dto.setTenantId(cat.getTenant().getTenantId());
+                    return dto;
+                })
+                .toList();
     }
+
+
 }
