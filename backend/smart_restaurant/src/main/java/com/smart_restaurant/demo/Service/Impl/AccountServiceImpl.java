@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -58,12 +59,14 @@ public class AccountServiceImpl implements AccountService {
     AccountRepository accountRepository;
     JavaMailSender mailSender;
     RoleRepository roleRepository;
+    PasswordEncoder passwordEncoder;
     @Override
     public SignupResponse createAccount(SignupRequest signupRequest) throws JOSEException {
         if(accountRepository.existsByUsername(signupRequest.getUsername()))
             throw new AppException(ErrorCode.ACCOUNT_EXISTED);
         Account newAccount=accountMapper.toAccount(signupRequest);
-
+        String password= passwordEncoder.encode(signupRequest.getPassword());
+        newAccount.setPassword(password);
         newAccount.setRoles(roleRepository.findAllByName(Roles.TENANT_ADMIN.toString()));
         String token=generateEmailToken(newAccount);
         try {

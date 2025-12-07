@@ -36,12 +36,13 @@ public class Tenant {
     @UpdateTimestamp
     @Column(name = "update_at")
     private LocalDateTime updateAt;
+    @ToString.Exclude
     @OneToMany(mappedBy = "tenant" ,cascade = CascadeType.REMOVE, orphanRemoval = true)
     List<RestaurantTable> table;
-
     @ToString.Exclude
     @OneToMany(mappedBy = "tenant",cascade = CascadeType.REMOVE, orphanRemoval = true)
     List<Account> account;
+    @ToString.Exclude
     @OneToMany(mappedBy = "tenant",cascade = CascadeType.REMOVE, orphanRemoval = true)
     List<ModifierGroup> modifierGroups ;
 }
