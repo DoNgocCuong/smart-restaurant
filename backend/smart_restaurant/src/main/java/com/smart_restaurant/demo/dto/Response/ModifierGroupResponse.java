@@ -16,4 +16,7 @@ import java.util.List;
 public class ModifierGroupResponse {
     Integer modifierGroupId;
     String name;
+    List<Item> items;
+    List<ModifierOption> options;
+    Integer tenantId;
 }

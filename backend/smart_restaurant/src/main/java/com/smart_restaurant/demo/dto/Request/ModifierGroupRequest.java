@@ -16,5 +16,5 @@ import java.util.List;
 @Builder
 public class ModifierGroupRequest {
     String name;
-    Integer tenanId;
+
 }

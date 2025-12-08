@@ -10,10 +10,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/menu/modifier-group")
@@ -34,4 +33,15 @@ public class ModifierGroupController {
 
 
     }
+    @GetMapping("")
+    public ApiResponse<List<ModifierGroupResponse>> getAllModifierGroup(JwtAuthenticationToken jwtAuthenticationToken){
+        List<ModifierGroupResponse> modifierGroupResponse = modifierGroupService.getAllModifierGroup(jwtAuthenticationToken);
+
+        return ApiResponse.<List<ModifierGroupResponse>>builder()
+                .message("get all ModifierGroup successfully")
+                .result(modifierGroupResponse)
+                .build();
+
+    }
+
 }
