@@ -1,5 +1,6 @@
 package com.smart_restaurant.demo.dto.Response;
 
+import com.smart_restaurant.demo.entity.Bank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

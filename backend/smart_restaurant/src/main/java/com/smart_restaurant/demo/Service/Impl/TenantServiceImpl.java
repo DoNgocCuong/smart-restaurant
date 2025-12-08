@@ -3,6 +3,7 @@ package com.smart_restaurant.demo.Service.Impl;
 import com.smart_restaurant.demo.Repository.AccountRepository;
 import com.smart_restaurant.demo.Repository.TenantRepository;
 import com.smart_restaurant.demo.Service.AccountService;
+import com.smart_restaurant.demo.Service.BankService;
 import com.smart_restaurant.demo.Service.TenantService;
 import com.smart_restaurant.demo.dto.Request.TenantRequest;
 import com.smart_restaurant.demo.dto.Response.TenantResponse;
@@ -23,7 +24,9 @@ import org.springframework.stereotype.Service;
 public class TenantServiceImpl implements TenantService {
     AccountRepository accountRepository;
     TenantMapper tenantMapper;
+
     TenantRepository tenantRepository;
+    BankService bankService;
     @Override
     public TenantResponse createTenant(TenantRequest tenantRequest, JwtAuthenticationToken jwtAuthenticationToken) {
         Account account=accountRepository.findByUsername(jwtAuthenticationToken.getName()).get();
@@ -37,6 +40,7 @@ public class TenantServiceImpl implements TenantService {
 
         account.setTenant(newTenant);
         accountRepository.save(account);
+        bankService.createBank(tenantRequest,newTenant);
         return tenantMapper.toTenantResponse(newTenant);
     }
 }

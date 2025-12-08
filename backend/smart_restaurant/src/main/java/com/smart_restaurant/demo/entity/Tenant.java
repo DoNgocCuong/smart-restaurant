@@ -22,7 +22,7 @@ public class Tenant {
     String nameTenant;
     @Column(name = "logo_url")
     String logoUrl;
-    @Column(name="phone",unique = true,nullable = false)
+    @Column(name="phone")
     String phone;
     @Column(name="address")
     String address;

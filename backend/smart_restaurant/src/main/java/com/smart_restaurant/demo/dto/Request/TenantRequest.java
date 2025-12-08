@@ -17,4 +17,7 @@ public class TenantRequest {
     String address;
     LocalTime openHours;
     LocalTime closeHours;
+    String nameBank;
+    String bankNumber;
+    String bankAccountHolderName;
 }
