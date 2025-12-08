@@ -27,6 +27,7 @@ public enum ErrorCode {
     TENANT_EXISTED("1020", "Each account can only register 1 restaurant.", HttpStatus.BAD_REQUEST),
     NOT_VERIFY_EMAIL("1021", "unverified email.", HttpStatus.BAD_REQUEST),
     MODIFIER_GROUP_NOT_FOUND("1022", "modifier group not found", HttpStatus.BAD_REQUEST),
+    ITEM_NOT_FOUND("1023", "item not found", HttpStatus.BAD_REQUEST),
 
     ;
     ErrorCode(String code, String message, HttpStatus httpStatusCode) {
