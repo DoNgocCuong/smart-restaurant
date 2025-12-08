@@ -43,6 +43,8 @@ public class ItemServiceImpl implements ItemService {
         if (categories.size() != request.getCategoryIds().size()) {
             throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
         }
+
+
        // Kiem tra trung Item
         boolean existsItem = itemRepository.existsByItemNameAndCategoryIn(request.getItemName(), categories);
         if (existsItem) {
@@ -134,7 +136,6 @@ public class ItemServiceImpl implements ItemService {
 
         // 8. Build response
         ItemResponse itemResponse = itemMapper.toItemResponse(updatedItem);
-
 
         List<CategoryResponse> categoryDTOs = categories.stream()
                 .map(c -> {

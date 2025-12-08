@@ -1,4 +1,5 @@
-package com.smart_restaurant.demo.dto.Response;
+package com.smart_restaurant.demo.dto.Request;
+
 
 import com.smart_restaurant.demo.entity.Item;
 import com.smart_restaurant.demo.entity.ModifierOption;
@@ -9,14 +10,11 @@ import lombok.experimental.FieldDefaults;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class ModifierGroupResponse {
-    Integer modifierGroupId;
+public class ModifierGroupRequest {
     String name;
-    List<Item> items;
-    List<ModifierOption> options;
-    Integer tenantId;
+
 }
