@@ -4,6 +4,8 @@ package com.smart_restaurant.demo.Service.Impl;
 import com.smart_restaurant.demo.Repository.CategoryRepository;
 import com.smart_restaurant.demo.Repository.ItemRepository;
 import com.smart_restaurant.demo.Repository.ModifierGroupRepository;
+import com.smart_restaurant.demo.Repository.TenantRepository;
+import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.CategoryService;
 import com.smart_restaurant.demo.Service.ItemService;
 import com.smart_restaurant.demo.dto.Request.ItemRequest;
@@ -14,6 +16,7 @@ import com.smart_restaurant.demo.dto.Response.ModifierGroupResponse;
 import com.smart_restaurant.demo.entity.Category;
 import com.smart_restaurant.demo.entity.Item;
 import com.smart_restaurant.demo.entity.ModifierGroup;
+import com.smart_restaurant.demo.entity.Tenant;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.smart_restaurant.demo.mapper.ItemMapper;
@@ -21,6 +24,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -36,12 +40,26 @@ public class ItemServiceImpl implements ItemService {
     ItemMapper itemMapper;
     ItemRepository itemRepository;
     ModifierGroupRepository modifierGroupRepository;
+    AccountService accountService;
+    TenantRepository tenantRepository;
 
     @Override
-    public ItemResponse createItem(ItemRequest request) {
+    public ItemResponse createItem(ItemRequest request, JwtAuthenticationToken jwtAuthenticationToken) {
+        // Lấy tenant_id từ username trong JWT
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = accountService.getTenantIdByUsername(username);
+
+        // Lấy categories từ request
         List<Category> categories = categoryRepository.findAllById(request.getCategoryIds());
         if (categories.size() != request.getCategoryIds().size()) {
             throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
+        }
+
+        // Kiểm tra tenant: tất cả categories phải thuộc tenant của user
+        boolean invalidTenant = categories.stream()
+                .anyMatch(c -> !c.getTenant().getTenantId().equals(tenantId));
+        if (invalidTenant) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
 
@@ -67,7 +85,6 @@ public class ItemServiceImpl implements ItemService {
         Item savedItem = itemRepository.save(item);
 
         ItemResponse itemResponse= itemMapper.toItemResponse(savedItem);
-
         List<CategoryResponse> categoryDTOs = categories.stream()
                 .map(c -> {
                     CategoryResponse cr = new CategoryResponse();
@@ -77,7 +94,6 @@ public class ItemServiceImpl implements ItemService {
                 }).toList();
         itemResponse.setCategory(categoryDTOs);
 
-        // Map ModifierGroup thủ công
         List<ModifierGroupResponse> modifierGroupDTOs = modifierGroup.stream()
                 .map(mg -> {
                     ModifierGroupResponse mr = new ModifierGroupResponse();
@@ -91,19 +107,31 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
-    public ItemResponse updateItemById(Integer id, UpdateItemRequest updateItemRequest) {
+    public ItemResponse updateItemById(Integer id, UpdateItemRequest updateItemRequest, JwtAuthenticationToken jwtAuthenticationToken) {
 
-        // 1. Lấy item cần update
+        // Lay tenant_id boi username
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = accountService.getTenantIdByUsername(username);
+
+        //  Lấy item cần update
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.ITEM_NOT_FOUND));
 
-        // 2. Validate category
+        // [ Kiểm tra tenant (multi-tenant check) ] **
+        boolean invalidTenant = item.getCategory()
+                .stream()
+                .anyMatch(category -> !category.getTenant().getTenantId().equals(tenantId));
+        if (invalidTenant) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Validate category
         List<Category> categories = categoryRepository.findAllById(updateItemRequest.getCategoryIds());
         if (categories.size() != updateItemRequest.getCategoryIds().size()) {
             throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
         }
 
-        // 3. Kiểm tra trùng tên item trong các category (bỏ qua chính item này)
+        // Kiểm tra trùng tên item trong các category (bỏ qua chính item này)
         boolean existsItem = itemRepository.existsByItemNameAndCategoryInAndItemIdNot(
                 updateItemRequest.getItemName(),
                 categories,
@@ -113,7 +141,7 @@ public class ItemServiceImpl implements ItemService {
             throw new AppException(ErrorCode.ITEM_ALREADY_EXISTS);
         }
 
-        // 4. Validate modifierGroups nếu có
+        // Validate modifierGroups nếu có
         List<ModifierGroup> modifierGroup;
         if (updateItemRequest.getModifierGroupIds() != null) {
             modifierGroup = modifierGroupRepository.findAllById(updateItemRequest.getModifierGroupIds());
@@ -125,16 +153,16 @@ public class ItemServiceImpl implements ItemService {
             modifierGroup = item.getModifierGroups();
         }
 
-        // 5. Map các trường đơn từ DTO sang entity
+        // Map các trường đơn từ DTO sang entity
         itemMapper.updateItem(item, updateItemRequest);
 
-        // 6. Update category
+        // Update category
         item.setCategory(categories);
 
-        // 7. Lưu DB
+        // Lưu DB
         Item updatedItem = itemRepository.save(item);
 
-        // 8. Build response
+        // Build response
         ItemResponse itemResponse = itemMapper.toItemResponse(updatedItem);
 
         List<CategoryResponse> categoryDTOs = categories.stream()
@@ -156,6 +184,57 @@ public class ItemServiceImpl implements ItemService {
                 }).toList();
         itemResponse.setModifierGroup(modifierGroupDTOs);
         return itemResponse;
+
+    }
+
+    @Override
+    public void deleteItemById(Integer itemId, JwtAuthenticationToken jwtAuthenticationToken) {
+
+        // Lay tenant_id boi username
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = accountService.getTenantIdByUsername(username);
+
+
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new AppException(ErrorCode.ITEM_NOT_FOUND));
+
+        boolean invalidTenant = item.getCategory()
+                .stream()
+                .anyMatch(category -> !category.getTenant().getTenantId().equals(tenantId));
+
+        if (invalidTenant) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        itemRepository.delete(item);
+    }
+
+    @Override
+    public List<ItemResponse> getAllItemByTenant(JwtAuthenticationToken jwtAuthenticationToken) {
+        // Lay tenant_id boi username
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = accountService.getTenantIdByUsername(username);
+
+        List<Item> tenantItems = itemRepository.findAllByTenantId(tenantId);
+
+        // Map sang ItemResponse
+        return tenantItems.stream().map(item -> {
+            ItemResponse itemResponse = itemMapper.toItemResponse(item);
+
+
+            List<CategoryResponse> categoryDTOs = item.getCategory().stream()
+                    .map(c -> new CategoryResponse(c.getCategoryName(), c.getTenant().getTenantId()))
+                    .toList();
+            itemResponse.setCategory(categoryDTOs);
+
+            List<ModifierGroupResponse> modifierGroupDTOs = item.getModifierGroups().stream()
+                    .map(mg -> new ModifierGroupResponse(mg.getModifierGroupId(), mg.getName(),mg.getItems(), mg.getOptions(), mg.getTenant().getTenantId()))
+                    .toList();
+            itemResponse.setModifierGroup(modifierGroupDTOs);
+
+            return itemResponse;
+        }).toList();
+
 
     }
 
