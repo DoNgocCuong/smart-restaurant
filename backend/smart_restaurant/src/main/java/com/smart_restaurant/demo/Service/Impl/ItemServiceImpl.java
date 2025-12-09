@@ -9,6 +9,7 @@ import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.CategoryService;
 import com.smart_restaurant.demo.Service.ItemService;
 import com.smart_restaurant.demo.dto.Request.ItemRequest;
+import com.smart_restaurant.demo.dto.Request.MenuAvailabilityToggleListRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateItemRequest;
 import com.smart_restaurant.demo.dto.Response.CategoryResponse;
 import com.smart_restaurant.demo.dto.Response.ItemResponse;
@@ -236,6 +237,57 @@ public class ItemServiceImpl implements ItemService {
         }).toList();
 
 
+    }
+
+    @Override
+    public List<ItemResponse> updateMenuAvailabilityToggle(MenuAvailabilityToggleListRequest request, JwtAuthenticationToken jwtAuthenticationToken) {
+        // Lay tenant_id boi username
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = accountService.getTenantIdByUsername(username);
+
+        List<ItemResponse> updatedItems = request.getItems().stream().map(itemRequest ->{
+
+            // Lấy Item
+            Item item = itemRepository.findById(itemRequest.getItemId()).orElseThrow(() -> new AppException(ErrorCode.ITEM_NOT_FOUND));
+
+            // Kiểm tra có phải chính thằng teant cầm thằng item này không
+            boolean invalidTenant = item.getCategory().stream()
+                    .anyMatch(category -> !category.getTenant().getTenantId().equals(tenantId));
+            if (invalidTenant) {
+                throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+
+            if (item.isStatus() != itemRequest.isStatus()) {
+                item.setStatus(itemRequest.isStatus());
+                itemRepository.save(item);
+            }
+            Item updatedItem = itemRepository.save(item);
+
+            ItemResponse itemResponse = itemMapper.toItemResponse(updatedItem);
+            List<CategoryResponse> categoryDTOs = updatedItem.getCategory().stream()
+                    .map(category -> {
+                        CategoryResponse categoryResponse = new CategoryResponse();
+                        categoryResponse.setCategoryName(category.getCategoryName());
+                        categoryResponse.setTenantId(category.getTenant().getTenantId());
+                        return categoryResponse;
+                    }).toList();
+            itemResponse.setCategory(categoryDTOs);
+
+            List<ModifierGroupResponse> modifierGroupDTOs = updatedItem.getModifierGroups().stream()
+                    .map(modifierGroup -> {
+                        ModifierGroupResponse modifierGroupResponse = new ModifierGroupResponse();
+                        modifierGroupResponse.setModifierGroupId(modifierGroup.getModifierGroupId());
+                        modifierGroupResponse.setName(modifierGroup.getName());
+                        return modifierGroupResponse;
+                    }).toList();
+            itemResponse.setModifierGroup(modifierGroupDTOs);
+
+
+            return itemResponse;
+
+        }).toList();
+
+        return updatedItems;
     }
 
 }
