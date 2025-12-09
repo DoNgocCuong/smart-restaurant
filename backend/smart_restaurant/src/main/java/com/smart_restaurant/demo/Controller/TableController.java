@@ -1,5 +1,6 @@
 package com.smart_restaurant.demo.Controller;
 
+import com.smart_restaurant.demo.Service.QrHistoryService;
 import com.smart_restaurant.demo.Service.TableService;
 import com.smart_restaurant.demo.dto.Request.TableRequest;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
@@ -18,6 +19,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class TableController {
     TableService tableService;
+    QrHistoryService qrHistoryService;
     @PostMapping("/add-table")
     ApiResponse<TableResponse>createTable(@RequestBody TableRequest tableRequest, JwtAuthenticationToken jwtAuthenticationToken){
         return ApiResponse.<TableResponse>builder()
@@ -30,4 +32,5 @@ public class TableController {
                 .result(tableService.getAllTable(jwtAuthenticationToken))
                 .build();
     }
+
 }

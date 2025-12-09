@@ -39,8 +39,16 @@ spring:
 jwt:
   secret: ${SECRET_KEY}
   EMAIL_KEY: ${EMAIL_KEY}
-  QR-KEY: ${QR_KEY}
+  qrKey: ${QR_KEY}
   access-token-validity-seconds: ${ACCESS_TOKEN}
   refresh-token-validity-seconds: ${REFRESH_TOKEN}
   email-token-validity-seconds: ${EMAIL_TOKEN}
   qr-token-validity-seconds: ${QR_TOKEN}
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}
+qr:
+  base-url: http://192.168.1.173:8080/api/qr/verify?t=
+  width: 300
+  height: 300
