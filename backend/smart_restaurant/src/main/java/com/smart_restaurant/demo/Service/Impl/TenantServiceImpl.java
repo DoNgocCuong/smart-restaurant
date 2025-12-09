@@ -2,7 +2,6 @@ package com.smart_restaurant.demo.Service.Impl;
 
 import com.smart_restaurant.demo.Repository.AccountRepository;
 import com.smart_restaurant.demo.Repository.TenantRepository;
-import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.BankService;
 import com.smart_restaurant.demo.Service.TenantService;
 import com.smart_restaurant.demo.dto.Request.TenantRequest;
@@ -42,5 +41,13 @@ public class TenantServiceImpl implements TenantService {
         accountRepository.save(account);
         bankService.createBank(tenantRequest,newTenant);
         return tenantMapper.toTenantResponse(newTenant);
+    }
+
+    @Override
+    public Tenant tenantId(JwtAuthenticationToken jwtAuthenticationToken) {
+        Account account=accountRepository.findByUsername(jwtAuthenticationToken.getName()).get();
+        if(account==null)
+            throw new AppException(ErrorCode.ACCOUNT_NOT_EXITS);
+        return account.getTenant();
     }
 }
