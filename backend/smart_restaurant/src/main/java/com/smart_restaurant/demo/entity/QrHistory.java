@@ -1,43 +1,34 @@
 package com.smart_restaurant.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
-@Table(name = "Account")
+@Table(name = "Qr_History")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Account {
+public class QrHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer accountId;
-    String username;
-    String password;
-    boolean is_first_activity;
-    boolean is_email_verify;
+    Integer qrId;
+    String qr_url;
+    boolean isActive;
     @CreationTimestamp
     @Column(name = "create_at", updatable = false)
     LocalDateTime createAt;
     @UpdateTimestamp
     @Column(name = "update_at")
     LocalDateTime updateAt;
-
-    @ToString.Exclude
     @ManyToOne
-    @JoinColumn(name="tenant_id")
+    @JoinColumn(name = "tenantId")
     Tenant tenant;
-    @ManyToMany
-    @JoinTable(
-            name = "account_role",
-            joinColumns = @JoinColumn(name="account_id"),
-            inverseJoinColumns=@JoinColumn(name="role_id")
-    )
-    List<Role>roles;
 }

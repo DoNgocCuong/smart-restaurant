@@ -26,16 +26,22 @@ public class Item {
     String imageUrl;
     boolean status;
 
-    @ManyToMany(fetch =FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "category_item",
-            joinColumns = @JoinColumn(name = "item_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id")
+            name = "item_category",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "item_id")
     )
-    List<Category> categories;
-    @ManyToOne
-    @JoinColumn(name="modifier_group_id")
-    ModifierGroup modifierGroup;
+    private List<Category> category;
+
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "modifier_group_item",
+            joinColumns = @JoinColumn(name = "item_id"),
+            inverseJoinColumns = @JoinColumn(name = "modifierGroupId")
+    )
+    private List<ModifierGroup> modifierGroups;
 
 }
 

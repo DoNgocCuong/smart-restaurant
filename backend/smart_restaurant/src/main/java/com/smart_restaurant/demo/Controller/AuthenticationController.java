@@ -1,10 +1,15 @@
 package com.smart_restaurant.demo.Controller;
 
 import com.nimbusds.jose.JOSEException;
+import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.AuthenticationService;
 import com.smart_restaurant.demo.dto.Request.AuthenticateRequest;
+import com.smart_restaurant.demo.dto.Request.SignupRequest;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.AuthenticationResponse;
+import com.smart_restaurant.demo.dto.Response.ConfirmEmailResponse;
+import com.smart_restaurant.demo.dto.Response.SignupResponse;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -12,19 +17,17 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 
-@RequestMapping("auth")
+@RequestMapping("api/auth")
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationController {
     AuthenticationService authenticationService;
+    AccountService accountService;
     @PostMapping("/log-in")
     ApiResponse<AuthenticationResponse> authenticated (@RequestBody @Valid AuthenticateRequest authenticateRequest, HttpServletResponse response){
         AuthenticationResponse result=authenticationService.authenticate(authenticateRequest,response);
@@ -42,6 +45,20 @@ public class AuthenticationController {
     ApiResponse<AuthenticationResponse> refreshToken(HttpServletRequest request,HttpServletResponse response) throws ParseException, JOSEException {
         return ApiResponse.<AuthenticationResponse>builder()
                 .result(authenticationService.refreshToken(request,response))
+                .build();
+    }
+    @PostMapping("/signup")
+    ApiResponse<SignupResponse> signup(@RequestBody @Valid SignupRequest request) throws MessagingException, JOSEException {
+        return ApiResponse.<SignupResponse>builder()
+                .message("sign up successfully")
+                .result(accountService.createAccount(request))
+                .build();
+    }
+    @GetMapping("/verify-email")
+    ApiResponse<ConfirmEmailResponse> verifyEmail(@RequestParam String token) throws jakarta.mail.internet.ParseException, ParseException, JOSEException {
+        return ApiResponse.<ConfirmEmailResponse>builder()
+                .message("verify email finish")
+                .result(accountService.verifyEmail(token))
                 .build();
     }
 }

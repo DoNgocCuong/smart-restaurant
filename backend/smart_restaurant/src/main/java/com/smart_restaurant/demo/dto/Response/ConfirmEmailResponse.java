@@ -8,7 +8,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class AuthenticationResponse {
-    String acessToken;
-    boolean is_first_activity;
+public class ConfirmEmailResponse {
+    boolean confirm_email;
 }

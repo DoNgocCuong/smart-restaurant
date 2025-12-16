@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -21,9 +22,13 @@ public class ModifierGroup {
     private Integer modifierGroupId;
     private String name;
 
-    @OneToMany(mappedBy="modifierGroup",cascade = CascadeType.REMOVE, orphanRemoval = true)
-    List<Item>items;
+
+    @ManyToMany(mappedBy = "modifierGroups", fetch = FetchType.LAZY)
+    private List<Item> items = new ArrayList<>();
 
     @OneToMany(mappedBy = "modifierGroup",cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ModifierOption> options;
+    @ManyToOne
+    @JoinColumn(name="tenant_id")
+    Tenant tenant;
 }

@@ -7,18 +7,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Builder
+@Table(name = "Bank")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="User")
-public class User {
+public class Bank {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer userId;
-    String name;
-    String phone;
+    Integer bankId;
+    String nameBank;
+    String bankNumber;
+    String bankAccountHolderName;
     @OneToOne
-    @JoinColumn(name="account_id")
-    Account account;
+    @JoinColumn(name = "tenantId")
+    Tenant tenant;
 }

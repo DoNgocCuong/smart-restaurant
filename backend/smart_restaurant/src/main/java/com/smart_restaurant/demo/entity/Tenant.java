@@ -1,10 +1,7 @@
 package com.smart_restaurant.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -13,7 +10,6 @@ import java.time.LocalTime;
 import java.util.List;
 
 @Entity
-@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,7 +22,7 @@ public class Tenant {
     String nameTenant;
     @Column(name = "logo_url")
     String logoUrl;
-    @Column(name="phone",unique = true,nullable = false)
+    @Column(name="phone")
     String phone;
     @Column(name="address")
     String address;
@@ -40,8 +36,13 @@ public class Tenant {
     @UpdateTimestamp
     @Column(name = "update_at")
     private LocalDateTime updateAt;
+    @ToString.Exclude
     @OneToMany(mappedBy = "tenant" ,cascade = CascadeType.REMOVE, orphanRemoval = true)
     List<RestaurantTable> table;
+    @ToString.Exclude
     @OneToMany(mappedBy = "tenant",cascade = CascadeType.REMOVE, orphanRemoval = true)
-    List<RestaurantTable> account;
+    List<Account> account;
+    @ToString.Exclude
+    @OneToMany(mappedBy = "tenant",cascade = CascadeType.REMOVE, orphanRemoval = true)
+    List<ModifierGroup> modifierGroups ;
 }
