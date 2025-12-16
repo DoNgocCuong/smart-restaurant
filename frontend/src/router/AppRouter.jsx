@@ -1,20 +1,32 @@
 import { Routes, Route } from "react-router-dom";
 import Login from "../pages/auth/Login";
-import Register from "../pages/auth/Register";
-import VerifyEmail from "../pages/auth/VerifyEmail";
-// import NotFoundPage from "../pages/auth/NotFoundPage";
 
-// import adminRoutes from "./roles/adminRoutes";
-// import managerRoutes from "./roles/managerRoutes";
-// import employeeRoutes from "./roles/employeeRoutes";
+import Unauthorized from "../pages/auth/Unauthorized";
+import RoleRoute from "./RoleRoute";
+
+import SuperAdminLayout from "../components/layout/SuperAdminLayout";
+
+import AccountManagement from "../pages/super-admin/AccountManagement";
 
 export default function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/register/verify-email" element={<VerifyEmail />} />
+      <Route path="/unauthorized" element={<Unauthorized />}></Route>
+
+      {/* Super Admin */}
+      <Route
+        path="/super-admin"
+        element={
+          <RoleRoute allowedRoles={["SUPER_ADMIN"]}>
+            {/* <RoleRoute> */}
+            <SuperAdminLayout />
+          </RoleRoute>
+        }
+      >
+        <Route path="accounts" element={<AccountManagement />} />
+      </Route>
     </Routes>
   );
 }
