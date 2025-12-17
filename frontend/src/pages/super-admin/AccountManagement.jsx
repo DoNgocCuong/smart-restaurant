@@ -3,6 +3,8 @@ import { useContext, useEffect, useState } from "react";
 import Logo from "../../assets/images/logo.png";
 import { AuthContext } from "../../context/AuthContext";
 
+import AddAccountCard from "../../components/super-admin/AddAccountCard";
+
 import { ChevronDown, LogOut, Pencil, Unlock } from "lucide-react";
 
 const mock_accounts = [
@@ -48,6 +50,8 @@ function AccountManagement() {
   const { role, logout } = useContext(AuthContext);
   const [userName, setUserName] = useState("");
   const [openMenu, setOpenMenu] = useState(false);
+
+  const [isOpenAddAccount, setIsOpenAddAccount] = useState(false);
 
   useEffect(() => {
     setAccounts(mock_accounts);
@@ -124,7 +128,12 @@ function AccountManagement() {
               </p>
             </div>
 
-            <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+            <button
+              onClick={() => {
+                setIsOpenAddAccount(true);
+              }}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            >
               <span className="text-lg">＋</span>
               Thêm tài khoản
             </button>
@@ -177,6 +186,13 @@ function AccountManagement() {
           </div>
         </div>
       </div>
+      {isOpenAddAccount && (
+        <AddAccountCard
+          onClose={() => {
+            setIsOpenAddAccount(false);
+          }}
+        />
+      )}
     </div>
   );
 }
