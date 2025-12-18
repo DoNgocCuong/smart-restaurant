@@ -20,8 +20,12 @@ public class Account {
     Integer accountId;
     String username;
     String password;
-    boolean is_first_activity;
-    boolean is_email_verify;
+    @Column(name = "is_first_activity")
+    Boolean isFirstActivity;
+    @Column(name="is_email_verify")
+    Boolean isEmailVerify;
+    @Column(name = "is_customer")
+    Boolean isCustomer;
     @CreationTimestamp
     @Column(name = "create_at", updatable = false)
     LocalDateTime createAt;
