@@ -1,3 +1,5 @@
+
+
 package com.smart_restaurant.demo.Repository;
 
 import com.smart_restaurant.demo.entity.RestaurantTable;
@@ -11,5 +13,6 @@ import java.util.Optional;
 public interface TableRepository extends JpaRepository<RestaurantTable,Integer> {
     Optional<RestaurantTable> findByTableName(String tableName);
     Page<RestaurantTable> findAllByTenant_TenantId(Integer tenantId, Pageable pageable);
-    Optional<RestaurantTable> findAllByTenant_TenantId(Integer tenantId);
+    List<RestaurantTable> findAllByTenant_TenantIdAndActiveTrue(Integer tenantId);
+    boolean existsByTableName(String tableName);
 }
