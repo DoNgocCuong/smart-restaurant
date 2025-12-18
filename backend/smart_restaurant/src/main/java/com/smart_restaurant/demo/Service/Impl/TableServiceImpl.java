@@ -50,7 +50,7 @@ public class TableServiceImpl implements TableService {
 
 
         tableRepository.findByTableName(tableRequest.getTableName())
-                .ifPresent(t -> { throw new AppException(ErrorCode.TABLE_EXITS); });
+                .ifPresent(t -> { throw new AppException(ErrorCode.TABLE_NOT_FOUND); });
 
         RestaurantTable restaurantTable = tableMapper.toTable(tableRequest);
         restaurantTable.setTenant(tenant);

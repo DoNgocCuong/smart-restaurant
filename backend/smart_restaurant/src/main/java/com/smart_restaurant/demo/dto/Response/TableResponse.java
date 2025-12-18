@@ -23,9 +23,8 @@ public class TableResponse {
     String tableName;
     String section;
     Integer capacity;
-    @JsonProperty("isActive")
-    Boolean isActive;
     Boolean is_active;
+    Integer tenantId;
     List<Order> orders;
     LocalDateTime createAt;
     LocalDateTime updateAt;
