@@ -8,8 +8,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface AccountMapper {
     @Mapping(target = "username", source = "username")
-    @Mapping(target = "is_first_activity",expression = "java(true)")
-    @Mapping(target = "is_email_verify",expression = "java(false)")
+    @Mapping(target = "isFirstActivity",expression = "java(true)")
+    @Mapping(target = "isEmailVerify",expression = "java(false)")
     Account toAccount(SignupRequest signupRequest);
     SignupResponse toSignupResponse(Account account);
 }

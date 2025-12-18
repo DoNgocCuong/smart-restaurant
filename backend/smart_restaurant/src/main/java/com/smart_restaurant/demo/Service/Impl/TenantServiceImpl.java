@@ -34,7 +34,7 @@ public class TenantServiceImpl implements TenantService {
         Account account=accountRepository.findByUsername(jwtAuthenticationToken.getName()).get();
         if(!(account.getTenant()==null))
             throw new AppException(ErrorCode.TENANT_EXISTED);
-        if(account.is_email_verify()==false)
+        if(account.getIsEmailVerify()==false)
             throw new AppException(ErrorCode.NOT_VERIFY_EMAIL);
         System.out.println("Phone mapped: " + tenantRequest.getPhone());
         System.out.println("Phone mapped: " + tenantMapper.toTenant(tenantRequest).getNameTenant());
@@ -61,7 +61,7 @@ public class TenantServiceImpl implements TenantService {
         Tenant tenant = account.getTenant();
 
         if (!tenant.getTenantId().equals(tenantId)) {
-            throw new AppException(ErrorCode.FORBIDDEN); // không cho update tenant khác
+            throw new AppException(ErrorCode.FOBIDEN); // không cho update tenant khác
         }
 
         tenantMapper.updateTenant(tenant, updateTenantRequest);

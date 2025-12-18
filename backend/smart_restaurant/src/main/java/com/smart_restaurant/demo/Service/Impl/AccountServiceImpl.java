@@ -83,7 +83,7 @@ public class AccountServiceImpl implements AccountService {
         boolean confirm=verifyEmailToken(token);
         SignedJWT signedJWT=SignedJWT.parse(token);
         Account account=accountRepository.findByUsername(signedJWT.getJWTClaimsSet().getSubject()).get();
-        account.set_email_verify(true);
+        account.setIsEmailVerify(true);
         accountRepository.save(account);
         return ConfirmEmailResponse.builder()
                 .confirm_email(true)

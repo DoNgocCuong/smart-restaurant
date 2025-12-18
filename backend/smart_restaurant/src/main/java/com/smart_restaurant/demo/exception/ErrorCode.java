@@ -32,16 +32,13 @@ public enum ErrorCode {
   
 
     TABLE_NOT_FOUND("1027", "NOT_FOUND", HttpStatus.BAD_REQUEST),
-    TABLE_NOT_BELONGS_TO_TENANT("1028", "TABLE_NOT_BELONGS_TO_TENANT", HttpStatus.BAD_REQUEST)
+    TABLE_NOT_BELONGS_TO_TENANT("1028", "TABLE_NOT_BELONGS_TO_TENANT", HttpStatus.BAD_REQUEST),
 
     TABLE_ALREADY_EXISTS("1025", "table name already exists", HttpStatus.BAD_REQUEST),
     INVALID_TOKEN_FORMAT("1026", "Invalid token format", HttpStatus.BAD_REQUEST),
 
 
-
-
-
-    ;
+    FOBIDEN("1027","forbidden" , HttpStatus.BAD_REQUEST);
     ErrorCode(String code, String message, HttpStatus httpStatusCode) {
         this.code = code;
         this.message = message;
