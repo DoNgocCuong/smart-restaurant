@@ -72,6 +72,168 @@ const mock_tables = [
       },
     ],
   },
+  {
+    table_id: "T004",
+    table_name: "Bàn 01",
+    section: "Indoor",
+    is_active: true,
+    created_at: "2024-01-10",
+    updated_at: "2024-01-15",
+    qr_history: [
+      {
+        qr_id: "QR001",
+        qr_url:
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Superqr.svg/330px-Superqr.svg.png",
+        is_active: true,
+        created_at: "2024-01-15",
+        updated_at: "2024-01-15",
+      },
+    ],
+  },
+  {
+    table_id: "T005",
+    table_name: "Bàn 02",
+    section: "Outdoor",
+    is_active: true,
+    created_at: "2024-02-01",
+    updated_at: "2024-02-10",
+    qr_history: [
+      {
+        qr_id: "QR002",
+        qr_url:
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Superqr.svg/330px-Superqr.svg.png",
+        is_active: true,
+        created_at: "2024-02-10",
+        updated_at: "2024-02-10",
+      },
+    ],
+  },
+  {
+    table_id: "T006",
+    table_name: "VIP-01",
+    section: "VIP Room",
+    is_active: false,
+    created_at: "2024-03-05",
+    updated_at: "2024-03-07",
+    qr_history: [
+      {
+        qr_id: "QR003",
+        qr_url:
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Superqr.svg/330px-Superqr.svg.png",
+        is_active: true,
+        created_at: "2024-03-07",
+        updated_at: "2024-03-07",
+      },
+    ],
+  },
+  {
+    table_id: "T007",
+    table_name: "Bàn 01",
+    section: "Indoor",
+    is_active: true,
+    created_at: "2024-01-10",
+    updated_at: "2024-01-15",
+    qr_history: [
+      {
+        qr_id: "QR001",
+        qr_url:
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Superqr.svg/330px-Superqr.svg.png",
+        is_active: true,
+        created_at: "2024-01-15",
+        updated_at: "2024-01-15",
+      },
+    ],
+  },
+  {
+    table_id: "T008",
+    table_name: "Bàn 02",
+    section: "Outdoor",
+    is_active: true,
+    created_at: "2024-02-01",
+    updated_at: "2024-02-10",
+    qr_history: [
+      {
+        qr_id: "QR002",
+        qr_url:
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Superqr.svg/330px-Superqr.svg.png",
+        is_active: true,
+        created_at: "2024-02-10",
+        updated_at: "2024-02-10",
+      },
+    ],
+  },
+  {
+    table_id: "T009",
+    table_name: "VIP-01",
+    section: "VIP Room",
+    is_active: false,
+    created_at: "2024-03-05",
+    updated_at: "2024-03-07",
+    qr_history: [
+      {
+        qr_id: "QR003",
+        qr_url:
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Superqr.svg/330px-Superqr.svg.png",
+        is_active: true,
+        created_at: "2024-03-07",
+        updated_at: "2024-03-07",
+      },
+    ],
+  },
+  {
+    table_id: "T010",
+    table_name: "Bàn 01",
+    section: "Indoor",
+    is_active: true,
+    created_at: "2024-01-10",
+    updated_at: "2024-01-15",
+    qr_history: [
+      {
+        qr_id: "QR001",
+        qr_url:
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Superqr.svg/330px-Superqr.svg.png",
+        is_active: true,
+        created_at: "2024-01-15",
+        updated_at: "2024-01-15",
+      },
+    ],
+  },
+  {
+    table_id: "T011",
+    table_name: "Bàn 02",
+    section: "Outdoor",
+    is_active: true,
+    created_at: "2024-02-01",
+    updated_at: "2024-02-10",
+    qr_history: [
+      {
+        qr_id: "QR002",
+        qr_url:
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Superqr.svg/330px-Superqr.svg.png",
+        is_active: true,
+        created_at: "2024-02-10",
+        updated_at: "2024-02-10",
+      },
+    ],
+  },
+  {
+    table_id: "T012",
+    table_name: "VIP-01",
+    section: "VIP Room",
+    is_active: false,
+    created_at: "2024-03-05",
+    updated_at: "2024-03-07",
+    qr_history: [
+      {
+        qr_id: "QR003",
+        qr_url:
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Superqr.svg/330px-Superqr.svg.png",
+        is_active: true,
+        created_at: "2024-03-07",
+        updated_at: "2024-03-07",
+      },
+    ],
+  },
 ];
 
 export default function TableManagement() {
