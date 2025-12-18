@@ -21,7 +21,7 @@ public class QrHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer qrId;
     String qr_url;
-    boolean isActive;
+    boolean active;
     @CreationTimestamp
     @Column(name = "create_at", updatable = false)
     LocalDateTime createAt;
@@ -29,6 +29,6 @@ public class QrHistory {
     @Column(name = "update_at")
     LocalDateTime updateAt;
     @ManyToOne
-    @JoinColumn(name = "tenantId")
-    Tenant tenant;
+    @JoinColumn(name = "tableId")
+    RestaurantTable restaurantTable;
 }

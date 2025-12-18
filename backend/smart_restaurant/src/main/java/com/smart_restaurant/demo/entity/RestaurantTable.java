@@ -25,6 +25,7 @@ public class RestaurantTable {
     Integer tableId;
     @Column(name="table_name")
     String tableName;
+    String section;
     Integer capacity;
     Boolean is_active;
     @CreationTimestamp
