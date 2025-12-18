@@ -75,7 +75,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String refreshToken=generateRefreshToken(account);
         setRefreshCookie(response,refreshToken);
         AuthenticationResponse authenticationResponse= AuthenticationResponse.builder()
-                .is_first_activity(account.getIsFirstActivity())
+                .isFirstActivity(account.getIsFirstActivity())
                 .acessToken(accessToken)
                 .build();
         account.setIsFirstActivity(false);

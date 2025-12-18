@@ -10,5 +10,5 @@ import lombok.experimental.FieldDefaults;
 @Builder
 public class AuthenticationResponse {
     String acessToken;
-    boolean is_first_activity;
+    boolean isFirstActivity;
 }
