@@ -6,6 +6,7 @@ import com.smart_restaurant.demo.Repository.TenantRepository;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.TableService;
 import com.smart_restaurant.demo.dto.Request.TableRequest;
+import com.smart_restaurant.demo.dto.Request.UpdateIsActiveTableRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateTableRequest;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.TableResponse;
@@ -66,6 +67,21 @@ public class TableController {
         TableResponse tableResponse = tableService.updateTable(id,updateTableRequest,jwtAuthenticationToken);
         return ApiResponse.<TableResponse>builder()
                 .message("Update thành công")
+                .result(tableResponse)
+                .build();
+
+
+    }
+
+    @PatchMapping("/{id}/status")
+    public ApiResponse<TableResponse> updateStatusTable(
+            @PathVariable Integer id,
+            @Valid @RequestBody UpdateIsActiveTableRequest updateIsActiveTableRequest,
+            JwtAuthenticationToken jwtAuthenticationToken){
+
+        TableResponse tableResponse = tableService.updateStatusTable(id,updateIsActiveTableRequest,jwtAuthenticationToken);
+        return ApiResponse.<TableResponse>builder()
+                .message("Update Status thành công")
                 .result(tableResponse)
                 .build();
     }

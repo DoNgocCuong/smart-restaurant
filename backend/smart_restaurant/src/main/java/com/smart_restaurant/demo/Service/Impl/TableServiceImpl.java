@@ -6,6 +6,7 @@ import com.smart_restaurant.demo.Repository.TenantRepository;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.TableService;
 import com.smart_restaurant.demo.dto.Request.TableRequest;
+import com.smart_restaurant.demo.dto.Request.UpdateIsActiveTableRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateTableRequest;
 import com.smart_restaurant.demo.dto.Response.TableResponse;
 import com.smart_restaurant.demo.entity.RestaurantTable;
@@ -96,6 +97,30 @@ public class TableServiceImpl implements TableService {
         }
 
         tableMapper.updateTable(restaurantTable,updateTableRequest);
+        restaurantTable = tableRepository.save(restaurantTable);
+        TableResponse updateTableResponse = tableMapper.toTableResponse(restaurantTable);
+        updateTableResponse.setTenantId(restaurantTable.getTenant().getTenantId());
+        updateTableResponse.setOrders(restaurantTable.getOrders());
+
+        return tableMapper.toTableResponse(restaurantTable);
+    }
+
+    @Override
+    public TableResponse updateStatusTable(Integer id, UpdateIsActiveTableRequest updateIsActiveTableRequest, JwtAuthenticationToken jwtAuthenticationToken) {
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = accountService.getTenantIdByUsername(username);
+        Tenant tenant = tenantRepository.findById(tenantId)
+                .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
+
+        RestaurantTable restaurantTable = tableRepository.findById(id)
+                .orElseThrow(() -> new AppException((ErrorCode.TABLE_NOT_FOUND)));
+
+        if(!restaurantTable.getTenant().getTenantId().equals(tenantId)){
+            throw new AppException(ErrorCode.TABLE_NOT_BELONGS_TO_TENANT);
+
+        }
+
+        restaurantTable.setIs_active(updateIsActiveTableRequest.getIs_active());
         restaurantTable = tableRepository.save(restaurantTable);
         TableResponse updateTableResponse = tableMapper.toTableResponse(restaurantTable);
         updateTableResponse.setTenantId(restaurantTable.getTenant().getTenantId());
