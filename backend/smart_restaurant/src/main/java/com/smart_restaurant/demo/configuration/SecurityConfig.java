@@ -11,6 +11,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 
 @Configuration
@@ -59,6 +62,20 @@ public class SecurityConfig {
 
         return jwtAuthenticationConverter;
     }
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.addAllowedOrigin("http://localhost:5173");
+        corsConfiguration.addAllowedMethod("*"); // cho phép tất cả các method (GET, POST, PUT, DELETE, ...)
+        corsConfiguration.addAllowedHeader("*"); // cho phép tất cả các header
+        corsConfiguration.setAllowCredentials(true); // cho phép gửi cookie
 
+        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource =
+                new UrlBasedCorsConfigurationSource(); // ánh xạ cấu hình CORS cho các endpoint
+        urlBasedCorsConfigurationSource.registerCorsConfiguration(
+                "/**", corsConfiguration); // áp dụng cấu hình CORS cho tất cả các endpoint
+
+        return new CorsFilter(urlBasedCorsConfigurationSource);
+    }
 
 }
