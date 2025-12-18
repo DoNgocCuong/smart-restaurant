@@ -26,7 +26,7 @@ public class RestaurantTable {
     @Column(name="table_name")
     String tableName;
     Integer capacity;
-    boolean is_active;
+    Boolean is_active;
     @CreationTimestamp
     @Column(name = "create_at", updatable = false)
     private LocalDateTime createAt;

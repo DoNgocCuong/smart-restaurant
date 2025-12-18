@@ -30,6 +30,7 @@ public enum ErrorCode {
     ITEM_NOT_FOUND("1023", "item not found", HttpStatus.BAD_REQUEST),
     MODIFIER_GROUP_ALREADY_EXISTS_FOR_TENANT("1024", "MODIFIER GROUP already exists for this tenant", HttpStatus.BAD_REQUEST),
     FORBIDDEN("1025", "FORBIDDEN", HttpStatus.FORBIDDEN),
+    TABLE_EXITS("1026", "Table exist", HttpStatus.BAD_REQUEST)
 
 
     ;
