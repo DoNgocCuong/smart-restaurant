@@ -1,3 +1,4 @@
+
 package com.smart_restaurant.demo.dto.Response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,8 +22,12 @@ public class TableResponse {
     Integer tableId;
     String tableName;
     String section;
+    Integer capacity;
     @JsonProperty("isActive")
     Boolean isActive;
+    Boolean is_active;
+    List<Order> orders;
     LocalDateTime createAt;
     LocalDateTime updateAt;
 }
+

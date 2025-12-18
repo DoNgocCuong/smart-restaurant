@@ -32,6 +32,7 @@ public enum ErrorCode {
     TABLE_ALREADY_EXISTS("1025", "table name already exists", HttpStatus.BAD_REQUEST),
     INVALID_TOKEN_FORMAT("1026", "Invalid token format", HttpStatus.BAD_REQUEST),
     FORBIDDEN("1027", "FORBIDDEN", HttpStatus.FORBIDDEN),
+    TABLE_EXITS("1028", "Table exist", HttpStatus.BAD_REQUEST)
 
 
     ;

@@ -1,3 +1,4 @@
+
 package com.smart_restaurant.demo.Service;
 
 import com.smart_restaurant.demo.dto.Request.TableRequest;
@@ -9,4 +10,5 @@ import java.util.List;
 public interface TableService {
     TableResponse createTable(TableRequest tableRequest, JwtAuthenticationToken jwtAuthenticationToken);
     List<TableResponse> getAllTable(JwtAuthenticationToken jwtAuthenticationToken);
+    Page<TableResponse> getAllTable(Integer pageNumber, Integer pageSize,Integer tenantId);
 }

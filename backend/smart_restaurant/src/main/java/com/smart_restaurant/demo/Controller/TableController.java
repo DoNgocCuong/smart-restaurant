@@ -1,3 +1,4 @@
+
 package com.smart_restaurant.demo.Controller;
 
 import com.smart_restaurant.demo.Service.QrHistoryService;
@@ -34,3 +35,4 @@ public class TableController {
     }
 
 }
+

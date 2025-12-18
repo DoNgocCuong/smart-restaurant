@@ -1,3 +1,4 @@
+
 package com.smart_restaurant.demo.mapper;
 
 import com.smart_restaurant.demo.dto.Request.TableRequest;
@@ -13,7 +14,10 @@ import java.util.List;
 public interface TableMapper {
     @Mapping(target = "active",expression = "java(true)")
     RestaurantTable toTable(TableRequest tableRequest);
-    @Mapping(source = "active", target = "isActive")
     TableResponse toTableResponse(RestaurantTable restaurantTable);
     List<TableResponse> toTableResponseList(List<RestaurantTable> entities);
+    @Mapping(target = "tenant", ignore = true)
+    @Mapping(target = "orders", ignore = true)
+    void updateTable(@MappingTarget RestaurantTable restaurantTable, UpdateTableRequest updateTableRequest);
 }
+    
