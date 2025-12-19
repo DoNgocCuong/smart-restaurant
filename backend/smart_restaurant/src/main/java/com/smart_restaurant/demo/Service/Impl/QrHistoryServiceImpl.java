@@ -71,6 +71,8 @@ public class QrHistoryServiceImpl implements QrHistoryService {
 
 
 
+
+
     public String generateTokenHS512(Integer tenantId, Integer tableId) throws Exception {
         long timestamp = Instant.now().getEpochSecond();
         String payload = tenantId + "." + tableId + "." + timestamp;
@@ -119,6 +121,7 @@ public class QrHistoryServiceImpl implements QrHistoryService {
         qrHistory.setActive(true);
         qrHistory.setQr_url(qrUrl);
         qrHistory.setRestaurantTable(tableRepository.findById(tableId).get());
+        qrHistory.setToken(token);
         QrResponse qrResponse=qrHistoryMapper.toQrResponse(qrHistoryRepository.save(qrHistory));
         qrResponse.setCreateAt(qrHistory.getCreateAt());
         return qrResponse;
@@ -142,10 +145,10 @@ public class QrHistoryServiceImpl implements QrHistoryService {
 
         boolean valid = expectedSignature.equals(signature);
         long now = Instant.now().getEpochSecond();
-        if (now - timestamp > 3600000) {
+        QrHistory qrHistory=qrHistoryRepository.findByRestaurantTable_TableIdAndToken(tableId,token).orElseThrow(()-> new AppException(ErrorCode.QR_NOT_EXIST));
+        if (now - timestamp > 3600000 || qrHistory.getActive()==false) {
             return false;
         }
-
         return valid;
 
     }
@@ -156,7 +159,7 @@ public class QrHistoryServiceImpl implements QrHistoryService {
 
         Integer tenantId = Integer.parseInt(parts[0]);
         Integer tableId = Integer.parseInt(parts[1]);
-        String redirectUrl = ok ? "http://192.168.1.66:8080/api/order/"+tenantId+"/tables/"+tableId : "http://192.168.1.66:8080/api/qr/error";
+        String redirectUrl = ok ? "http://192.168.1.77:8080/api/order/"+tenantId+"/tables/"+tableId : "http://192.168.1.77:8080/api/qr/error";
         response.sendRedirect(redirectUrl);
     }
 

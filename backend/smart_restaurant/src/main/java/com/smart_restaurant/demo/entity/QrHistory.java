@@ -22,6 +22,7 @@ public class QrHistory {
     Integer qrId;
     String qr_url;
     Boolean active;
+    String token;
     @CreationTimestamp
     @Column(name = "create_at", updatable = false)
     LocalDateTime createAt;
