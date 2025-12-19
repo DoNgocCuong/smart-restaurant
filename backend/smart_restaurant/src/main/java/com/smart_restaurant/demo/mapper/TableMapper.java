@@ -4,6 +4,7 @@ package com.smart_restaurant.demo.mapper;
 import com.smart_restaurant.demo.dto.Request.TableRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateTableRequest;
 import com.smart_restaurant.demo.dto.Response.TableResponse;
+import com.smart_restaurant.demo.dto.Response.TableResponseActive;
 import com.smart_restaurant.demo.entity.RestaurantTable;
 
 import org.mapstruct.Mapper;
@@ -21,5 +22,6 @@ public interface TableMapper {
     @Mapping(target = "tenant", ignore = true)
     @Mapping(target = "orders", ignore = true)
     void updateTable(@MappingTarget RestaurantTable restaurantTable, UpdateTableRequest updateTableRequest);
+    TableResponseActive toTableResponseActive(RestaurantTable restaurantTable);
 }
     

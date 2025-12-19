@@ -6,11 +6,16 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.qrcode.QRCodeWriter;
+import com.smart_restaurant.demo.Repository.AccountRepository;
 import com.smart_restaurant.demo.Repository.QrHistoryRepository;
 import com.smart_restaurant.demo.Repository.TableRepository;
 import com.smart_restaurant.demo.Service.QrHistoryService;
+import com.smart_restaurant.demo.Service.TableService;
 import com.smart_restaurant.demo.Service.TenantService;
 import com.smart_restaurant.demo.dto.Response.QrResponse;
+import com.smart_restaurant.demo.dto.Response.TableResponse;
+import com.smart_restaurant.demo.dto.Response.TableResponseActive;
+import com.smart_restaurant.demo.entity.Account;
 import com.smart_restaurant.demo.entity.QrHistory;
 import com.smart_restaurant.demo.entity.RestaurantTable;
 import com.smart_restaurant.demo.exception.AppException;
@@ -38,6 +43,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -63,6 +69,10 @@ public class QrHistoryServiceImpl implements QrHistoryService {
     QrHistoryRepository qrHistoryRepository;
     TableRepository tableRepository;
     QrHistoryMapper qrHistoryMapper;
+    AccountRepository accountRepository;
+    TableService tableService;
+
+
 
 
 
@@ -114,6 +124,7 @@ public class QrHistoryServiceImpl implements QrHistoryService {
         qrHistory.setActive(true);
         qrHistory.setQr_url(qrUrl);
         qrHistory.setRestaurantTable(tableRepository.findById(tableId).get());
+        qrHistory.setToken(token);
         QrResponse qrResponse=qrHistoryMapper.toQrResponse(qrHistoryRepository.save(qrHistory));
         qrResponse.setCreateAt(qrHistory.getCreateAt());
         return qrResponse;
@@ -137,10 +148,10 @@ public class QrHistoryServiceImpl implements QrHistoryService {
 
         boolean valid = expectedSignature.equals(signature);
         long now = Instant.now().getEpochSecond();
-        if (now - timestamp > 3600000) {
+        QrHistory qrHistory=qrHistoryRepository.findByRestaurantTable_TableIdAndToken(tableId,token).orElseThrow(()-> new AppException(ErrorCode.QR_NOT_EXIST));
+        if (now - timestamp > 3600000 || qrHistory.getActive()==false) {
             return false;
         }
-
         return valid;
 
     }
@@ -151,9 +162,34 @@ public class QrHistoryServiceImpl implements QrHistoryService {
 
         Integer tenantId = Integer.parseInt(parts[0]);
         Integer tableId = Integer.parseInt(parts[1]);
-        String redirectUrl = ok ? "http://192.168.1.66:8080/api/order/"+tenantId+"/tables/"+tableId : "http://192.168.1.66:8080/api/qr/error";
+        String redirectUrl = ok ? "http://192.168.1.77:8080/api/order/"+tenantId+"/tables/"+tableId : "http://192.168.1.77:8080/api/qr/error";
         response.sendRedirect(redirectUrl);
     }
 
+    @Override
+    public List<QrResponse> getAllTableQRCode(JwtAuthenticationToken jwtAuthenticationToken) {
+        String username= jwtAuthenticationToken.getName();
+        Account account=accountRepository.findByUsername(username).orElseThrow(()->new AppException(ErrorCode.ACCOUNT_NOT_EXITS));
+        return qrHistoryMapper.toListQrResponse(qrHistoryRepository.findAllByRestaurantTable_Tenant_TenantIdAndActiveTrue(account.getAccountId()));
 
+    }
+
+    @Override
+    public List<QrResponse> generateAllTableQrCode(JwtAuthenticationToken jwtAuthenticationToken) {
+        String username= jwtAuthenticationToken.getName();
+        Account account=accountRepository.findByUsername(username).orElseThrow(()->new AppException(ErrorCode.ACCOUNT_NOT_EXITS));
+        List<TableResponseActive> restaurantTables=tableService.getAllTableActive(jwtAuthenticationToken);
+        return restaurantTables.stream()
+                .map(table -> {
+                    try {
+                        return generateTableQRCode(
+                                table.getTableId(),
+                                jwtAuthenticationToken
+                        );
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .toList();
+    }
 }

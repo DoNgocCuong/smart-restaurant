@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/qr")
@@ -26,6 +27,12 @@ public class QrHistoryController {
                 .result(qrHistoryService.generateTableQRCode(id,jwtAuthenticationToken))
                 .build();
     }
+    @GetMapping
+    ApiResponse<List<QrResponse>> getAllQrCode(JwtAuthenticationToken jwtAuthenticationToken){
+        return ApiResponse.<List<QrResponse>>builder()
+                .result(qrHistoryService.getAllTableQRCode(jwtAuthenticationToken))
+                .build();
+    }
     @GetMapping("/verify")
     void verify(@RequestParam(name = "t") String token,HttpServletResponse response) throws NoSuchAlgorithmException, IOException, InvalidKeyException {
         qrHistoryService.verify(token,  response);
@@ -33,6 +40,12 @@ public class QrHistoryController {
     @GetMapping("/error")
     ApiResponse<String> error(){
         return ApiResponse.<String>builder().result("page error 404 not fause").build();
+    }
+    @PostMapping
+    ApiResponse<List<QrResponse>> refreshAllQr(JwtAuthenticationToken jwtAuthenticationToken){
+        return ApiResponse.<List<QrResponse>>builder()
+                .result(qrHistoryService.generateAllTableQrCode(jwtAuthenticationToken))
+                .build();
     }
 }
 

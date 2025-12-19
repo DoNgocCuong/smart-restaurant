@@ -36,20 +36,20 @@ public class ApplicationInitConfig {
     @Bean
     ApplicationRunner applicationRunner(AccountRepository accountRepository){
         return args -> {
-            if(accountRepository.findByUsername("admin").isEmpty()){
+            if(accountRepository.findByUsername("superadmin").isEmpty()){
                 var roles = new ArrayList<Role>();
-                Optional<Role> role=roleRepository.findByName(Roles.TENANT_ADMIN.toString());
+                Optional<Role> role=roleRepository.findByName(Roles.SUPPER_ADMIN.toString());
                 if((role.isEmpty())){
                     Role adminRole = roleRepository.save(Role.builder()
-                            .name(Roles.TENANT_ADMIN.toString())
+                            .name(Roles.SUPPER_ADMIN.toString())
                             .build());
                     roles.add(adminRole);
                 }else{
                     roles.add(role.get());
                 }
                 Account account= Account.builder()
-                        .username("admin")
-                        .password(passwordEncoder.encode("admin"))
+                        .username("superadmin")
+                        .password(passwordEncoder.encode("superadmin"))
                         .isFirstActivity(false)
                         .isCustomer(false)
                         .isEmailVerify(true)
