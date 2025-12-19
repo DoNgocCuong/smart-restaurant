@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/super-admin")
+@RequestMapping("/api/v1/accounts")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AccountController {
     AccountService accountService;
 
-    @PostMapping("/create-admin")
+    @PostMapping("/create-account-admin")
     ApiResponse<SignupResponse> createAdmin(@RequestBody @Valid SignupRequest signupRequest) throws MessagingException, JOSEException{
         return ApiResponse.<SignupResponse>builder()
                 .message("tạo thành công accout admin")
