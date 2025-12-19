@@ -1,6 +1,9 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
+import authApi from "../../api/authApi";
+import tenantApi from "../../api/tenantApi";
+import toast from "react-hot-toast";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -8,23 +11,78 @@ function Login() {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   try {
+  //     const res = await authApi.login({
+  //       userName: email,
+  //       password: password,
+  //     });
+
+  //     localStorage.setItem("userName", email);
+  //     const accessToken = res.result.acessToken;
+
+  //     // login vào context (context tự lo decode + lưu)
+  //     login(accessToken);
+
+  //     console.log(localStorage.getItem("token"));
+
+  //     // lấy role từ localStorage (do AuthContext set)
+  //     const role = localStorage.getItem("role");
+  //     // redirect
+  //     getTenantProfile();
+  //     if (role === "SUPER_ADMIN") {
+  //       navigate("/super-admin/accounts", { replace: true });
+  //     } else {
+  //       navigate(`/${role.toLowerCase()}/dashboard`, { replace: true });
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     toast.error("Không thể đăng nhập");
+  //   }
+  // };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 🔥 Fake token
-    const fakePayload = {
-      sub: email,
-      scope: "ROLE_SUPER_ADMIN",
-      exp: 9999999999,
-    };
+    try {
+      const res = await authApi.login({
+        userName: email,
+        password,
+      });
+      localStorage.setItem("userName", email);
 
-    const fakeToken = createFakeJWT(fakePayload);
-    localStorage.setItem("userName", email);
-    // Login vào context
-    login(fakeToken);
+      const accessToken = res.result.acessToken;
 
-    // Redirect
-    navigate("/super-admin/accounts", { replace: true });
+      // 1. login vào context (set token + role)
+      await login(accessToken);
+
+      // 2. gọi profile và bắt riêng lỗi 403
+      try {
+        const profile = await tenantApi.getTenantProfile();
+        console.log("TENANT PROFILE:", profile);
+      } catch (profileError) {
+        if (profileError?.response?.status === 403) {
+          toast.error("Bạn cần tạo nhà hàng trước khi sử dụng hệ thống.");
+          navigate("/tenant-admin/tenant-create", { replace: true });
+          return;
+        }
+        throw profileError; // nếu lỗi khác, ném lên catch ngoài
+      }
+
+      // 3. redirect
+      const role = localStorage.getItem("role");
+      console.log(role);
+      if (role === "SUPER_ADMIN") {
+        navigate("/super-admin/accounts", { replace: true });
+      } else {
+        navigate(`/tenant-admin/dashboard`, { replace: true });
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Không thể đăng nhập");
+    }
   };
 
   return (
@@ -39,7 +97,7 @@ function Login() {
           <label>
             <p className="font-bold mb-1">Email</p>
             <input
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -74,19 +132,6 @@ function Login() {
       </div>
     </div>
   );
-}
-
-/* ===== helper ===== */
-function createFakeJWT(payload) {
-  const header = { alg: "HS256", typ: "JWT" };
-
-  const encode = (obj) =>
-    btoa(JSON.stringify(obj))
-      .replace(/=/g, "")
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_");
-
-  return `${encode(header)}.${encode(payload)}.fake-signature`;
 }
 
 export default Login;
