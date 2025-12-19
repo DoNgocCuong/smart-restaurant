@@ -13,4 +13,5 @@ public interface AccountService {
 
     SignupResponse createAccount(SignupRequest signupRequest) throws JOSEException, MessagingException;
     ConfirmEmailResponse verifyEmail(String token) throws ParseException, java.text.ParseException, JOSEException;
+    SignupResponse createAccountAdmin(SignupRequest signupRequest) throws JOSEException, MessagingException;
 }
