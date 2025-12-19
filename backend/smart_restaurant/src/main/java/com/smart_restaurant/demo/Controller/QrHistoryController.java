@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/qr")
@@ -24,6 +25,12 @@ public class QrHistoryController {
     ApiResponse<QrResponse> createQr(@PathVariable Integer id, JwtAuthenticationToken jwtAuthenticationToken) throws Exception {
         return ApiResponse.<QrResponse>builder()
                 .result(qrHistoryService.generateTableQRCode(id,jwtAuthenticationToken))
+                .build();
+    }
+    @GetMapping
+    ApiResponse<List<QrResponse>> getAllQrCode(JwtAuthenticationToken jwtAuthenticationToken){
+        return ApiResponse.<List<QrResponse>>builder()
+                .result(qrHistoryService.getAllTableQRCode(jwtAuthenticationToken))
                 .build();
     }
     @GetMapping("/verify")

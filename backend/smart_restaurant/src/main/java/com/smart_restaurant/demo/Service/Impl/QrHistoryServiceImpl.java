@@ -6,11 +6,14 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.qrcode.QRCodeWriter;
+import com.smart_restaurant.demo.Repository.AccountRepository;
 import com.smart_restaurant.demo.Repository.QrHistoryRepository;
 import com.smart_restaurant.demo.Repository.TableRepository;
 import com.smart_restaurant.demo.Service.QrHistoryService;
 import com.smart_restaurant.demo.Service.TenantService;
 import com.smart_restaurant.demo.dto.Response.QrResponse;
+import com.smart_restaurant.demo.dto.Response.TableResponse;
+import com.smart_restaurant.demo.entity.Account;
 import com.smart_restaurant.demo.entity.QrHistory;
 import com.smart_restaurant.demo.entity.RestaurantTable;
 import com.smart_restaurant.demo.exception.AppException;
@@ -38,6 +41,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -63,6 +67,7 @@ public class QrHistoryServiceImpl implements QrHistoryService {
     QrHistoryRepository qrHistoryRepository;
     TableRepository tableRepository;
     QrHistoryMapper qrHistoryMapper;
+    AccountRepository accountRepository;
 
 
 
@@ -155,5 +160,11 @@ public class QrHistoryServiceImpl implements QrHistoryService {
         response.sendRedirect(redirectUrl);
     }
 
+    @Override
+    public List<QrResponse> getAllTableQRCode(JwtAuthenticationToken jwtAuthenticationToken) {
+        String username= jwtAuthenticationToken.getName();
+        Account account=accountRepository.findByUsername(username).orElseThrow(()->new AppException(ErrorCode.ACCOUNT_NOT_EXITS));
+        return qrHistoryMapper.toListQrResponse(qrHistoryRepository.findAllByRestaurantTable_Tenant_TenantIdAndActiveTrue(account.getAccountId()));
 
+    }
 }
