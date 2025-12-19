@@ -1,21 +1,20 @@
 package com.smart_restaurant.demo.dto.Response;
 
-import com.smart_restaurant.demo.entity.RestaurantTable;
 import com.smart_restaurant.demo.enums.StatusTable;
+import jakarta.persistence.Column;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class QrResponse {
-    Integer qrId;
-    String qr_url;
-    boolean active;
-    LocalDateTime createAt;
-    RestaurantTableResponse restaurantTable;
+public class RestaurantTableResponse {
+    Integer tableId;
+    String tableName;
+    String section;
+    Integer capacity;
+    Boolean is_active;
+    StatusTable statusTable;
 }

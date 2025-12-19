@@ -1,6 +1,7 @@
 package com.smart_restaurant.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.smart_restaurant.demo.enums.StatusTable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,6 +29,9 @@ public class RestaurantTable {
     String section;
     Integer capacity;
     Boolean is_active;
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    StatusTable statusTable=StatusTable.unoccupied;
     @CreationTimestamp
     @Column(name = "create_at", updatable = false)
     private LocalDateTime createAt;

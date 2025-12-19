@@ -1,5 +1,6 @@
 package com.smart_restaurant.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -37,12 +38,15 @@ public class Tenant {
     @Column(name = "update_at")
     private LocalDateTime updateAt;
     @ToString.Exclude
+    @JsonIgnore
     @OneToMany(mappedBy = "tenant" ,cascade = CascadeType.REMOVE, orphanRemoval = true)
     List<RestaurantTable> table;
     @ToString.Exclude
+    @JsonIgnore
     @OneToMany(mappedBy = "tenant",cascade = CascadeType.REMOVE, orphanRemoval = true)
     List<Account> account;
     @ToString.Exclude
+    @JsonIgnore
     @OneToMany(mappedBy = "tenant",cascade = CascadeType.REMOVE, orphanRemoval = true)
     List<ModifierGroup> modifierGroups ;
 }

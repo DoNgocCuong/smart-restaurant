@@ -90,6 +90,46 @@ public class AccountServiceImpl implements AccountService {
                 .build();
     }
 
+    @Override
+    public SignupResponse createAccountAdmin(SignupRequest signupRequest) throws JOSEException, MessagingException {
+        if(accountRepository.existsByUsername(signupRequest.getUsername()))
+            throw new AppException(ErrorCode.USER_EXISTED);
+        Account newAccount=accountMapper.toAccount(signupRequest);
+        String password= passwordEncoder.encode(signupRequest.getPassword());
+        newAccount.setPassword(password);
+        newAccount.setRoles(roleRepository.findAllByName(Roles.TENANT_ADMIN.toString()));
+        newAccount.setIsEmailVerify(true);
+        String token=generateEmailToken(newAccount);
+        return accountMapper.toSignupResponse(accountRepository.save(newAccount));
+    }
+
+    @Override
+    public SignupResponse createAccountStaff(SignupRequest signupRequest) throws JOSEException, MessagingException {
+        if(accountRepository.existsByUsername(signupRequest.getUsername()))
+            throw new AppException(ErrorCode.USER_EXISTED);
+        Account newAccount=accountMapper.toAccount(signupRequest);
+        String password= passwordEncoder.encode(signupRequest.getPassword());
+        newAccount.setPassword(password);
+        newAccount.setRoles(roleRepository.findAllByName(Roles.STAFF.toString()));
+        newAccount.setIsEmailVerify(true);
+        String token=generateEmailToken(newAccount);
+        return accountMapper.toSignupResponse(accountRepository.save(newAccount));
+    }
+
+    @Override
+    public SignupResponse createAccountKitchen(SignupRequest signupRequest) throws JOSEException, MessagingException {
+        if(accountRepository.existsByUsername(signupRequest.getUsername()))
+            throw new AppException(ErrorCode.USER_EXISTED);
+        Account newAccount=accountMapper.toAccount(signupRequest);
+        String password= passwordEncoder.encode(signupRequest.getPassword());
+        newAccount.setPassword(password);
+        newAccount.setRoles(roleRepository.findAllByName(Roles.KITCHEN_STAFF.toString()));
+        newAccount.setIsEmailVerify(true);
+        String token=generateEmailToken(newAccount);
+        return accountMapper.toSignupResponse(accountRepository.save(newAccount));
+    }
+
+
     private void sendQrEmail(String toEmail, String token) throws MessagingException {
         String confirmUrl = "http://localhost:8080/api/auth/verify-email?token=" + token;
 
