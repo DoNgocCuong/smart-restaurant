@@ -1,6 +1,7 @@
 
 package com.smart_restaurant.demo.Service.Impl;
 
+import com.smart_restaurant.demo.Repository.AccountRepository;
 import com.smart_restaurant.demo.Repository.TableRepository;
 import com.smart_restaurant.demo.Repository.TenantRepository;
 import com.smart_restaurant.demo.Service.AccountService;
@@ -9,6 +10,8 @@ import com.smart_restaurant.demo.dto.Request.TableRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateIsActiveTableRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateTableRequest;
 import com.smart_restaurant.demo.dto.Response.TableResponse;
+import com.smart_restaurant.demo.dto.Response.TableResponseActive;
+import com.smart_restaurant.demo.entity.Account;
 import com.smart_restaurant.demo.entity.RestaurantTable;
 import com.smart_restaurant.demo.entity.Tenant;
 import com.smart_restaurant.demo.exception.AppException;
@@ -26,6 +29,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -37,6 +41,7 @@ public class TableServiceImpl implements TableService {
     TableMapper tableMapper;
     AccountService accountService;
     TenantRepository tenantRepository;
+    AccountRepository accountRepository;
 
 
 
@@ -127,6 +132,18 @@ public class TableServiceImpl implements TableService {
         updateTableResponse.setOrders(restaurantTable.getOrders());
 
         return tableMapper.toTableResponse(restaurantTable);
+    }
+
+    @Override
+    public List<TableResponseActive> getAllTableActive(JwtAuthenticationToken jwtAuthenticationToken) {
+        String username= jwtAuthenticationToken.getName();
+        Account account=accountRepository.findByUsername(username).orElseThrow(()->new AppException(ErrorCode.ACCOUNT_NOT_EXITS));
+        List<RestaurantTable> restaurantTables=tableRepository.findAllByTenant_TenantId(account.getTenant().getTenantId());
+        return restaurantTables.stream()
+                .filter(t -> Boolean.TRUE.equals(t.getIs_active()))
+                .map(tableMapper::toTableResponseActive)
+                .toList();
+
     }
 }
 

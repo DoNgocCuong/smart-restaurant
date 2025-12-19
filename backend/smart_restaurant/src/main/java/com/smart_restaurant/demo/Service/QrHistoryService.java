@@ -16,4 +16,6 @@ public interface QrHistoryService {
     void verify(String token, HttpServletResponse response) throws NoSuchAlgorithmException, InvalidKeyException, IOException;
 
     public List<QrResponse> getAllTableQRCode(JwtAuthenticationToken jwtAuthenticationToken);
+
+    List<QrResponse> generateAllTableQrCode(JwtAuthenticationToken jwtAuthenticationToken);
 }

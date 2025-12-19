@@ -41,5 +41,11 @@ public class QrHistoryController {
     ApiResponse<String> error(){
         return ApiResponse.<String>builder().result("page error 404 not fause").build();
     }
+    @PostMapping
+    ApiResponse<List<QrResponse>> refreshAllQr(JwtAuthenticationToken jwtAuthenticationToken){
+        return ApiResponse.<List<QrResponse>>builder()
+                .result(qrHistoryService.generateAllTableQrCode(jwtAuthenticationToken))
+                .build();
+    }
 }
 

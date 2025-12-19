@@ -10,9 +10,11 @@ import com.smart_restaurant.demo.Repository.AccountRepository;
 import com.smart_restaurant.demo.Repository.QrHistoryRepository;
 import com.smart_restaurant.demo.Repository.TableRepository;
 import com.smart_restaurant.demo.Service.QrHistoryService;
+import com.smart_restaurant.demo.Service.TableService;
 import com.smart_restaurant.demo.Service.TenantService;
 import com.smart_restaurant.demo.dto.Response.QrResponse;
 import com.smart_restaurant.demo.dto.Response.TableResponse;
+import com.smart_restaurant.demo.dto.Response.TableResponseActive;
 import com.smart_restaurant.demo.entity.Account;
 import com.smart_restaurant.demo.entity.QrHistory;
 import com.smart_restaurant.demo.entity.RestaurantTable;
@@ -68,6 +70,7 @@ public class QrHistoryServiceImpl implements QrHistoryService {
     TableRepository tableRepository;
     QrHistoryMapper qrHistoryMapper;
     AccountRepository accountRepository;
+    TableService tableService;
 
 
 
@@ -169,5 +172,24 @@ public class QrHistoryServiceImpl implements QrHistoryService {
         Account account=accountRepository.findByUsername(username).orElseThrow(()->new AppException(ErrorCode.ACCOUNT_NOT_EXITS));
         return qrHistoryMapper.toListQrResponse(qrHistoryRepository.findAllByRestaurantTable_Tenant_TenantIdAndActiveTrue(account.getAccountId()));
 
+    }
+
+    @Override
+    public List<QrResponse> generateAllTableQrCode(JwtAuthenticationToken jwtAuthenticationToken) {
+        String username= jwtAuthenticationToken.getName();
+        Account account=accountRepository.findByUsername(username).orElseThrow(()->new AppException(ErrorCode.ACCOUNT_NOT_EXITS));
+        List<TableResponseActive> restaurantTables=tableService.getAllTableActive(jwtAuthenticationToken);
+        return restaurantTables.stream()
+                .map(table -> {
+                    try {
+                        return generateTableQRCode(
+                                table.getTableId(),
+                                jwtAuthenticationToken
+                        );
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .toList();
     }
 }

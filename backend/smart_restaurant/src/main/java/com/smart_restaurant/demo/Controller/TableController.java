@@ -10,6 +10,7 @@ import com.smart_restaurant.demo.dto.Request.UpdateIsActiveTableRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateTableRequest;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.TableResponse;
+import com.smart_restaurant.demo.dto.Response.TableResponseActive;
 import com.smart_restaurant.demo.entity.Tenant;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
@@ -20,6 +21,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/tables")
@@ -83,6 +86,12 @@ public class TableController {
         return ApiResponse.<TableResponse>builder()
                 .message("Update Status thành công")
                 .result(tableResponse)
+                .build();
+    }
+    @GetMapping("/active")
+    public  ApiResponse<List<TableResponseActive>> getAllActive(JwtAuthenticationToken jwtAuthenticationToken){
+        return ApiResponse.<List<TableResponseActive>>builder()
+                .result(tableService.getAllTableActive(jwtAuthenticationToken))
                 .build();
     }
 

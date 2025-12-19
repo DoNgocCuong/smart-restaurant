@@ -36,7 +36,7 @@ public class ApplicationInitConfig {
     @Bean
     ApplicationRunner applicationRunner(AccountRepository accountRepository){
         return args -> {
-            if(accountRepository.findByUsername("admin").isEmpty()){
+            if(accountRepository.findByUsername("superadmin").isEmpty()){
                 var roles = new ArrayList<Role>();
                 Optional<Role> role=roleRepository.findByName(Roles.SUPPER_ADMIN.toString());
                 if((role.isEmpty())){
