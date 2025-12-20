@@ -71,6 +71,7 @@ public class TableServiceImpl implements TableService {
         tableResponse.setIs_active(restaurantTable.getIs_active());
         tableResponse.setTenantId(restaurantTable.getTenant().getTenantId());
         tableResponse.setOrders(restaurantTable.getOrders());
+        tableResponse.setStatusTable(restaurantTable.getStatusTable());
         return tableResponse;
     }
 
@@ -80,8 +81,9 @@ public class TableServiceImpl implements TableService {
         Page<RestaurantTable> restaurantTables = tableRepository.findAllByTenant_TenantId(tenantId, pageable);
         return restaurantTables.map(restaurantTable -> {
             TableResponse response = tableMapper.toTableResponse(restaurantTable);
-            response.setTenantId(restaurantTable.getTenant().getTenantId());  // thêm tenantId
-            response.setOrders(restaurantTable.getOrders());                 // thêm orders
+            response.setTenantId(restaurantTable.getTenant().getTenantId());
+            response.setOrders(restaurantTable.getOrders());
+            response.setStatusTable(restaurantTable.getStatusTable());
             return response;
         });
     }
@@ -130,6 +132,7 @@ public class TableServiceImpl implements TableService {
         TableResponse updateTableResponse = tableMapper.toTableResponse(restaurantTable);
         updateTableResponse.setTenantId(restaurantTable.getTenant().getTenantId());
         updateTableResponse.setOrders(restaurantTable.getOrders());
+        updateTableResponse.setStatusTable(restaurantTable.getStatusTable());
 
         return tableMapper.toTableResponse(restaurantTable);
     }
