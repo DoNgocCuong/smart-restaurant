@@ -209,7 +209,7 @@ export default function TableDetailModal({ table, onClose, onEdit }) {
 
         {/* Dropdown chọn định dạng */}
         {showDownloadOptions && (
-          <div className="absolute right-4 sm:right-6 bottom-[80px] bg-white border border-gray-300 rounded-lg shadow-md w-40 animate-fadeIn z-10">
+          <div className="absolute right-4 sm:right-6 bottom-20 bg-white border border-gray-300 rounded-lg shadow-md w-40 animate-fadeIn z-10">
             <button
               onClick={() => {
                 handleDownloadPNG(table);
