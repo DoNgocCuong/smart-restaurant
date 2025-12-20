@@ -19,6 +19,11 @@ export default function TableManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState(null);
 
+  // Modal tải QR
+  const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
+  const [downloadFormat, setDownloadFormat] = useState("png");
+  const [downloading, setDownloading] = useState(false);
+
   /* ================= FETCH TABLES ================= */
   useEffect(() => {
     const fetchTables = async () => {
@@ -30,7 +35,6 @@ export default function TableManagement() {
         toast.error("Không thể tải danh sách bàn");
       }
     };
-
     fetchTables();
   }, []);
 
@@ -56,42 +60,71 @@ export default function TableManagement() {
     toast.success("Tạo lại QR thành công");
   };
 
+  // ======= TẢI TẤT CẢ QR =======
   const handleDownloadAllQR = async () => {
-    const zip = new JSZip();
-    const folder = zip.folder("TABLE_QR");
+    setDownloading(true);
 
-    for (const table of tables) {
-      try {
-        const res = await fetch(
-          `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
-            getQRUrl(table.tableId)
-          )}`
-        );
-        const blob = await res.blob();
+    const activeTables = tables.filter((t) => t.is_active);
 
-        const base64Image = await new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(blob);
-          reader.onloadend = () => resolve(reader.result);
-        });
+    try {
+      if (downloadFormat === "png") {
+        // === ZIP PNG ===
+        const zip = new JSZip();
+        const folder = zip.folder("TABLE_QR_PNG");
 
+        for (const table of activeTables) {
+          const res = await fetch(
+            `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+              getQRUrl(table.tableId)
+            )}`
+          );
+          const blob = await res.blob();
+          folder.file(`${table.tableName}.png`, blob);
+        }
+
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        saveAs(zipBlob, "ALL_TABLE_QR_PNG.zip");
+      } else {
+        // === SINGLE PDF ===
         const pdf = new jsPDF("p", "mm", "a4");
-        pdf.setFontSize(18);
-        pdf.text("TABLE INFORMATION", 105, 20, { align: "center" });
-        pdf.setFontSize(12);
-        pdf.text(`Table: ${table.tableName}`, 20, 45);
-        pdf.text(`Section: ${table.section ?? "N/A"}`, 20, 55);
 
-        pdf.addImage(base64Image, "PNG", 120, 45, 60, 60);
-        folder.file(`QR_${table.tableName}.pdf`, pdf.output("blob"));
-      } catch {
-        console.log("Skip table", table.tableId);
+        for (let i = 0; i < activeTables.length; i++) {
+          const table = activeTables[i];
+          const res = await fetch(
+            `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+              getQRUrl(table.tableId)
+            )}`
+          );
+          const blob = await res.blob();
+          const base64Image = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = () => resolve(reader.result);
+          });
+
+          if (i > 0) pdf.addPage();
+
+          pdf.setFontSize(18);
+          pdf.text(`Table ${table.tableName}`, 105, 20, { align: "center" });
+          pdf.addImage(base64Image, "PNG", 60, 40, 90, 90);
+          pdf.setFontSize(12);
+          pdf.text("Scan to Order", 105, 140, { align: "center" });
+          pdf.text("WiFi: Restaurant_123 / 12345678", 105, 150, {
+            align: "center",
+          });
+        }
+
+        pdf.save("ALL_TABLE_QR.pdf");
       }
-    }
 
-    const zipBlob = await zip.generateAsync({ type: "blob" });
-    saveAs(zipBlob, "ALL_TABLE_QR.zip");
-    toast.success("Tải QR thành công");
+      toast.success("Tải QR thành công");
+    } catch (err) {
+      toast.error("Lỗi khi tải QR");
+      console.error(err);
+    } finally {
+      setDownloading(false);
+      setIsDownloadDialogOpen(false);
+    }
   };
 
   return (
@@ -140,7 +173,7 @@ export default function TableManagement() {
             </p>
           </div>
           <button
-            onClick={handleDownloadAllQR}
+            onClick={() => setIsDownloadDialogOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md cursor-pointer hover:opacity-90"
           >
             Tải tất cả QR
@@ -171,12 +204,9 @@ export default function TableManagement() {
         ))}
       </div>
 
+      {/* CREATE / EDIT DIALOGS */}
       {isCreateDialogOpen && (
-        <CreateTableDialog
-          onClose={() => {
-            setIsCreateDialogOpen(false);
-          }}
-        />
+        <CreateTableDialog onClose={() => setIsCreateDialogOpen(false)} />
       )}
 
       {isEditDialogOpen && selectedTable && (
@@ -186,6 +216,65 @@ export default function TableManagement() {
           setTables={setTables}
           onClose={() => setIsEditDialogOpen(false)}
         />
+      )}
+
+      {/* DOWNLOAD MODAL (TỰ CODE, KHÔNG DÙNG HEADLESSUI) */}
+      {isDownloadDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* overlay */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => !downloading && setIsDownloadDialogOpen(false)}
+          ></div>
+
+          {/* modal content */}
+          <div className="relative bg-white rounded-lg p-6 w-[90%] max-w-md shadow-lg z-10">
+            <h2 className="text-lg font-semibold mb-4">
+              Chọn định dạng tải QR
+            </h2>
+
+            <div className="space-y-3">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="format"
+                  value="png"
+                  checked={downloadFormat === "png"}
+                  onChange={() => setDownloadFormat("png")}
+                />
+                <span>Ảnh PNG (ZIP nhiều file)</span>
+              </label>
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="format"
+                  value="pdf"
+                  checked={downloadFormat === "pdf"}
+                  onChange={() => setDownloadFormat("pdf")}
+                />
+                <span>File PDF (tất cả bàn trong 1 file)</span>
+              </label>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setIsDownloadDialogOpen(false)}
+                className="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100"
+                disabled={downloading}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleDownloadAllQR}
+                className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                disabled={downloading}
+              >
+                {downloading ? "Đang tải..." : "Tải xuống"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
