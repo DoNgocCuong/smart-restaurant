@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Optional;
 
 public interface QrHistoryService {
     QrResponse generateTableQRCode(Integer tableId, JwtAuthenticationToken jwtAuthenticationToken) throws Exception;
@@ -18,4 +19,5 @@ public interface QrHistoryService {
     public List<QrResponse> getAllTableQRCode(JwtAuthenticationToken jwtAuthenticationToken);
 
     List<QrResponse> generateAllTableQrCode(JwtAuthenticationToken jwtAuthenticationToken);
+    QrResponse findOneTableQrCode( Integer tableId,JwtAuthenticationToken jwtAuthenticationToken);
 }

@@ -15,7 +15,7 @@ public interface QrHistoryRepository extends JpaRepository<QrHistory, Integer> {
 
     List<QrHistory> findAllByRestaurantTable_Tenant_TenantIdAndActiveTrue(Integer tenantId);
     Optional<QrHistory> findByRestaurantTable_TableIdAndToken(Integer tableId, String token);
-
+    Optional<QrHistory> findByRestaurantTable_TableIdAndRestaurantTable_Tenant_TenantIdAndActiveTrue(Integer tableId,Integer tenantId);
 }
 
 
