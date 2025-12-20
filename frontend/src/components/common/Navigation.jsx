@@ -77,7 +77,7 @@ function Navigation() {
           </div>
 
           {/* Center - Desktop Navigation (hidden on mobile) */}
-          {!pathname.includes("tenant-create") && (
+          {role !== "SUPER_ADMIN" && !pathname.includes("tenant-create") && (
             <nav className="hidden lg:flex gap-3">
               {navItems.map((item) => (
                 <Link
@@ -146,24 +146,26 @@ function Navigation() {
             </div>
 
             {/* Navigation links */}
-            {mobileMenuOpen && !pathname.includes("tenant-create") && (
-              <div className="flex flex-col gap-1">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`${mobileLinkStyle} ${
-                      isActive(item.to)
-                        ? "bg-[#5B94FF]/10 border-l-4 border-[#5B94FF]"
-                        : ""
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            )}
+            {mobileMenuOpen &&
+              role !== "SUPER_ADMIN" &&
+              !pathname.includes("tenant-create") && (
+                <div className="flex flex-col gap-1">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`${mobileLinkStyle} ${
+                        isActive(item.to)
+                          ? "bg-[#5B94FF]/10 border-l-4 border-[#5B94FF]"
+                          : ""
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
 
             {/* Logout button */}
             <button

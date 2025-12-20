@@ -1,262 +1,162 @@
-import { useContext, useEffect, useState } from "react";
-
+import { useContext, useEffect, useState, useMemo } from "react";
 import Logo from "../../assets/images/logo.png";
 import { AuthContext } from "../../context/AuthContext";
-
-import AddAccountCard from "../../components/super-admin/AddAccountCard";
-
-import { ChevronDown, LogOut, Pencil, Unlock, RefreshCcw } from "lucide-react";
+import { ChevronDown, LogOut, Search, Plus } from "lucide-react";
 import toast from "react-hot-toast";
-const mock_accounts = [
-  {
-    id: "#001",
-    restaurant: "La Casa Bella",
-    email: "admin1@restaurant.com",
-    status: "active",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: "#002",
-    restaurant: "La Casa Bella",
-    email: "admin1@restaurant.com",
-    status: "inactive",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: "#003",
-    restaurant: "La Casa Bella",
-    email: "admin1@restaurant.com",
-    status: "active",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: "#004",
-    restaurant: "La Casa Bella",
-    email: "admin1@restaurant.com",
-    status: "active",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: "#005",
-    restaurant: "La Casa Bella",
-    email: "admin1@restaurant.com",
-    status: "inactive",
-    createdAt: "2024-01-15",
-  },
-];
-
+import accountApi from "../../api/accountApi";
+import DetailAdminAccountModal from "../../components/super-admin/DetailAdminAccountModal";
+import AddAccountCard from "../../components/super-admin/AddAccountCard";
+import Fuse from "fuse.js";
+import Navigation from "../../components/common/Navigation";
 function AccountManagement() {
   const [accounts, setAccounts] = useState([]);
-  const { role, logout } = useContext(AuthContext);
-  const [userName, setUserName] = useState("");
-  const [openMenu, setOpenMenu] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
+  const [selectedTenant, setSelectedTenant] = useState(null);
+  const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [isOpenAddAccount, setIsOpenAddAccount] = useState(false);
-  const [hoveredButton, setHoveredButton] = useState(null);
+
+  const fetchAccounts = async () => {
+    try {
+      const res = await accountApi.getAllAdminAccount();
+      if (res.code === "1000") {
+        const mapped = res.result.map((item, index) => ({
+          id: `#${index + 1}`,
+          username: item.username,
+          tenant: item.tenant,
+          createdAt: new Date(item.createAt).toLocaleDateString("vi-VN"),
+        }));
+        setAccounts(mapped);
+      } else {
+        toast.error("Không thể lấy danh sách tài khoản");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Lỗi khi tải danh sách tài khoản");
+    }
+  };
 
   useEffect(() => {
-    setAccounts(mock_accounts);
-    setUserName(localStorage.getItem("userName") || "");
-  }, []);
+    fetchAccounts();
+  }, [isOpenAddAccount]);
 
-  const handleLogout = () => {
-    logout();
-    localStorage.clear();
+  const handleSelectTenant = (tenant) => {
+    setSelectedTenant(tenant);
+    setIsOpenDetail(true);
   };
 
-  const handleResetPassword = (id) => {
-    // Gọi API reset password theo id
+  const fuse = useMemo(() => {
+    return new Fuse(accounts, {
+      keys: ["tenant.nameTenant"],
+      threshold: 0.3,
+      includeScore: true,
+    });
+  }, [accounts]);
 
-    toast.success(`Reset mật khẩu của ${id} thành công`);
-  };
-
-  const handleLockAccount = (id) => {
-    // Gọi API khóa tài khoản
-
-    toast.success(`Khóa tài khoản ${id} thành công`);
-  };
-
-  const handleUnlockAccount = (id) => {
-    // Gọi API mở khóa tài khoản
-
-    toast.success(`Mở khóa tài khoản ${id} thành công`);
-  };
+  const filteredAccounts = useMemo(() => {
+    if (!searchTerm.trim()) return accounts;
+    return fuse.search(searchTerm).map((r) => r.item);
+  }, [searchTerm, accounts, fuse]);
 
   return (
     <div className="col-span-12 bg-slate-50 min-h-screen">
       {/* Header */}
-      <header className="bg-white h-16 shadow-sm py-10 px-20 flex items-center justify-between">
-        {/* Left */}
-        <div className="flex items-center gap-3">
-          <img
-            src={Logo}
-            alt=""
-            className="w-10 h-10 flex items-center justify-center"
-          />
-          <div>
-            <h1 className="font-bold leading-tight">Quản trị hệ thống</h1>
-            <p className="text-sm text-gray-500 leading-tight">
-              Quản lý tài khoản Admin của nhà hàng
-            </p>
-          </div>
-        </div>
-
-        {/* Right */}
-        <div className="relative">
-          <div
-            onClick={() => setOpenMenu(!openMenu)}
-            className="flex items-center cursor-pointer select-none"
-          >
-            {/* Username */}
-            <div className="mr-3 hidden md:flex flex-col leading-tight">
-              <span className="font-semibold text-sm text-right">
-                {userName}
-              </span>
-              <span className="text-xs text-gray-500 text-right">{role}</span>
-            </div>
-            {/* Avatar */}
-            <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-400 to-purple-400 flex items-center justify-center text-white font-bold">
-              {userName ? userName.charAt(0).toUpperCase() : "👤"}{" "}
-            </div>
-            <ChevronDown />
-          </div>
-
-          {/* Dropdown */}
-          {openMenu && (
-            <div className="absolute right-0 mt-3 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-              <button
-                onClick={() => handleLogout()}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600 flex items-center gap-3"
-              >
-                <LogOut size={16} /> <span>Đăng xuất</span>
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
-
-      {/* Card */}
-      <div className="py-10 px-20">
-        <div className="bg-white rounded-xl shadow p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+      <Navigation />
+      {/* Content */}
+      <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-20">
+        <div className="bg-white rounded-xl shadow p-4 sm:p-6">
+          {/* Header + Search + Button */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
             <div>
-              <h1 className="text-2xl font-bold">Quản lý tài khoản</h1>
-              <p className="text-gray-500">
+              <h1 className="text-xl sm:text-2xl font-bold">
+                Quản lý tài khoản
+              </h1>
+              <p className="text-gray-500 text-sm sm:text-base">
                 Quản lý các tài khoản Admin của nhà hàng
               </p>
             </div>
 
-            <button
-              onClick={() => {
-                setIsOpenAddAccount(true);
-              }}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer"
-            >
-              <span className="text-lg">＋</span>
-              Thêm tài khoản
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full sm:w-auto">
+              <div className="relative w-full sm:w-80">
+                <input
+                  type="text"
+                  placeholder="Tìm theo tên nhà hàng..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+                <Search
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                />
+              </div>
+
+              <button
+                onClick={() => setIsOpenAddAccount(true)}
+                className="flex items-center justify-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300"
+              >
+                <Plus size={18} />
+                <span className="text-sm sm:text-base">Thêm tài khoản</span>
+              </button>
+            </div>
           </div>
 
-          {/* Table */}
-          <div className=" h-fit">
-            <table className="w-full border-collapse h-fit">
+          {/* Table responsive */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full border-collapse">
               <thead>
                 <tr className="border-b border-b-gray-300 text-gray-500 text-sm">
                   <th className="text-left py-3 px-2">ID</th>
                   <th className="text-left py-3 px-2">Nhà hàng</th>
-                  <th className="text-left py-3 px-2">Email</th>
-                  <th className="text-left py-3 px-2">Trạng thái</th>
+                  <th className="text-left py-3 px-2">Email Admin</th>
                   <th className="text-left py-3 px-2">Ngày tạo</th>
-                  <th className="text-center py-3 px-2">Thao tác</th>
                 </tr>
               </thead>
 
               <tbody>
-                {accounts.map((acc) => (
-                  <tr
-                    key={acc.id}
-                    className="border-b border-b-gray-300 hover:bg-slate-50 transition"
-                  >
-                    <td className="py-3 px-2 font-semibold">{acc.id}</td>
-                    <td className="py-3 px-2">{acc.restaurant}</td>
-                    <td className="py-3 px-2 font-semibold">{acc.email}</td>
-                    <td
-                      className={`py-3 px-2 font-semibold ${
-                        acc.status == "active"
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
+                {filteredAccounts.length > 0 ? (
+                  filteredAccounts.map((acc) => (
+                    <tr
+                      key={acc.id}
+                      onClick={() => handleSelectTenant(acc.tenant)}
+                      className="border-b border-b-gray-300 hover:bg-slate-100 transition cursor-pointer"
                     >
-                      {acc.status == "active" ? "Hoạt động" : "Bị khóa"}
-                    </td>
-                    <td className="py-3 px-2">{acc.createdAt}</td>
-                    <td className="py-3 px-2">
-                      <div className="flex justify-center gap-2">
-                        {/* Đặt lại mật khẩu */}
-                        <div className="relative">
-                          <button
-                            onMouseEnter={() =>
-                              setHoveredButton({ id: acc.id, type: "reset" })
-                            }
-                            onMouseLeave={() => setHoveredButton(null)}
-                            onClick={() => handleResetPassword(acc.id)}
-                            className="w-8 h-8 flex items-center justify-center border border-gray-400 rounded-md hover:bg-gray-200 cursor-pointer"
-                          >
-                            <RefreshCcw size={16} />
-                          </button>
-
-                          {/* Tooltip */}
-                          {hoveredButton?.id === acc.id &&
-                            hoveredButton?.type === "reset" && (
-                              <div
-                                className="z-20 absolute top-full mt-2 left-1/2 -translate-x-1/2 
-          bg-gray-800 text-white text-sm rounded-md px-2 py-1 
-          whitespace-nowrap shadow-md animate-fadeIn pointer-events-none"
-                              >
-                                Đặt lại mật khẩu
-                              </div>
-                            )}
-                        </div>
-
-                        {/* Khóa */}
-                        <div className="relative">
-                          <button
-                            onMouseEnter={() =>
-                              setHoveredButton({ id: acc.id, type: "lock" })
-                            }
-                            onMouseLeave={() => setHoveredButton(null)}
-                            onClick={() => handleLockAccount(acc.id)}
-                            className="w-8 h-8 flex items-center justify-center bg-red-600 text-white rounded-md hover:bg-red-700 cursor-pointer"
-                          >
-                            <Unlock size={16} />
-                          </button>
-
-                          {/* Tooltip */}
-                          {hoveredButton?.id === acc.id &&
-                            hoveredButton?.type === "lock" && (
-                              <div
-                                className="z-20 absolute top-full mt-2 left-1/2 -translate-x-1/2 
-          bg-red-700 text-white text-sm rounded-md px-2 py-1 
-          whitespace-nowrap shadow-md animate-fadeIn pointer-events-none"
-                              >
-                                Khóa tài khoản
-                              </div>
-                            )}
-                        </div>
-                      </div>
+                      <td className="py-3 px-2 font-semibold">{acc.id}</td>
+                      <td className="py-3 px-2">{acc.tenant?.nameTenant}</td>
+                      <td className="py-3 px-2 font-semibold">
+                        {acc.username}
+                      </td>
+                      <td className="py-3 px-2">{acc.createdAt}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="4"
+                      className="text-center py-6 text-gray-500 italic"
+                    >
+                      Không tìm thấy kết quả phù hợp
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
         </div>
       </div>
+
+      {isOpenDetail && selectedTenant && (
+        <DetailAdminAccountModal
+          tenant={selectedTenant}
+          onClose={() => setIsOpenDetail(false)}
+        />
+      )}
+
       {isOpenAddAccount && (
         <AddAccountCard
           onClose={() => {
             setIsOpenAddAccount(false);
+            fetchAccounts();
           }}
         />
       )}

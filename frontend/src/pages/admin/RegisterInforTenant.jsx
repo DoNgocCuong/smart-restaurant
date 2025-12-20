@@ -2,6 +2,7 @@ import { useState } from "react";
 import tenantApi from "../../api/tenantApi";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router";
+import { Upload } from "lucide-react";
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 const BANK_LIST = [
@@ -96,7 +97,7 @@ function RegisterInforTenant() {
           các chức năng khác
         </p>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3 lg:gap-6 ">
           {/* Tên nhà hàng */}
           <div>
             <label className="font-medium text-gray-700">Tên nhà hàng</label>
@@ -165,19 +166,8 @@ function RegisterInforTenant() {
                   />
                 ) : (
                   <>
-                    <svg
-                      className="w-10 h-10 text-gray-400 mb-2"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M7 16V4m10 12V4M3 16h18M5 20h14"
-                      />
-                    </svg>
+                    <Upload className="text-gray-400 mb-2" />
+
                     <p className="text-sm text-gray-600">
                       Click để tải logo hoặc kéo thả
                     </p>
@@ -299,11 +289,11 @@ function RegisterInforTenant() {
             </div>
           </div>
           {/* Submit */}
-          <div className="md:col-span-2 flex justify-end">
+          <div className=" md:col-span-2 flex justify-end">
             <button
               type="submit"
               disabled={loading}
-              className="px-8 py-3 rounded-md bg-blue-600 text-white font-semibold
+              className="w-full lg:w-fi px-8 py-3 rounded-md bg-blue-600 text-white font-semibold
                          hover:bg-blue-700 transition disabled:opacity-50"
             >
               {loading ? "Đang đăng ký..." : "Đăng ký nhà hàng"}

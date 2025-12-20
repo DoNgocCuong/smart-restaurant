@@ -57,8 +57,13 @@ export default function CreateTableDialog({ onClose }) {
 
       {/* Dialog */}
       <div
-        className="fixed left-1/2 top-1/2 z-50 w-full max-w-md
-        -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-6 shadow-lg"
+        className="
+    fixed left-1/2 top-1/2 z-50
+    w-[90%] max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl
+    -translate-x-1/2 -translate-y-1/2
+    rounded-xl bg-white p-4 sm:p-6 md:p-8
+    shadow-lg
+  "
       >
         <h2 className="text-lg font-semibold mb-4">Tạo bàn mới</h2>
 
@@ -71,7 +76,7 @@ export default function CreateTableDialog({ onClose }) {
               onChange={(e) =>
                 setFormData({ ...formData, table_name: e.target.value })
               }
-              className="w-full px-3 py-2 border rounded-md text-sm"
+              className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
               placeholder="VD: Bàn 01"
             />
           </div>
@@ -89,7 +94,7 @@ export default function CreateTableDialog({ onClose }) {
                   capacity: Number(e.target.value),
                 })
               }
-              className="w-full px-3 py-2 border rounded-md text-sm"
+              className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
               placeholder="VD: 4"
             />
           </div>
@@ -105,10 +110,10 @@ export default function CreateTableDialog({ onClose }) {
                   is_active: e.target.value === "active",
                 })
               }
-              className="w-full px-3 py-2 border rounded-md text-sm"
+              className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
             >
               <option value="active">Hoạt động</option>
-              <option value="inactive">Không hoạt động</option>
+              {/* <option value="inactive">Không hoạt động</option> */}
             </select>
           </div>
         </div>

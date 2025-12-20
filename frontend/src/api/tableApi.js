@@ -1,3 +1,4 @@
+import { data } from "react-router";
 import axiosClient from "./axiosClient";
 
 const tableApi = {
@@ -12,6 +13,8 @@ const tableApi = {
   },
 
   createTable: (data) => axiosClient.post("/admin/tables", data),
+
+  updateTable: (id, data) => axiosClient.put(`/admin/tables/${id}`, data),
 };
 
 export default tableApi;
