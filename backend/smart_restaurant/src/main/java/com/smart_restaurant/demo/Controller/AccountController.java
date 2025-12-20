@@ -3,6 +3,7 @@ package com.smart_restaurant.demo.Controller;
 import com.nimbusds.jose.JOSEException;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.dto.Request.SignupRequest;
+import com.smart_restaurant.demo.dto.Response.AccountResponse;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.SignupResponse;
 import jakarta.mail.MessagingException;
@@ -11,10 +12,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/accounts")
@@ -31,21 +32,37 @@ public class AccountController {
                 .build();
     }
 
+    @GetMapping("/all-admin")
+    ApiResponse<List<AccountResponse>> getAllAdmin(){
+        return ApiResponse.<List<AccountResponse>>builder()
+                .message("GET ALL TẤT CẢ TÀI KHOAN ADMIN THÀNH CÔNG")
+                .result(accountService.getAllAdmin())
+                .build();
+    }
+
     @PreAuthorize("hasRole('TENANT_ADMIN')")
     @PostMapping("/create-account-staff")
-    ApiResponse<SignupResponse> createAccountSatff(@RequestBody @Valid SignupRequest signupRequest) throws MessagingException, JOSEException{
+    ApiResponse<SignupResponse> createAccountSatff(@RequestBody @Valid SignupRequest signupRequest, JwtAuthenticationToken jwtAuthenticationToken) throws MessagingException, JOSEException{
         return ApiResponse.<SignupResponse>builder()
                 .message("Tạo thành công account Staff")
-                .result(accountService.createAccountStaff(signupRequest))
+                .result(accountService.createAccountStaff(signupRequest, jwtAuthenticationToken))
                 .build();
     }
 
     @PreAuthorize("hasRole('TENANT_ADMIN')")
     @PostMapping("/create-account-kitchen")
-    ApiResponse<SignupResponse> createAccountKitchen(@RequestBody @Valid SignupRequest signupRequest) throws MessagingException, JOSEException{
+    ApiResponse<SignupResponse> createAccountKitchen(@RequestBody @Valid SignupRequest signupRequest, JwtAuthenticationToken jwtAuthenticationToken) throws MessagingException, JOSEException{
         return ApiResponse.<SignupResponse>builder()
                 .message("Tạo thành công account kitchen staff")
-                .result(accountService.createAccountKitchen(signupRequest))
+                .result(accountService.createAccountKitchen(signupRequest,jwtAuthenticationToken))
+                .build();
+    }
+
+    @GetMapping("/tenant/get-all-staff")
+    ApiResponse<List<AccountResponse>> getAllStaffAndKitchenByTenant(JwtAuthenticationToken jwtAuthenticationToken){
+        return ApiResponse.<List<AccountResponse>>builder()
+                .message("Get all tài khoan nhan vien thanh cong trong TENANT")
+                .result(accountService.getAllStaffAndKitchenByTenant(jwtAuthenticationToken))
                 .build();
     }
 

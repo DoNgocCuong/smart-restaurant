@@ -4,6 +4,7 @@ package com.smart_restaurant.demo.dto.Response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.smart_restaurant.demo.entity.Order;
 import com.smart_restaurant.demo.entity.Tenant;
+import com.smart_restaurant.demo.enums.StatusTable;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -24,6 +25,7 @@ public class TableResponse {
     String section;
     Integer capacity;
     Boolean is_active;
+    StatusTable statusTable;
     Integer tenantId;
     List<Order> orders;
     LocalDateTime createAt;

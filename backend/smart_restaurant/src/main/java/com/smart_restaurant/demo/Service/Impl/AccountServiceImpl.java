@@ -2,7 +2,10 @@ package com.smart_restaurant.demo.Service.Impl;
 
 
 import com.smart_restaurant.demo.Repository.AccountRepository;
+import com.smart_restaurant.demo.Repository.TenantRepository;
 import com.smart_restaurant.demo.Service.AccountService;
+import com.smart_restaurant.demo.dto.Response.AccountResponse;
+import com.smart_restaurant.demo.entity.Tenant;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.nimbusds.jose.*;
@@ -35,6 +38,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -60,6 +64,8 @@ public class AccountServiceImpl implements AccountService {
     JavaMailSender mailSender;
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
+    TenantRepository tenantRepository;
+
     @Override
     public SignupResponse createAccount(SignupRequest signupRequest) throws JOSEException {
         if(accountRepository.existsByUsername(signupRequest.getUsername()))
@@ -104,29 +110,82 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public SignupResponse createAccountStaff(SignupRequest signupRequest) throws JOSEException, MessagingException {
+    public SignupResponse createAccountStaff(SignupRequest signupRequest, JwtAuthenticationToken jwtAuthenticationToken) throws JOSEException, MessagingException {
         if(accountRepository.existsByUsername(signupRequest.getUsername()))
             throw new AppException(ErrorCode.USER_EXISTED);
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = this.getTenantIdByUsername(username);
+
+        Tenant tenant = tenantRepository.findById(tenantId)
+                .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
+
         Account newAccount=accountMapper.toAccount(signupRequest);
         String password= passwordEncoder.encode(signupRequest.getPassword());
         newAccount.setPassword(password);
         newAccount.setRoles(roleRepository.findAllByName(Roles.STAFF.toString()));
         newAccount.setIsEmailVerify(true);
+        newAccount.setTenant(tenant);
         String token=generateEmailToken(newAccount);
         return accountMapper.toSignupResponse(accountRepository.save(newAccount));
     }
 
     @Override
-    public SignupResponse createAccountKitchen(SignupRequest signupRequest) throws JOSEException, MessagingException {
+    public SignupResponse createAccountKitchen(SignupRequest signupRequest, JwtAuthenticationToken jwtAuthenticationToken) throws JOSEException, MessagingException {
         if(accountRepository.existsByUsername(signupRequest.getUsername()))
             throw new AppException(ErrorCode.USER_EXISTED);
+
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = this.getTenantIdByUsername(username);
+
+        Tenant tenant = tenantRepository.findById(tenantId)
+                .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
+
         Account newAccount=accountMapper.toAccount(signupRequest);
         String password= passwordEncoder.encode(signupRequest.getPassword());
         newAccount.setPassword(password);
         newAccount.setRoles(roleRepository.findAllByName(Roles.KITCHEN_STAFF.toString()));
         newAccount.setIsEmailVerify(true);
+        newAccount.setTenant(tenant);
         String token=generateEmailToken(newAccount);
         return accountMapper.toSignupResponse(accountRepository.save(newAccount));
+    }
+
+    @Override
+    public List<AccountResponse> getAllAdmin() {
+        var admins = accountRepository.findAll().stream()
+                .filter(account -> account.getRoles().stream()
+                        .anyMatch(role -> role.getName().equals("TENANT_ADMIN")))
+                .toList();
+
+        var adminDTOs = admins.stream()
+                .map(admin -> {
+                    var dto = accountMapper.toAccountResponse(admin);
+                    dto.setTenant(admin.getTenant());
+                    dto.setRoles(admin.getRoles());
+                    return dto;
+                })
+                .toList();
+
+        return adminDTOs;
+    }
+    @Override
+    public List<AccountResponse> getAllStaffAndKitchenByTenant(JwtAuthenticationToken jwtAuthenticationToken) {
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = this.getTenantIdByUsername(username);
+
+        return accountRepository.findAll().stream()
+                .filter(account -> account.getTenant() != null
+                        && account.getTenant().getTenantId().equals(tenantId)
+                        && account.getRoles().stream()
+                        .anyMatch(role -> role.getName().equals("STAFF")
+                                || role.getName().equals("KITCHEN_STAFF")))
+                .map(account -> {
+                    var dto = accountMapper.toAccountResponse(account);
+                    dto.setTenant(account.getTenant());
+                    dto.setRoles(account.getRoles());
+                    return dto;
+                })
+                .toList();
     }
 
 
