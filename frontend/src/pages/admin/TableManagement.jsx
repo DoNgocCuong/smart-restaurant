@@ -25,6 +25,7 @@ export default function TableManagement() {
       try {
         const res = await tableApi.getAllTable(); // Spring pageable: page bắt đầu từ 0
         setTables(res.result.content);
+        console.log(res.result.content);
       } catch (error) {
         toast.error("Không thể tải danh sách bàn");
       }
@@ -53,52 +54,6 @@ export default function TableManagement() {
 
   const handleRegenerateQR = () => {
     toast.success("Tạo lại QR thành công");
-  };
-
-  const handleDownloadQR = async (table) => {
-    try {
-      const res = await fetch(
-        `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
-          getQRUrl(table.tableId)
-        )}`
-      );
-      const blob = await res.blob();
-
-      const reader = new FileReader();
-      reader.readAsDataURL(blob);
-
-      reader.onloadend = () => {
-        const pdf = new jsPDF("p", "mm", "a4");
-
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(18);
-        pdf.text("TABLE INFORMATION", 105, 20, { align: "center" });
-
-        pdf.setFont("helvetica", "normal");
-        pdf.setFontSize(12);
-        pdf.text(`Table: ${table.tableName}`, 20, 45);
-        pdf.text(`Section: ${table.section ?? "N/A"}`, 20, 55);
-        pdf.text(`Capacity: ${table.capacity}`, 20, 65);
-        pdf.text(
-          `Status: ${
-            table.is_active
-              ? table.orders.length > 0
-                ? "Occupied"
-                : "Available"
-              : "Inactive"
-          }`,
-          20,
-          75
-        );
-
-        pdf.addImage(reader.result, "PNG", 120, 45, 60, 60);
-        pdf.text("Scan QR to view menu", 150, 115, { align: "center" });
-
-        pdf.save(`QR_${table.tableName}.pdf`);
-      };
-    } catch {
-      toast.error("Download QR failed");
-    }
   };
 
   const handleDownloadAllQR = async () => {
@@ -209,7 +164,6 @@ export default function TableManagement() {
                     setIsEditDialogOpen(true);
                   }}
                   onQR={handleRegenerateQR}
-                  onDownload={() => handleDownloadQR(table)}
                 />
               ))}
             </div>
