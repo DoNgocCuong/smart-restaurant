@@ -21,7 +21,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class QrHistoryController {
     QrHistoryService qrHistoryService;
-    @GetMapping("{id}")
+    @PostMapping("{id}")
     ApiResponse<QrResponse> createQr(@PathVariable Integer id, JwtAuthenticationToken jwtAuthenticationToken) throws Exception {
         return ApiResponse.<QrResponse>builder()
                 .result(qrHistoryService.generateTableQRCode(id,jwtAuthenticationToken))
@@ -45,6 +45,12 @@ public class QrHistoryController {
     ApiResponse<List<QrResponse>> refreshAllQr(JwtAuthenticationToken jwtAuthenticationToken){
         return ApiResponse.<List<QrResponse>>builder()
                 .result(qrHistoryService.generateAllTableQrCode(jwtAuthenticationToken))
+                .build();
+    }
+    @GetMapping("/{id}")
+    ApiResponse<QrResponse> findOneTableQrCode(@PathVariable Integer id, JwtAuthenticationToken jwtAuthenticationToken){
+        return  ApiResponse.<QrResponse>builder()
+                .result(qrHistoryService.findOneTableQrCode(id, jwtAuthenticationToken))
                 .build();
     }
 }

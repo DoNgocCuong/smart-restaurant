@@ -192,4 +192,13 @@ public class QrHistoryServiceImpl implements QrHistoryService {
                 })
                 .toList();
     }
+
+    @Override
+    public QrResponse findOneTableQrCode(Integer tableId,JwtAuthenticationToken jwtAuthenticationToken) {
+        String username= jwtAuthenticationToken.getName();
+        Account account=accountRepository.findByUsername(username).orElseThrow(()->new AppException(ErrorCode.ACCOUNT_NOT_EXITS));
+        QrHistory qrHistory=qrHistoryRepository.findByRestaurantTable_TableIdAndRestaurantTable_Tenant_TenantIdAndActiveTrue(
+                                                tableId,account.getTenant().getTenantId()).orElseThrow(()->new AppException(ErrorCode.QR_NOT_EXIST));
+        return qrHistoryMapper.toQrResponse(qrHistory);
+    }
 }
