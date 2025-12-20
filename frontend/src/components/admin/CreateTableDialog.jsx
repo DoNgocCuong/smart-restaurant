@@ -4,14 +4,16 @@ import tableApi from "../../api/tableApi";
 
 export default function CreateTableDialog({ onClose }) {
   const [formData, setFormData] = useState({
-    table_name: "",
+    tableName: "",
+    section: "Trong nhà",
     capacity: 1,
     is_active: true,
   });
 
   const resetForm = () => {
     setFormData({
-      table_name: "",
+      tableName: "",
+      section: "Trong nhà",
       capacity: 1,
       is_active: true,
     });
@@ -22,7 +24,7 @@ export default function CreateTableDialog({ onClose }) {
   }, []);
 
   const handleCreate = async () => {
-    if (!formData.table_name.trim()) {
+    if (!formData.tableName.trim()) {
       toast.error("Vui lòng nhập tên bàn");
       return;
     }
@@ -33,7 +35,8 @@ export default function CreateTableDialog({ onClose }) {
     }
 
     const payload = {
-      tableName: formData.table_name,
+      tableName: formData.tableName,
+      section: formData.section,
       capacity: formData.capacity,
       is_active: formData.is_active,
     };
@@ -72,9 +75,9 @@ export default function CreateTableDialog({ onClose }) {
           <div>
             <label className="text-sm font-medium">Tên bàn *</label>
             <input
-              value={formData.table_name}
+              value={formData.tableName}
               onChange={(e) =>
-                setFormData({ ...formData, table_name: e.target.value })
+                setFormData({ ...formData, tableName: e.target.value })
               }
               className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
               placeholder="VD: Bàn 01"
