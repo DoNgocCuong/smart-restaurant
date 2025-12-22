@@ -323,7 +323,7 @@ public Page<ItemResponse> getAllItems(int page, int size, String itemName, Integ
             sortBy = "POPULAR";
         }
         return switch (sortBy.toUpperCase()) {
-            case "POPULAR" -> Sort.by(Sort.Direction.DESC, "itemId");
+//            case "POPULAR" -> Sort.by(Sort.Direction.DESC, "itemId");
             case "PRICE_ASC" -> Sort.by(Sort.Direction.ASC, "price");
             case "PRICE_DESC" -> Sort.by(Sort.Direction.DESC, "price");
             case "NAME" -> Sort.by(Sort.Direction.ASC, "itemName");
