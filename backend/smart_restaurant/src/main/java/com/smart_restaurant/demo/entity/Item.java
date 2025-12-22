@@ -23,16 +23,20 @@ public class Item {
     String itemName;
     String description;
     Double price;
-    String imageUrl;
-    boolean status;
-
+    @Column(name = "is_kitchen")
+    Boolean isKitchen;
+    Boolean status;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "avatar_id")
+    Image avatar;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "item_category",
-            joinColumns = @JoinColumn(name = "category_id"),
-            inverseJoinColumns = @JoinColumn(name = "item_id")
+            joinColumns = @JoinColumn(name = "item_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
     )
-    private List<Category> category;
+    List<Category> category;
+
 
 
     @ManyToMany(fetch = FetchType.LAZY)
