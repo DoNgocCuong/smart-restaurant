@@ -2,6 +2,7 @@ package com.smart_restaurant.demo.Controller;
 
 import com.nimbusds.jose.JOSEException;
 import com.smart_restaurant.demo.Service.AccountService;
+import com.smart_restaurant.demo.dto.Request.AccountUpdateIsActiveRequest;
 import com.smart_restaurant.demo.dto.Request.AccountUpdateRequest;
 import com.smart_restaurant.demo.dto.Request.SignupRequest;
 import com.smart_restaurant.demo.dto.Response.AccountResponse;
@@ -59,11 +60,27 @@ public class AccountController {
                 .build();
     }
 
-    @GetMapping("/tenant/get-all-staff")
+    @GetMapping("/tenant/get-all-staff-kitchen")
     ApiResponse<List<AccountResponse>> getAllStaffAndKitchenByTenant(JwtAuthenticationToken jwtAuthenticationToken){
         return ApiResponse.<List<AccountResponse>>builder()
-                .message("Get all tài khoan nhan vien thanh cong trong TENANT")
+                .message("Get all tài khoan nhân viên và đầu bếp thanh cong trong TENANT")
                 .result(accountService.getAllStaffAndKitchenByTenant(jwtAuthenticationToken))
+                .build();
+    }
+
+    @GetMapping("/tenant/get-all-staff")
+    ApiResponse<List<AccountResponse>> getAllStaffByTenant(JwtAuthenticationToken jwtAuthenticationToken){
+        return ApiResponse.<List<AccountResponse>>builder()
+                .message("Get all tài khoan nhan vien thanh cong trong TENANT")
+                .result(accountService.getAllStaffByTenant(jwtAuthenticationToken))
+                .build();
+    }
+
+    @GetMapping("/tenant/get-all-kitchen")
+    ApiResponse<List<AccountResponse>> getAllKitchenByTenant(JwtAuthenticationToken jwtAuthenticationToken){
+        return ApiResponse.<List<AccountResponse>>builder()
+                .message("Get all tài khoan đầu bếp thanh cong trong TENANT")
+                .result(accountService.getAllKitchenByTenant(jwtAuthenticationToken))
                 .build();
     }
 
@@ -76,6 +93,18 @@ public class AccountController {
         return ApiResponse.<AccountResponse>builder()
                 .message("Cập nhật thành công account")
                 .result(accountService.updateAccount(accountId, updateRequest, jwtAuthenticationToken))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('TENANT_ADMIN')")
+    @PatchMapping("/update-active-account/{accountId}")
+    ApiResponse<AccountResponse> updateActiveAccount(
+            @PathVariable Integer accountId,
+            @RequestBody @Valid AccountUpdateIsActiveRequest updateRequest,
+            JwtAuthenticationToken jwtAuthenticationToken) {
+        return ApiResponse.<AccountResponse>builder()
+                .message("Cập nhật thành công active account")
+                .result(accountService.updateActiveAccount(accountId, updateRequest, jwtAuthenticationToken))
                 .build();
     }
 

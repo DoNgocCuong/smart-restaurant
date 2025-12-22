@@ -2,6 +2,7 @@ package com.smart_restaurant.demo.Service;
 
 
 import com.nimbusds.jose.JOSEException;
+import com.smart_restaurant.demo.dto.Request.AccountUpdateIsActiveRequest;
 import com.smart_restaurant.demo.dto.Request.AccountUpdateRequest;
 import com.smart_restaurant.demo.dto.Request.SignupRequest;
 import com.smart_restaurant.demo.dto.Response.AccountResponse;
@@ -21,8 +22,11 @@ public interface AccountService {
     SignupResponse createAccountAdmin(SignupRequest signupRequest) throws JOSEException, MessagingException;
     SignupResponse createAccountStaff(SignupRequest signupRequest, JwtAuthenticationToken jwtAuthenticationToken) throws JOSEException, MessagingException;
     SignupResponse createAccountKitchen(SignupRequest signupRequest, JwtAuthenticationToken jwtAuthenticationToken) throws JOSEException, MessagingException;
+    List<AccountResponse> getAllStaffByTenant(JwtAuthenticationToken jwtAuthenticationToken);
+    List<AccountResponse> getAllKitchenByTenant(JwtAuthenticationToken jwtAuthenticationToken);
     List<AccountResponse> getAllAdmin();
     List<AccountResponse> getAllStaffAndKitchenByTenant(JwtAuthenticationToken jwtAuthenticationToken);
     AccountResponse updateAccount(Integer accountId, AccountUpdateRequest updateRequest, JwtAuthenticationToken jwtAuthenticationToken);
+    AccountResponse updateActiveAccount(Integer accountId, AccountUpdateIsActiveRequest updateRequest, JwtAuthenticationToken jwtAuthenticationToken);
     void deleteAccount(Integer accountId, JwtAuthenticationToken jwtAuthenticationToken);
 }

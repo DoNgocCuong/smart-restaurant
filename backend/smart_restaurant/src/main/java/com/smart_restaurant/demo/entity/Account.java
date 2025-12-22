@@ -26,6 +26,8 @@ public class Account {
     Boolean isEmailVerify;
     @Column(name = "is_customer")
     Boolean isCustomer;
+    @Column(name = "is_active")
+    Boolean isActive;
     @CreationTimestamp
     @Column(name = "create_at", updatable = false)
     LocalDateTime createAt;

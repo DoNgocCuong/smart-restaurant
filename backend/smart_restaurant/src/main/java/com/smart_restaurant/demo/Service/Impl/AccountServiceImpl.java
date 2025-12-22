@@ -4,6 +4,7 @@ package com.smart_restaurant.demo.Service.Impl;
 import com.smart_restaurant.demo.Repository.AccountRepository;
 import com.smart_restaurant.demo.Repository.TenantRepository;
 import com.smart_restaurant.demo.Service.AccountService;
+import com.smart_restaurant.demo.dto.Request.AccountUpdateIsActiveRequest;
 import com.smart_restaurant.demo.dto.Request.AccountUpdateRequest;
 import com.smart_restaurant.demo.dto.Response.AccountResponse;
 import com.smart_restaurant.demo.entity.Tenant;
@@ -106,25 +107,32 @@ public class AccountServiceImpl implements AccountService {
         newAccount.setPassword(password);
         newAccount.setRoles(roleRepository.findAllByName(Roles.TENANT_ADMIN.toString()));
         newAccount.setIsEmailVerify(true);
+        newAccount.setIsActive(true);
         String token=generateEmailToken(newAccount);
         return accountMapper.toSignupResponse(accountRepository.save(newAccount));
     }
 
     @Override
     public SignupResponse createAccountStaff(SignupRequest signupRequest, JwtAuthenticationToken jwtAuthenticationToken) throws JOSEException, MessagingException {
-        if(accountRepository.existsByUsername(signupRequest.getUsername()))
-            throw new AppException(ErrorCode.USER_EXISTED);
+
         String username = jwtAuthenticationToken.getName();
         Integer tenantId = this.getTenantIdByUsername(username);
 
         Tenant tenant = tenantRepository.findById(tenantId)
                 .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
 
+        if (accountRepository.existsByUsernameAndTenant_TenantId(
+                signupRequest.getUsername(), tenantId)) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
+
+
         Account newAccount=accountMapper.toAccount(signupRequest);
         String password= passwordEncoder.encode(signupRequest.getPassword());
         newAccount.setPassword(password);
         newAccount.setRoles(roleRepository.findAllByName(Roles.STAFF.toString()));
         newAccount.setIsEmailVerify(true);
+        newAccount.setIsActive(true);
         newAccount.setTenant(tenant);
         String token=generateEmailToken(newAccount);
         return accountMapper.toSignupResponse(accountRepository.save(newAccount));
@@ -141,14 +149,59 @@ public class AccountServiceImpl implements AccountService {
         Tenant tenant = tenantRepository.findById(tenantId)
                 .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
 
+        if (accountRepository.existsByUsernameAndTenant_TenantId(
+                signupRequest.getUsername(), tenantId)) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
+
+
         Account newAccount=accountMapper.toAccount(signupRequest);
         String password= passwordEncoder.encode(signupRequest.getPassword());
         newAccount.setPassword(password);
         newAccount.setRoles(roleRepository.findAllByName(Roles.KITCHEN_STAFF.toString()));
         newAccount.setIsEmailVerify(true);
+        newAccount.setIsActive(true);
         newAccount.setTenant(tenant);
         String token=generateEmailToken(newAccount);
         return accountMapper.toSignupResponse(accountRepository.save(newAccount));
+    }
+
+    @Override
+    public List<AccountResponse> getAllStaffByTenant(JwtAuthenticationToken jwtAuthenticationToken) {
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = this.getTenantIdByUsername(username);
+
+        return accountRepository.findAll().stream()
+                .filter(account -> account.getTenant() != null
+                        && account.getTenant().getTenantId().equals(tenantId)
+                        && account.getRoles().stream()
+                        .anyMatch(role -> role.getName().equals("STAFF")))
+                .map(account -> {
+                    var dto = accountMapper.toAccountResponse(account);
+                    dto.setTenant(account.getTenant());
+                    dto.setRoles(account.getRoles());
+                    return dto;
+                })
+                .toList();
+    }
+
+    @Override
+    public List<AccountResponse> getAllKitchenByTenant(JwtAuthenticationToken jwtAuthenticationToken) {
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = this.getTenantIdByUsername(username);
+
+        return accountRepository.findAll().stream()
+                .filter(account -> account.getTenant() != null
+                        && account.getTenant().getTenantId().equals(tenantId)
+                        && account.getRoles().stream()
+                        .anyMatch(role -> role.getName().equals("KITCHEN_STAFF")))
+                .map(account -> {
+                    var dto = accountMapper.toAccountResponse(account);
+                    dto.setTenant(account.getTenant());
+                    dto.setRoles(account.getRoles());
+                    return dto;
+                })
+                .toList();
     }
 
     @Override
@@ -215,6 +268,36 @@ public class AccountServiceImpl implements AccountService {
         // Cập nhật password nếu có
         if(updateRequest.getPassword() != null && !updateRequest.getPassword().isEmpty())
             account.setPassword(passwordEncoder.encode(updateRequest.getPassword()));
+
+        Account updatedAccount = accountRepository.save(account);
+        return accountMapper.toAccountResponse(updatedAccount);
+    }
+
+    @Override
+    public AccountResponse updateActiveAccount(Integer accountId, AccountUpdateIsActiveRequest updateRequest, JwtAuthenticationToken jwtAuthenticationToken) {
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = this.getTenantIdByUsername(username);
+
+        // Kiểm tra account tồn tại
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+        // Kiểm tra account có thuộc tenant hiện tại không
+        if(!account.getTenant().getTenantId().equals(tenantId))
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+
+        // Kiểm tra account là staff hoặc kitchen staff
+        boolean isStaffOrKitchen = account.getRoles().stream()
+                .anyMatch(role -> role.getName().equals(Roles.STAFF.toString())
+                        || role.getName().equals(Roles.KITCHEN_STAFF.toString()));
+
+        if(!isStaffOrKitchen)
+            throw new AppException(ErrorCode.INVALID_ROLE);
+
+        // Cập nhật thông tin
+        if (updateRequest.getIsActive() != null) {
+            account.setIsActive(updateRequest.getIsActive());
+        }
 
         Account updatedAccount = accountRepository.save(account);
         return accountMapper.toAccountResponse(updatedAccount);

@@ -18,6 +18,7 @@ public class AccountResponse {
     String password;
     Boolean is_first_activity;
     Boolean is_email_verify;
+    Boolean is_active;
     Tenant tenant;
     List<Role> roles;
     LocalDateTime createAt;

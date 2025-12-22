@@ -25,33 +25,6 @@ public class CategoryController {
     CategoryService categoryService;
     AccountService accountService;
 
-//    @PostMapping("")
-//    public ApiResponse<CategoryResponse> createCategory(
-//            @Valid @RequestBody CategoryRequest request,
-//            JwtAuthenticationToken jwtToken) {
-//
-//        String username = jwtToken.getName();
-//        Integer tenantId = accountService.getTenantIdByUsername(username);
-//        CategoryResponse category = categoryService.createCategory(request, tenantId);
-//
-//        return ApiResponse.<CategoryResponse>builder()
-//                        .message("Category created successfully")
-//                        .result(category)
-//                        .build();
-//    }
-//
-//    @GetMapping("")
-//    public ApiResponse<List<CategoryResponse>> getAllCategories(JwtAuthenticationToken jwtToken){
-//        String username = jwtToken.getName();
-//        Integer tenantId = accountService.getTenantIdByUsername(username);
-//        List<CategoryResponse> categories = categoryService.getAllCategories(tenantId);
-//
-//        return ApiResponse.<List<CategoryResponse>>builder()
-//                .message("Categories retrieved successfully")
-//                .result(categories)
-//                .build();
-//
-//    }
 @PostMapping("")
 public ApiResponse<CategoryResponse> createCategory(
         @Valid @RequestBody CategoryRequest request,

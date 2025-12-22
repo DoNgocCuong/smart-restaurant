@@ -13,5 +13,9 @@ public interface AccountMapper {
     @Mapping(target = "isEmailVerify",expression = "java(false)")
     Account toAccount(SignupRequest signupRequest);
     SignupResponse toSignupResponse(Account account);
+
+    @Mapping(source = "isFirstActivity", target = "is_first_activity")
+    @Mapping(source = "isEmailVerify", target = "is_email_verify")
+    @Mapping(source = "isActive", target = "is_active")
     AccountResponse toAccountResponse(Account account);
 }

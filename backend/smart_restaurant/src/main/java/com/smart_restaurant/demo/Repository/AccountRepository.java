@@ -13,4 +13,6 @@ public interface AccountRepository extends JpaRepository<Account,Integer> {
 
     @Query("SELECT a.tenant.tenantId FROM Account a WHERE a.username = :username")
     Optional<Integer> findTenantIdByUsername(@Param("username") String username);
+
+    boolean existsByUsernameAndTenant_TenantId(String username, Integer tenantId);
 }
