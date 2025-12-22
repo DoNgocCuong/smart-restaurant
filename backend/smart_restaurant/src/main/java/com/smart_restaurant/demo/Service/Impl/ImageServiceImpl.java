@@ -41,4 +41,13 @@ public class ImageServiceImpl implements ImageService {
         }
         return imageMapper.toImageResponse(imageRepository.saveAll(images));
     }
+
+    @Override
+    public String deleteImage(Integer id) {
+        Image image=imageRepository.findById(id).orElseThrow(()->new AppException(ErrorCode.ITEM_NOT_FOUND));
+        if(image.getItem().getAvatar().getId()==id)
+            throw new AppException(ErrorCode.AVARTAR_NOT_DELETE);
+        imageRepository.deleteById(id);
+        return "delete successfully";
+    }
 }

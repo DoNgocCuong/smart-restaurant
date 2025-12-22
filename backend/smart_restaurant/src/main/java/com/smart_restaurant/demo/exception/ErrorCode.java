@@ -43,7 +43,8 @@ public enum ErrorCode {
     USER_EXISTED("1029","USER_EXISTED",HttpStatus.BAD_REQUEST),
     ACCOUNT_NOT_FOUND("1030", "ACCOUNT_NOT_FOUND", HttpStatus.BAD_REQUEST),
     INVALID_ROLE("1031", "INVALID_ROLE", HttpStatus.BAD_REQUEST),
-    MODIFIER_GROUP_IN_USE("1032", "MODIFIER_GROUP_IN_USE", HttpStatus.BAD_REQUEST);
+    MODIFIER_GROUP_IN_USE("1032", "MODIFIER_GROUP_IN_USE", HttpStatus.BAD_REQUEST),
+    AVARTAR_NOT_DELETE("1033","Unable to delete profile picture",HttpStatus.BAD_REQUEST);
     ErrorCode(String code, String message, HttpStatus httpStatusCode) {
         this.code = code;
         this.message = message;

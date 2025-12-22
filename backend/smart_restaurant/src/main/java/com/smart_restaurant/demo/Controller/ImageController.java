@@ -23,4 +23,10 @@ public class ImageController {
                 .result(imageService.uploadImage(itemId,imageRequest))
                 .build();
     }
+    @DeleteMapping("/{imageId}")
+    public  ApiResponse<String> deleteImage(@PathVariable Integer imageId){
+        return ApiResponse.<String>builder()
+                .result(imageService.deleteImage(imageId))
+                .build();
+    }
 }

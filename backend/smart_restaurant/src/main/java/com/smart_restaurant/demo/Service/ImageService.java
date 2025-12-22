@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ImageService {
     List<ImageResponse> uploadImage(Integer itemId, ImageRequest imageRequest);
+    String deleteImage(Integer id);
 }
