@@ -12,10 +12,18 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 
 public interface ItemMapper {
+    @Mapping(target = "avatar", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "modifierGroups", ignore = true)
     Item toItem(ItemRequest item);
 
+    @Mapping(target = "avatarUrl", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "modifierGroup", ignore = true)
     ItemResponse toItemResponse (Item item);
+
+    @Mapping(target = "avatar", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "modifierGroups", ignore = true)
     void updateItem(@MappingTarget Item item, UpdateItemRequest updateItemRequest);
 }

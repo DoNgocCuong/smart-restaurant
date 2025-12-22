@@ -1,10 +1,7 @@
 package com.smart_restaurant.demo.Service.Impl;
 
 
-import com.smart_restaurant.demo.Repository.CategoryRepository;
-import com.smart_restaurant.demo.Repository.ItemRepository;
-import com.smart_restaurant.demo.Repository.ModifierGroupRepository;
-import com.smart_restaurant.demo.Repository.TenantRepository;
+import com.smart_restaurant.demo.Repository.*;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.CategoryService;
 import com.smart_restaurant.demo.Service.ItemService;
@@ -14,10 +11,7 @@ import com.smart_restaurant.demo.dto.Request.UpdateItemRequest;
 import com.smart_restaurant.demo.dto.Response.CategoryResponse;
 import com.smart_restaurant.demo.dto.Response.ItemResponse;
 import com.smart_restaurant.demo.dto.Response.ModifierGroupResponse;
-import com.smart_restaurant.demo.entity.Category;
-import com.smart_restaurant.demo.entity.Item;
-import com.smart_restaurant.demo.entity.ModifierGroup;
-import com.smart_restaurant.demo.entity.Tenant;
+import com.smart_restaurant.demo.entity.*;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.smart_restaurant.demo.mapper.ItemMapper;
@@ -32,6 +26,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +45,7 @@ public class ItemServiceImpl implements ItemService {
     ModifierGroupRepository modifierGroupRepository;
     AccountService accountService;
     TenantRepository tenantRepository;
+    ImageRepository imageRepository;
 
     @Override
     public ItemResponse createItem(ItemRequest request, JwtAuthenticationToken jwtAuthenticationToken) {
@@ -80,6 +76,12 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemMapper.toItem(request);
         item.setCategory(categories);
 
+        Image avatar = Image.builder()
+                .url(request.getAvatarUrl())
+                .build();
+        Image savedAvatar = imageRepository.save(avatar);
+        item.setAvatar(savedAvatar);
+
         // Phần modifierGroup
         List<ModifierGroup> modifierGroup = new ArrayList<>();
 
@@ -91,8 +93,15 @@ public class ItemServiceImpl implements ItemService {
             item.setModifierGroups(modifierGroup);
         }
         Item savedItem = itemRepository.save(item);
+        savedAvatar.setItem(savedItem);
+        imageRepository.save(savedAvatar);
 
         ItemResponse itemResponse= itemMapper.toItemResponse(savedItem);
+
+        if (item.getAvatar() != null) {
+            itemResponse.setAvatarUrl(item.getAvatar().getUrl());  // ← Lấy URL từ Image entity
+        }
+
         List<CategoryResponse> categoryDTOs = categories.stream()
                 .map(c -> {
                     CategoryResponse cr = new CategoryResponse();
@@ -149,6 +158,24 @@ public class ItemServiceImpl implements ItemService {
             throw new AppException(ErrorCode.ITEM_ALREADY_EXISTS);
         }
 
+        // Update avatar nếu có URL mới
+        if (updateItemRequest.getAvatarUrl() != null && !updateItemRequest.getAvatarUrl().isBlank()) {
+            if (item.getAvatar() != null) {
+                // Update URL của avatar cũ
+                item.getAvatar().setUrl(updateItemRequest.getAvatarUrl());
+                imageRepository.save(item.getAvatar());
+            } else {
+                // Tạo avatar mới nếu chưa có
+                Image newAvatar = Image.builder()
+                        .url(updateItemRequest.getAvatarUrl())
+                        .item(item)
+                        .build();
+                Image savedAvatar = imageRepository.save(newAvatar);
+                item.setAvatar(savedAvatar);
+            }
+        }
+
+
         // Validate modifierGroups nếu có
         List<ModifierGroup> modifierGroup;
         if (updateItemRequest.getModifierGroupIds() != null) {
@@ -172,6 +199,10 @@ public class ItemServiceImpl implements ItemService {
 
         // Build response
         ItemResponse itemResponse = itemMapper.toItemResponse(updatedItem);
+
+        if (item.getAvatar() != null) {
+            itemResponse.setAvatarUrl(item.getAvatar().getUrl());
+        }
 
         List<CategoryResponse> categoryDTOs = categories.stream()
                 .map(c -> {
@@ -254,6 +285,10 @@ public Page<ItemResponse> getAllItems(int page, int size, String itemName, Integ
     return itemsPage.map(item -> {
         ItemResponse itemResponse = itemMapper.toItemResponse(item);
 
+        if (item.getAvatar() != null) {
+            itemResponse.setAvatarUrl(item.getAvatar().getUrl());  // ← Lấy URL từ Image entity
+        }
+
         List<CategoryResponse> categoryDTOs = item.getCategory().stream()
                 .map(c -> new CategoryResponse(c.getCategoryId(),c.getCategoryName(), c.getTenant().getTenantId()))
                 .toList();
@@ -293,6 +328,11 @@ public Page<ItemResponse> getAllItems(int page, int size, String itemName, Integ
             Item updatedItem = itemRepository.save(item);
 
             ItemResponse itemResponse = itemMapper.toItemResponse(updatedItem);
+
+            if (item.getAvatar() != null) {
+                itemResponse.setAvatarUrl(item.getAvatar().getUrl());  // ← Lấy URL từ Image entity
+            }
+
             List<CategoryResponse> categoryDTOs = updatedItem.getCategory().stream()
                     .map(category -> {
                         CategoryResponse categoryResponse = new CategoryResponse();

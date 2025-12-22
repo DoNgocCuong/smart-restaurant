@@ -17,7 +17,7 @@ public class ItemResponse {
     String itemName;
     String description;
     Double price;
-    String imageUrl;
+    String avatarUrl;
     boolean status;
     List<CategoryResponse> category;
     List<ModifierGroupResponse> modifierGroup;

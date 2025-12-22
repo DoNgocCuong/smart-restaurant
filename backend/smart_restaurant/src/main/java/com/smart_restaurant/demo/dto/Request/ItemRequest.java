@@ -26,7 +26,7 @@ public class ItemRequest {
     Double price;
 
     @NotBlank(message = "Ảnh không được để trống")
-    String imageUrl;
+    String avatarUrl;
     boolean status;
 
     @NotEmpty(message = "Phải chọn ít nhất một category")
