@@ -25,11 +25,17 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.springframework.data.jpa.repository.query.KeysetScrollSpecification.createSort;
 
 @Slf4j
 @Service
@@ -210,34 +216,51 @@ public class ItemServiceImpl implements ItemService {
         itemRepository.delete(item);
     }
 
-    @Override
-    public List<ItemResponse> getAllItemByTenant(JwtAuthenticationToken jwtAuthenticationToken) {
-        // Lay tenant_id boi username
-        String username = jwtAuthenticationToken.getName();
-        Integer tenantId = accountService.getTenantIdByUsername(username);
+@Override
+public Page<ItemResponse> getAllItems(int page, int size, String itemName, Integer categoryId,
+                                      String sortBy, JwtAuthenticationToken jwtAuthenticationToken) {
+    String username = jwtAuthenticationToken.getName();
+    Integer tenantId = accountService.getTenantIdByUsername(username);
 
-        List<Item> tenantItems = itemRepository.findAllByTenantId(tenantId);
+    // Kiểm tra tenant tồn tại
+    tenantRepository.findById(tenantId)
+            .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
 
-        // Map sang ItemResponse
-        return tenantItems.stream().map(item -> {
-            ItemResponse itemResponse = itemMapper.toItemResponse(item);
+    // Kiểm tra categoryId có thuộc tenant hiện tại không (nếu có)
+    if (categoryId != null) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
-
-            List<CategoryResponse> categoryDTOs = item.getCategory().stream()
-                    .map(c -> new CategoryResponse(c.getCategoryName(), c.getTenant().getTenantId()))
-                    .toList();
-            itemResponse.setCategory(categoryDTOs);
-
-            List<ModifierGroupResponse> modifierGroupDTOs = item.getModifierGroups().stream()
-                    .map(mg -> new ModifierGroupResponse(mg.getModifierGroupId(), mg.getName(),mg.getItems(), mg.getOptions(), mg.getTenant().getTenantId()))
-                    .toList();
-            itemResponse.setModifierGroup(modifierGroupDTOs);
-
-            return itemResponse;
-        }).toList();
-
-
+        if (!category.getTenant().getTenantId().equals(tenantId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
     }
+
+    // Tạo Sort theo sortBy parameter
+    Sort sort = getSortBy(sortBy);
+    Pageable pageable = PageRequest.of(page, size, sort);
+
+    // Lấy items theo điều kiện filter
+    Page<Item> itemsPage = itemRepository.findItemsByFilters(
+            tenantId, itemName, categoryId, pageable);
+
+    // Map sang ItemResponse
+    return itemsPage.map(item -> {
+        ItemResponse itemResponse = itemMapper.toItemResponse(item);
+
+        List<CategoryResponse> categoryDTOs = item.getCategory().stream()
+                .map(c -> new CategoryResponse(c.getCategoryName(), c.getTenant().getTenantId()))
+                .toList();
+        itemResponse.setCategory(categoryDTOs);
+
+        List<ModifierGroupResponse> modifierGroupDTOs = item.getModifierGroups().stream()
+                .map(mg -> new ModifierGroupResponse(mg.getModifierGroupId(), mg.getName(), mg.getItems(), mg.getOptions(), mg.getTenant().getTenantId()))
+                .toList();
+        itemResponse.setModifierGroup(modifierGroupDTOs);
+
+        return itemResponse;
+    });
+}
 
     @Override
     public List<ItemResponse> updateMenuAvailabilityToggle(MenuAvailabilityToggleListRequest request, JwtAuthenticationToken jwtAuthenticationToken) {
@@ -288,6 +311,20 @@ public class ItemServiceImpl implements ItemService {
         }).toList();
 
         return updatedItems;
+    }
+
+    private Sort getSortBy(String sortBy) {
+        if (sortBy == null) {
+            sortBy = "POPULAR";
+        }
+        return switch (sortBy.toUpperCase()) {
+            case "POPULAR" -> Sort.by(Sort.Direction.DESC, "itemId");
+            case "PRICE_ASC" -> Sort.by(Sort.Direction.ASC, "price");
+            case "PRICE_DESC" -> Sort.by(Sort.Direction.DESC, "price");
+            case "NAME" -> Sort.by(Sort.Direction.ASC, "itemName");
+            case "NEWEST" -> Sort.by(Sort.Direction.DESC, "itemId");
+            default -> Sort.by(Sort.Direction.DESC, "itemId");
+        };
     }
 
 }

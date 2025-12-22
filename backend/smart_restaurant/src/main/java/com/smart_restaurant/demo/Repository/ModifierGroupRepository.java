@@ -10,4 +10,5 @@ import java.util.List;
 public interface ModifierGroupRepository extends JpaRepository<ModifierGroup,Integer> {
     boolean existsByNameAndTenantTenantId(String name, Integer tenantId);
     List<ModifierGroup> findAllByTenant_TenantId(Integer modifierGroupId);
+    List<ModifierGroup> findAllByModifierGroupIdInAndTenantTenantId(List<Integer> modifierGroupIds, Integer tenantId);
 }

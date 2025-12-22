@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,16 +54,23 @@ public class ItemController {
                 .build();
     }
 
-    @GetMapping("")
-    public ApiResponse<List<ItemResponse>> getAllItemByTenat(JwtAuthenticationToken jwtAuthenticationToken){
+@GetMapping("")
+public ApiResponse<Page<ItemResponse>> getAllItems(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String itemName,
+        @RequestParam(required = false) Integer categoryId,
+        @RequestParam(defaultValue = "POPULAR") String sortBy,
+        JwtAuthenticationToken jwtAuthenticationToken) {
 
-        List<ItemResponse> itemResponse = itemService.getAllItemByTenant(jwtAuthenticationToken);
-        return ApiResponse.<List<ItemResponse>>builder()
-                .message("Item getAll successfully")
-                .result(itemResponse)
-                .build();
+    Page<ItemResponse> items = itemService.getAllItems(
+            page, size, itemName, categoryId, sortBy, jwtAuthenticationToken);
 
-    }
+    return ApiResponse.<Page<ItemResponse>>builder()
+            .message("Items retrieved successfully")
+            .result(items)
+            .build();
+}
 
     @PutMapping("/availability")
     public ApiResponse<List<ItemResponse>> updateMenuAvailabilityToggle(
