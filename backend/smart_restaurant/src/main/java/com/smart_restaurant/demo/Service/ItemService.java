@@ -7,6 +7,7 @@ import com.smart_restaurant.demo.dto.Request.UpdateItemRequest;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.ItemResponse;
 import com.smart_restaurant.demo.entity.Item;
+import org.springframework.data.domain.Page;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -17,6 +18,7 @@ public interface ItemService {
     public ItemResponse createItem(ItemRequest request, JwtAuthenticationToken jwtAuthenticationToken);
     public ItemResponse updateItemById(Integer id, UpdateItemRequest updateItemRequest, JwtAuthenticationToken jwtAuthenticationToken);
     public void deleteItemById(Integer itemId, JwtAuthenticationToken jwtAuthenticationToken);
-    public List<ItemResponse> getAllItemByTenant(JwtAuthenticationToken jwtAuthenticationToken);
+//    public List<ItemResponse> getAllItemByTenant(JwtAuthenticationToken jwtAuthenticationToken);
+    Page<ItemResponse> getAllItems(int page, int size, String itemName, Integer categoryId, String sortBy, JwtAuthenticationToken jwtAuthenticationToken);
     public List<ItemResponse> updateMenuAvailabilityToggle( MenuAvailabilityToggleListRequest request, JwtAuthenticationToken jwtAuthenticationToken);
 }
