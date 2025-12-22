@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class CategoryResponse {
+    Integer categoryId;
     String categoryName;
     Integer tenantId;
 }

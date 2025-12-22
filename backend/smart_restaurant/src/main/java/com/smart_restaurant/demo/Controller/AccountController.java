@@ -2,6 +2,7 @@ package com.smart_restaurant.demo.Controller;
 
 import com.nimbusds.jose.JOSEException;
 import com.smart_restaurant.demo.Service.AccountService;
+import com.smart_restaurant.demo.dto.Request.AccountUpdateRequest;
 import com.smart_restaurant.demo.dto.Request.SignupRequest;
 import com.smart_restaurant.demo.dto.Response.AccountResponse;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
@@ -63,6 +64,30 @@ public class AccountController {
         return ApiResponse.<List<AccountResponse>>builder()
                 .message("Get all tài khoan nhan vien thanh cong trong TENANT")
                 .result(accountService.getAllStaffAndKitchenByTenant(jwtAuthenticationToken))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('TENANT_ADMIN')")
+    @PutMapping("/update-account/{accountId}")
+    ApiResponse<AccountResponse> updateAccount(
+            @PathVariable Integer accountId,
+            @RequestBody @Valid AccountUpdateRequest updateRequest,
+            JwtAuthenticationToken jwtAuthenticationToken) {
+        return ApiResponse.<AccountResponse>builder()
+                .message("Cập nhật thành công account")
+                .result(accountService.updateAccount(accountId, updateRequest, jwtAuthenticationToken))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('TENANT_ADMIN')")
+    @DeleteMapping("/delete-account/{accountId}")
+    ApiResponse<String> deleteAccount(
+            @PathVariable Integer accountId,
+            JwtAuthenticationToken jwtAuthenticationToken) {
+        accountService.deleteAccount(accountId, jwtAuthenticationToken);
+        return ApiResponse.<String>builder()
+                .message("Xóa thành công account")
+                .result("Account đã được xóa")
                 .build();
     }
 

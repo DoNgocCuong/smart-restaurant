@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.data.jpa.repository.query.KeysetScrollSpecification.createSort;
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
@@ -239,6 +240,10 @@ public Page<ItemResponse> getAllItems(int page, int size, String itemName, Integ
     // Tạo Sort theo sortBy parameter
     Sort sort = getSortBy(sortBy);
     Pageable pageable = PageRequest.of(page, size, sort);
+            List<CategoryResponse> categoryDTOs = item.getCategory().stream()
+                    .map(c -> new CategoryResponse(c.getCategoryId(),c .getCategoryName(), c.getTenant().getTenantId()))
+                    .toList();
+            itemResponse.setCategory(categoryDTOs);
 
     // Lấy items theo điều kiện filter
     Page<Item> itemsPage = itemRepository.findItemsByFilters(

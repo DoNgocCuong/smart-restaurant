@@ -40,7 +40,9 @@ public enum ErrorCode {
 
     FOBIDEN("1027","forbidden" , HttpStatus.BAD_REQUEST),
     QR_NOT_EXIST("1028","qr not exist",HttpStatus.BAD_REQUEST),
-    USER_EXISTED("1029","USER_EXISTED",HttpStatus.BAD_REQUEST);
+    USER_EXISTED("1029","USER_EXISTED",HttpStatus.BAD_REQUEST),
+    ACCOUNT_NOT_FOUND("1030", "ACCOUNT_NOT_FOUND", HttpStatus.BAD_REQUEST),
+    INVALID_ROLE("1031", "INVALID_ROLE", HttpStatus.BAD_REQUEST);
     ErrorCode(String code, String message, HttpStatus httpStatusCode) {
         this.code = code;
         this.message = message;

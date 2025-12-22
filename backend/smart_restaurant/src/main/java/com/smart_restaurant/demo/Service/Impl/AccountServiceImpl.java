@@ -4,6 +4,7 @@ package com.smart_restaurant.demo.Service.Impl;
 import com.smart_restaurant.demo.Repository.AccountRepository;
 import com.smart_restaurant.demo.Repository.TenantRepository;
 import com.smart_restaurant.demo.Service.AccountService;
+import com.smart_restaurant.demo.dto.Request.AccountUpdateRequest;
 import com.smart_restaurant.demo.dto.Response.AccountResponse;
 import com.smart_restaurant.demo.entity.Tenant;
 import com.smart_restaurant.demo.exception.AppException;
@@ -186,6 +187,62 @@ public class AccountServiceImpl implements AccountService {
                     return dto;
                 })
                 .toList();
+    }
+    @Override
+    public AccountResponse updateAccount(Integer accountId, AccountUpdateRequest updateRequest, JwtAuthenticationToken jwtAuthenticationToken) {
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = this.getTenantIdByUsername(username);
+
+        // Kiểm tra account tồn tại
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+        // Kiểm tra account có thuộc tenant hiện tại không
+        if(!account.getTenant().getTenantId().equals(tenantId))
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+
+        // Kiểm tra account là staff hoặc kitchen staff
+        boolean isStaffOrKitchen = account.getRoles().stream()
+                .anyMatch(role -> role.getName().equals(Roles.STAFF.toString())
+                        || role.getName().equals(Roles.KITCHEN_STAFF.toString()));
+
+        if(!isStaffOrKitchen)
+            throw new AppException(ErrorCode.INVALID_ROLE);
+
+        // Cập nhật thông tin
+        if(updateRequest.getUserName() != null && !updateRequest.getUserName().isEmpty())
+            account.setUsername(updateRequest.getUserName());
+        // Cập nhật password nếu có
+        if(updateRequest.getPassword() != null && !updateRequest.getPassword().isEmpty())
+            account.setPassword(passwordEncoder.encode(updateRequest.getPassword()));
+
+        Account updatedAccount = accountRepository.save(account);
+        return accountMapper.toAccountResponse(updatedAccount);
+    }
+
+    @Override
+    public void deleteAccount(Integer accountId, JwtAuthenticationToken jwtAuthenticationToken) {
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = this.getTenantIdByUsername(username);
+
+        // Kiểm tra account tồn tại
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+        // Kiểm tra account có thuộc tenant hiện tại không
+        if(!account.getTenant().getTenantId().equals(tenantId))
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+
+        // Kiểm tra account là staff hoặc kitchen staff
+        boolean isStaffOrKitchen = account.getRoles().stream()
+                .anyMatch(role -> role.getName().equals(Roles.STAFF.toString())
+                        || role.getName().equals(Roles.KITCHEN_STAFF.toString()));
+
+        if(!isStaffOrKitchen)
+            throw new AppException(ErrorCode.INVALID_ROLE);
+
+        // Xóa account
+        accountRepository.deleteById(accountId);
     }
 
 
