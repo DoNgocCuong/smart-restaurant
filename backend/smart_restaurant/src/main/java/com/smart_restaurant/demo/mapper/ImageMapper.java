@@ -1,5 +1,6 @@
 package com.smart_restaurant.demo.mapper;
 
+import com.smart_restaurant.demo.dto.Request.AvatarRequest;
 import com.smart_restaurant.demo.dto.Request.ImageRequest;
 import com.smart_restaurant.demo.dto.Response.ImageResponse;
 import com.smart_restaurant.demo.entity.Image;
@@ -12,4 +13,5 @@ import java.util.List;
 public interface ImageMapper {
     @Mapping(source = "Id", target = "id")
     List<ImageResponse> toImageResponse(List<Image> images);
+    Image toImage(AvatarRequest avatarRequest);
 }

@@ -2,6 +2,7 @@ package com.smart_restaurant.demo.Controller;
 
 
 import com.smart_restaurant.demo.Service.ItemService;
+import com.smart_restaurant.demo.dto.Request.AvatarRequest;
 import com.smart_restaurant.demo.dto.Request.ItemRequest;
 import com.smart_restaurant.demo.dto.Request.MenuAvailabilityToggleListRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateItemRequest;
@@ -82,5 +83,11 @@ public ApiResponse<Page<ItemResponse>> getAllItems(
                 .result(itemResponses)
                 .build();
     }
+    @PostMapping("/avatar/{itemId}")
 
+    public ApiResponse<String> replaceAvatar(@RequestBody AvatarRequest avatarRequest,@PathVariable Integer itemId){
+        return ApiResponse.<String>builder()
+                .result(itemService.replaceAvatar(avatarRequest,itemId))
+                .build();
+    }
 }

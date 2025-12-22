@@ -5,6 +5,7 @@ import com.smart_restaurant.demo.Repository.*;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.CategoryService;
 import com.smart_restaurant.demo.Service.ItemService;
+import com.smart_restaurant.demo.dto.Request.AvatarRequest;
 import com.smart_restaurant.demo.dto.Request.ItemRequest;
 import com.smart_restaurant.demo.dto.Request.MenuAvailabilityToggleListRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateItemRequest;
@@ -14,6 +15,7 @@ import com.smart_restaurant.demo.dto.Response.ModifierGroupResponse;
 import com.smart_restaurant.demo.entity.*;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
+import com.smart_restaurant.demo.mapper.ImageMapper;
 import com.smart_restaurant.demo.mapper.ItemMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +48,7 @@ public class ItemServiceImpl implements ItemService {
     AccountService accountService;
     TenantRepository tenantRepository;
     ImageRepository imageRepository;
-
+    ImageMapper imageMapper;
     @Override
     public ItemResponse createItem(ItemRequest request, JwtAuthenticationToken jwtAuthenticationToken) {
         // Lấy tenant_id từ username trong JWT
@@ -373,4 +375,12 @@ public Page<ItemResponse> getAllItems(int page, int size, String itemName, Integ
         };
     }
 
+    @Override
+    public String replaceAvatar(AvatarRequest avatarRequest, Integer itemId) {
+        Item item=itemRepository.findById(itemId).orElseThrow(()->new AppException(ErrorCode.ITEM_NOT_FOUND));
+        Image image=imageMapper.toImage(avatarRequest);
+        item.setAvatar(imageRepository.save(image));
+        itemRepository.save(item);
+        return "replace avatar successfully";
+    }
 }
