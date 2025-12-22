@@ -286,7 +286,7 @@ public Page<ItemResponse> getAllItems(int page, int size, String itemName, Integ
                 throw new AppException(ErrorCode.UNAUTHORIZED);
             }
 
-            if (item.isStatus() != itemRequest.isStatus()) {
+            if (item.getStatus() != itemRequest.isStatus()) {
                 item.setStatus(itemRequest.isStatus());
                 itemRepository.save(item);
             }
