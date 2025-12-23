@@ -47,11 +47,11 @@ public class AuthenticationController {
                 .result(authenticationService.refreshToken(request,response))
                 .build();
     }
-    @PostMapping("/signup")
-    ApiResponse<SignupResponse> signup(@RequestBody @Valid SignupRequest request) throws MessagingException, JOSEException {
+    @PostMapping("/signup/{tenantId}")
+    ApiResponse<SignupResponse> signup(@RequestBody @Valid SignupRequest request,@PathVariable Integer tenantId) throws MessagingException, JOSEException {
         return ApiResponse.<SignupResponse>builder()
                 .message("sign up successfully")
-                .result(accountService.createAccount(request))
+                .result(accountService.createAccountCustomer(request,tenantId))
                 .build();
     }
     @GetMapping("/verify-email")

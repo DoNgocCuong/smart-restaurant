@@ -49,6 +49,6 @@ cloudinary:
   api-key: ${CLOUDINARY_API_KEY}
   api-secret: ${CLOUDINARY_API_SECRET}
 qr:
-  base-url: qr.base-url=http://localhost:5173/qr?t=
+  base-url: qr.base-url=http://172.17.128.1:8080/qr?t=
   width: 300
   height: 300

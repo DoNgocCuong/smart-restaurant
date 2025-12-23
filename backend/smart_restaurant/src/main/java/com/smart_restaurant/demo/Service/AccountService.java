@@ -17,7 +17,7 @@ import java.util.List;
 public interface AccountService {
     public Integer getTenantIdByUsername(String username);
 
-    SignupResponse createAccount(SignupRequest signupRequest) throws JOSEException, MessagingException;
+    SignupResponse createAccountCustomer(SignupRequest signupRequest, Integer tenantId) throws JOSEException, MessagingException;
     ConfirmEmailResponse verifyEmail(String token) throws ParseException, java.text.ParseException, JOSEException;
     SignupResponse createAccountAdmin(SignupRequest signupRequest) throws JOSEException, MessagingException;
     SignupResponse createAccountStaff(SignupRequest signupRequest, JwtAuthenticationToken jwtAuthenticationToken) throws JOSEException, MessagingException;

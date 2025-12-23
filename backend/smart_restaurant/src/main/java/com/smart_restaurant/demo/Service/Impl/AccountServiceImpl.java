@@ -69,16 +69,19 @@ public class AccountServiceImpl implements AccountService {
     TenantRepository tenantRepository;
 
     @Override
-    public SignupResponse createAccount(SignupRequest signupRequest) throws JOSEException {
-        if(accountRepository.existsByUsername(signupRequest.getUsername()))
+    public SignupResponse createAccountCustomer(SignupRequest signupRequest,Integer tenantId) throws JOSEException {
+        Tenant tenant= tenantRepository.findById(tenantId).orElseThrow(()->new AppException(ErrorCode.TENANT_NOT_FOUND));
+
+        if(accountRepository.existsByUsernameAndTenant_TenantId(signupRequest.getUsername(),tenantId))
             throw new AppException(ErrorCode.ACCOUNT_EXISTED);
         Account newAccount=accountMapper.toAccount(signupRequest);
         String password= passwordEncoder.encode(signupRequest.getPassword());
         newAccount.setPassword(password);
         newAccount.setRoles(roleRepository.findAllByName(Roles.TENANT_ADMIN.toString()));
-        newAccount.setIsCustomer(false);
-        newAccount.setIsFirstActivity(false);
-        newAccount.setIsEmailVerify(true);
+        newAccount.setIsCustomer(true);
+        newAccount.setIsFirstActivity(true);
+        newAccount.setIsEmailVerify(false);
+        newAccount.setTenant(tenant);
         String token=generateEmailToken(newAccount);
         try {
             sendQrEmail(newAccount.getUsername(),token);
@@ -333,7 +336,7 @@ public class AccountServiceImpl implements AccountService {
 
 
     private void sendQrEmail(String toEmail, String token) throws MessagingException {
-        String confirmUrl = "http://localhost:8080/api/auth/verify-email?token=" + token;
+        String confirmUrl = "http://172.17.128.1:8080/api/auth/verify-email?token=" + token;
 
         String htmlMsg = "<h3>Chào mừng bạn!</h3>"
                 + "<p>Bạn vừa đăng ký web quản lý nhà hàng của mình.</p>"
@@ -397,7 +400,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountResponse updateAccountAdminTenant(Integer accountId, AccountUpdateRequest updateRequest) {
         Account account= accountRepository.findById(accountId).orElseThrow(()-> new AppException(ErrorCode.ACCOUNT_NOT_EXITS));
-        if(accountRepository.existsByUsername(updateRequest.getUserName())==true){
+        if(accountRepository.existsByUsernameAndTenant_TenantId(updateRequest.getUserName(),account.getTenant().getTenantId())==true){
             throw  new AppException(ErrorCode.ACCOUNT_EXISTED);
         }
         account.setUsername(updateRequest.getUserName());
