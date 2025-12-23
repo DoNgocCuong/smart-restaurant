@@ -15,6 +15,7 @@ public interface ItemMapper {
     @Mapping(target = "avatar", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "modifierGroups", ignore = true)
+    @Mapping(source = "isKitchen", target = "isKitchen")
     Item toItem(ItemRequest item);
 
     @Mapping(target = "avatarUrl", ignore = true)
@@ -26,5 +27,6 @@ public interface ItemMapper {
     @Mapping(target = "avatar", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "modifierGroups", ignore = true)
+    @Mapping(source = "isKitchen", target = "isKitchen")
     void updateItem(@MappingTarget Item item, UpdateItemRequest updateItemRequest);
 }

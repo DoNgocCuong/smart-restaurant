@@ -98,24 +98,29 @@ public class ItemServiceImpl implements ItemService {
 
         ItemResponse itemResponse= itemMapper.toItemResponse(savedItem);
 
+        // Map Avatar
         if (item.getAvatar() != null) {
-            itemResponse.setAvatarUrl(item.getAvatar().getUrl());  // ← Lấy URL từ Image entity
+            itemResponse.setAvatarUrl(savedItem.getAvatar().getUrl());  // ← Lấy URL từ Image entity
         }
-
+        // Map category
         List<CategoryResponse> categoryDTOs = categories.stream()
                 .map(c -> {
                     CategoryResponse cr = new CategoryResponse();
+                    cr.setCategoryId(c.getCategoryId());
                     cr.setCategoryName(c.getCategoryName());
                     cr.setTenantId(c.getTenant().getTenantId());
                     return cr;
                 }).toList();
         itemResponse.setCategory(categoryDTOs);
 
+        // Map MODIFIERGOUP
         List<ModifierGroupResponse> modifierGroupDTOs = modifierGroup.stream()
                 .map(mg -> {
                     ModifierGroupResponse mr = new ModifierGroupResponse();
                     mr.setModifierGroupId(mg.getModifierGroupId());
                     mr.setName(mg.getName());
+                    mr.setIsRequired(mr.getIsRequired());
+                    mr.setSelectionType(mr.getSelectionType());
                     return mr;
                 }).toList();
         itemResponse.setModifierGroup(modifierGroupDTOs);
@@ -207,6 +212,7 @@ public class ItemServiceImpl implements ItemService {
         List<CategoryResponse> categoryDTOs = categories.stream()
                 .map(c -> {
                     CategoryResponse cr = new CategoryResponse();
+                    cr.setCategoryId(c.getCategoryId());
                     cr.setCategoryName(c.getCategoryName());
                     cr.setTenantId(c.getTenant().getTenantId());
                     return cr;
@@ -219,6 +225,8 @@ public class ItemServiceImpl implements ItemService {
                     ModifierGroupResponse mr = new ModifierGroupResponse();
                     mr.setModifierGroupId(mg.getModifierGroupId());
                     mr.setName(mg.getName());
+                    mr.setIsRequired(mr.getIsRequired());
+                    mr.setSelectionType(mr.getSelectionType());
                     return mr;
                 }).toList();
         itemResponse.setModifierGroup(modifierGroupDTOs);
@@ -249,39 +257,20 @@ public class ItemServiceImpl implements ItemService {
     }
 
 @Override
-public Page<ItemResponse> getAllItems(int page, int size, String itemName, Integer categoryId,
-                                      String sortBy, JwtAuthenticationToken jwtAuthenticationToken) {
+public Page<ItemResponse> getAllItems(int page, int size,
+                                      JwtAuthenticationToken jwtAuthenticationToken) {
     String username = jwtAuthenticationToken.getName();
     Integer tenantId = accountService.getTenantIdByUsername(username);
 
-    // Kiểm tra tenant tồn tại
     tenantRepository.findById(tenantId)
             .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
 
-    // Kiểm tra categoryId có thuộc tenant hiện tại không (nếu có)
-    if (categoryId != null) {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+    // Tạo Pageable
+    Pageable pageable = PageRequest.of(0, 10, Sort.by("itemId").descending());
 
-        if (!category.getTenant().getTenantId().equals(tenantId)) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
-    }
+    // Lấy items thuộc tenant này
+    Page<Item> itemsPage = itemRepository.findAllByTenantId(tenantId, pageable);
 
-    Page<Item> itemsPage;
-
-    // Nếu sort POPULAR, dùng query riêng (COUNT order)
-    if (sortBy != null && sortBy.equalsIgnoreCase("POPULAR")) {
-        Pageable pageable = PageRequest.of(page, size);
-        itemsPage = itemRepository.findItemsByFiltersPopular(tenantId, itemName, categoryId, pageable);
-    } else {
-        // Các sort khác dùng Sort bình thường
-        Sort sort = getSortBy(sortBy);
-        Pageable pageable = PageRequest.of(page, size, sort);
-        itemsPage = itemRepository.findItemsByFilters(tenantId, itemName, categoryId, pageable);
-    }
-
-    // Map sang ItemResponse
     return itemsPage.map(item -> {
         ItemResponse itemResponse = itemMapper.toItemResponse(item);
 
@@ -290,12 +279,25 @@ public Page<ItemResponse> getAllItems(int page, int size, String itemName, Integ
         }
 
         List<CategoryResponse> categoryDTOs = item.getCategory().stream()
-                .map(c -> new CategoryResponse(c.getCategoryId(),c.getCategoryName(), c.getTenant().getTenantId()))
+                .filter(c -> c.getTenant().getTenantId().equals(tenantId)) // Lọc category của tenant
+                .map(c -> new CategoryResponse(
+                        c.getCategoryId(),
+                        c.getCategoryName(),
+                        c.getTenant().getTenantId()
+                ))
                 .toList();
         itemResponse.setCategory(categoryDTOs);
 
         List<ModifierGroupResponse> modifierGroupDTOs = item.getModifierGroups().stream()
-                .map(mg -> new ModifierGroupResponse(mg.getModifierGroupId(), mg.getName(),mg.getSelectionType(),mg.getIsRequired(), mg.getItems(), mg.getOptions(), mg.getTenant().getTenantId()))
+                .map(mg -> new ModifierGroupResponse(
+                        mg.getModifierGroupId(),
+                        mg.getName(),
+                        mg.getSelectionType(),
+                        mg.getIsRequired(),
+                        mg.getItems(),
+                        mg.getOptions(),
+                        mg.getTenant().getTenantId()
+                ))
                 .toList();
         itemResponse.setModifierGroup(modifierGroupDTOs);
 
@@ -338,6 +340,7 @@ public Page<ItemResponse> getAllItems(int page, int size, String itemName, Integ
                         CategoryResponse categoryResponse = new CategoryResponse();
                         categoryResponse.setCategoryName(category.getCategoryName());
                         categoryResponse.setTenantId(category.getTenant().getTenantId());
+                        categoryResponse.setCategoryId(category.getTenant().getTenantId());
                         return categoryResponse;
                     }).toList();
             itemResponse.setCategory(categoryDTOs);
@@ -456,5 +459,46 @@ public Page<ItemResponse> getAllItems(int page, int size, String itemName, Integ
             case PRICE -> Sort.by(direction, "price");
             case CREATED_DATE -> Sort.by(direction, "createAt");
         };
+    }
+
+    private ItemResponse buildItemResponse(Item item) {
+        ItemResponse itemResponse = itemMapper.toItemResponse(item);
+
+        if (item.getAvatar() != null) {
+            itemResponse.setAvatarUrl(item.getAvatar().getUrl());
+        }
+
+        // Luôn set list, không bao giờ null
+        if (item.getCategory() != null && !item.getCategory().isEmpty()) {
+            List<CategoryResponse> categoryDTOs = item.getCategory().stream()
+                    .map(c -> new CategoryResponse(
+                            c.getCategoryId(),
+                            c.getCategoryName(),
+                            c.getTenant().getTenantId()
+                    ))
+                    .toList();
+            itemResponse.setCategory(categoryDTOs);
+        } else {
+            itemResponse.setCategory(new ArrayList<>()); // ← Set empty list, không null
+        }
+
+        if (item.getModifierGroups() != null && !item.getModifierGroups().isEmpty()) {
+            List<ModifierGroupResponse> modifierGroupDTOs = item.getModifierGroups().stream()
+                    .map(mg -> new ModifierGroupResponse(
+                            mg.getModifierGroupId(),
+                            mg.getName(),
+                            mg.getSelectionType(),
+                            mg.getIsRequired(),
+                            mg.getItems(),
+                            mg.getOptions(),
+                            mg.getTenant().getTenantId()
+                    ))
+                    .toList();
+            itemResponse.setModifierGroup(modifierGroupDTOs);
+        } else {
+            itemResponse.setModifierGroup(new ArrayList<>()); // ← Set empty list, không null
+        }
+
+        return itemResponse;
     }
 }

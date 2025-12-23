@@ -18,7 +18,7 @@ public interface ItemService {
     public ItemResponse updateItemById(Integer id, UpdateItemRequest updateItemRequest, JwtAuthenticationToken jwtAuthenticationToken);
     public void deleteItemById(Integer itemId, JwtAuthenticationToken jwtAuthenticationToken);
 //    public List<ItemResponse> getAllItemByTenant(JwtAuthenticationToken jwtAuthenticationToken);
-    Page<ItemResponse> getAllItems(int page, int size, String itemName, Integer categoryId, String sortBy, JwtAuthenticationToken jwtAuthenticationToken);
+    Page<ItemResponse> getAllItems(int page, int size, JwtAuthenticationToken jwtAuthenticationToken);
     public List<ItemResponse> updateMenuAvailabilityToggle( MenuAvailabilityToggleListRequest request, JwtAuthenticationToken jwtAuthenticationToken);
     String replaceAvatar(AvatarRequest avatarRequest,Integer itemId);
 

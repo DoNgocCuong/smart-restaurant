@@ -113,4 +113,16 @@ public class ItemController {
                 .result(items)
                 .build();
     }
+
+    @GetMapping("/all-items")
+    public ApiResponse<Page<ItemResponse>> GetAllItem(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            JwtAuthenticationToken jwtAuthenticationToken) {
+        Page<ItemResponse> items = itemService.getAllItems(page, size, jwtAuthenticationToken);
+        return ApiResponse.<Page<ItemResponse>>builder()
+                .message("Items retrieved successfully")
+                .result(items)
+                .build();
+    }
 }

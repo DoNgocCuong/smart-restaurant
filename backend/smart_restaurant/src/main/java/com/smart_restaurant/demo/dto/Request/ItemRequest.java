@@ -27,10 +27,11 @@ public class ItemRequest {
 
     @NotBlank(message = "Ảnh không được để trống")
     String avatarUrl;
-    boolean status;
-    boolean isKitchen;
+    Boolean status;
+    Boolean isKitchen;
 
     @NotEmpty(message = "Phải chọn ít nhất một category")
     List<Integer> categoryIds;
+
     List<Integer> modifierGroupIds;
 }
