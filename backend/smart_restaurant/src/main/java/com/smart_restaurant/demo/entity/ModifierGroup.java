@@ -1,11 +1,13 @@
 package com.smart_restaurant.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.smart_restaurant.demo.enums.SelectionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,12 @@ public class ModifierGroup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer modifierGroupId;
     private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "selection_type")
+    private SelectionType selectionType;
+    @Column(name = "is_required")
+    private Boolean isRequired;
 
     @JsonBackReference
     @ManyToMany(mappedBy = "modifierGroups", fetch = FetchType.LAZY)

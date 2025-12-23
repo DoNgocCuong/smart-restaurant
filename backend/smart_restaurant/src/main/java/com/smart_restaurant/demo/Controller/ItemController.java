@@ -90,4 +90,19 @@ public ApiResponse<Page<ItemResponse>> getAllItems(
                 .result(itemService.replaceAvatar(avatarRequest,itemId))
                 .build();
     }
+
+    @GetMapping("/chef-recommen")
+    public ApiResponse<Page<ItemResponse>> getAllItemsByChefRecommendation(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+
+            JwtAuthenticationToken jwtAuthenticationToken) {
+
+        Page<ItemResponse> items = itemService.getAllItemsByChefRecommendation(jwtAuthenticationToken);
+
+        return ApiResponse.<Page<ItemResponse>>builder()
+                .message("Items retrieved successfully")
+                .result(items)
+                .build();
+    }
 }

@@ -297,7 +297,7 @@ public Page<ItemResponse> getAllItems(int page, int size, String itemName, Integ
         itemResponse.setCategory(categoryDTOs);
 
         List<ModifierGroupResponse> modifierGroupDTOs = item.getModifierGroups().stream()
-                .map(mg -> new ModifierGroupResponse(mg.getModifierGroupId(), mg.getName(), mg.getItems(), mg.getOptions(), mg.getTenant().getTenantId()))
+                .map(mg -> new ModifierGroupResponse(mg.getModifierGroupId(), mg.getName(),mg.getSelectionType(),mg.getIsRequired(), mg.getItems(), mg.getOptions(), mg.getTenant().getTenantId()))
                 .toList();
         itemResponse.setModifierGroup(modifierGroupDTOs);
 
@@ -382,5 +382,55 @@ public Page<ItemResponse> getAllItems(int page, int size, String itemName, Integ
         item.setAvatar(imageRepository.save(image));
         itemRepository.save(item);
         return "replace avatar successfully";
+    }
+
+    @Override
+    public Page<ItemResponse> getAllItemsByChefRecommendation(JwtAuthenticationToken jwtAuthenticationToken) {
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = accountService.getTenantIdByUsername(username);
+
+        // Kiểm tra tenant tồn tại
+        tenantRepository.findById(tenantId)
+                .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
+
+        // Tạo Pageable
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("itemId").descending());
+
+        // Lấy items thuộc tenant này và có isKitchen = true
+        Page<Item> itemsPage = itemRepository.findByTenantIdAndIsKitchenTrue(tenantId, pageable);
+
+        // Chuyển đổi sang DTO và lọc items theo tenant
+        return itemsPage.map(item -> {
+            ItemResponse itemResponse = itemMapper.toItemResponse(item);
+
+            if (item.getAvatar() != null) {
+                itemResponse.setAvatarUrl(item.getAvatar().getUrl());
+            }
+
+            List<CategoryResponse> categoryDTOs = item.getCategory().stream()
+                    .filter(c -> c.getTenant().getTenantId().equals(tenantId)) // Lọc category của tenant
+                    .map(c -> new CategoryResponse(
+                            c.getCategoryId(),
+                            c.getCategoryName(),
+                            c.getTenant().getTenantId()
+                    ))
+                    .toList();
+            itemResponse.setCategory(categoryDTOs);
+
+            List<ModifierGroupResponse> modifierGroupDTOs = item.getModifierGroups().stream()
+                    .map(mg -> new ModifierGroupResponse(
+                            mg.getModifierGroupId(),
+                            mg.getName(),
+                            mg.getSelectionType(),
+                            mg.getIsRequired(),
+                            mg.getItems(),
+                            mg.getOptions(),
+                            mg.getTenant().getTenantId()
+                    ))
+                    .toList();
+            itemResponse.setModifierGroup(modifierGroupDTOs);
+
+            return itemResponse;
+        });
     }
 }

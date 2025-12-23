@@ -20,6 +20,7 @@ public interface ItemMapper {
     @Mapping(target = "avatarUrl", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "modifierGroup", ignore = true)
+    @Mapping(source = "isKitchen", target = "isKitchen")
     ItemResponse toItemResponse (Item item);
 
     @Mapping(target = "avatar", ignore = true)

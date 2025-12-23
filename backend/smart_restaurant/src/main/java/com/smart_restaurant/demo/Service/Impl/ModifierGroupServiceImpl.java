@@ -9,6 +9,7 @@ import com.smart_restaurant.demo.dto.Request.UpdateModifierGroupRequest;
 import com.smart_restaurant.demo.dto.Response.ModifierGroupResponse;
 import com.smart_restaurant.demo.entity.ModifierGroup;
 import com.smart_restaurant.demo.entity.Tenant;
+import com.smart_restaurant.demo.enums.SelectionType;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.smart_restaurant.demo.mapper.ModifierGroupMapper;
@@ -56,6 +57,9 @@ public class ModifierGroupServiceImpl implements ModifierGroupService {
         modifierGroup.setTenant(tenant);
         modifierGroup.setOptions(new ArrayList<>());
         modifierGroup.setItems(new ArrayList<>());
+        modifierGroup.setSelectionType(SelectionType.valueOf(request.getSelectionType().toUpperCase()));
+        modifierGroup.setIsRequired(request.getIsRequired() != null ? request.getIsRequired() : false);
+
 
         ModifierGroup saveModifierGroup = modifierGroupRepository.save(modifierGroup);
         ModifierGroupResponse modifierGroupResponse = modifierGroupMapper.toModifierGroupResponse(saveModifierGroup);
@@ -139,6 +143,8 @@ public class ModifierGroupServiceImpl implements ModifierGroupService {
 
         // Cập nhật
         modifierGroup.setName(request.getName());
+        modifierGroup.setSelectionType(SelectionType.valueOf(request.getSelectionType().toUpperCase()));
+        modifierGroup.setIsRequired(request.getIsRequired() != null ? request.getIsRequired() : false);
         ModifierGroup updatedModifierGroup = modifierGroupRepository.save(modifierGroup);
 
         ModifierGroupResponse response = modifierGroupMapper.toModifierGroupResponse(updatedModifierGroup);

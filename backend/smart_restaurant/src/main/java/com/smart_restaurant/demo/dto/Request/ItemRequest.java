@@ -28,6 +28,7 @@ public class ItemRequest {
     @NotBlank(message = "Ảnh không được để trống")
     String avatarUrl;
     boolean status;
+    boolean isKitchen;
 
     @NotEmpty(message = "Phải chọn ít nhất một category")
     List<Integer> categoryIds;

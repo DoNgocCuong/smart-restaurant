@@ -19,6 +19,7 @@ public class ItemResponse {
     Double price;
     String avatarUrl;
     boolean status;
+    Boolean isKitchen;
     List<CategoryResponse> category;
     List<ModifierGroupResponse> modifierGroup;
 }

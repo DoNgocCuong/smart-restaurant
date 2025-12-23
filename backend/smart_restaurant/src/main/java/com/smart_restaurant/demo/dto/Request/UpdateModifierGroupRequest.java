@@ -11,4 +11,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 public class UpdateModifierGroupRequest {
     String name;
+    private String selectionType;
+    private Boolean isRequired;
 }

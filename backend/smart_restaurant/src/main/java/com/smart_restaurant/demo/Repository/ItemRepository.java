@@ -51,5 +51,11 @@ public interface ItemRepository extends JpaRepository<Item,Integer> {
             @Param("categoryId") Integer categoryId,
             Pageable pageable);
 
+    @Query("SELECT DISTINCT i FROM Item i " +
+            "INNER JOIN i.category c " +
+            "WHERE c.tenant.tenantId = :tenantId AND i.isKitchen = true " +
+            "ORDER BY i.itemId DESC")
+    Page<Item> findByTenantIdAndIsKitchenTrue(@Param("tenantId") Integer tenantId, Pageable pageable);
+
 
 }

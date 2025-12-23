@@ -25,4 +25,6 @@ public interface ItemService {
     Page<ItemResponse> getAllItems(int page, int size, String itemName, Integer categoryId, String sortBy, JwtAuthenticationToken jwtAuthenticationToken);
     public List<ItemResponse> updateMenuAvailabilityToggle( MenuAvailabilityToggleListRequest request, JwtAuthenticationToken jwtAuthenticationToken);
     String replaceAvatar(AvatarRequest avatarRequest,Integer itemId);
+
+    Page<ItemResponse> getAllItemsByChefRecommendation(JwtAuthenticationToken jwtAuthenticationToken);
 }

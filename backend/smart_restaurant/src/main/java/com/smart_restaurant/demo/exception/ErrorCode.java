@@ -47,7 +47,7 @@ public enum ErrorCode {
     AVARTAR_NOT_DELETE("1036","Unable to delete profile picture",HttpStatus.BAD_REQUEST),
     USER_NAME_PASSWORD_NOT_NULL("1037","username or password not null",HttpStatus.BAD_REQUEST),
 
-    AVARTAR_NOT_DELETE("1033","Unable to delete profile picture",HttpStatus.BAD_REQUEST),
+//    AVARTAR_NOT_DELETE("1033","Unable to delete profile picture",HttpStatus.BAD_REQUEST),
 
     MODIFIER_OPTION_ALREADY_EXISTS("1035","MODIFIER_OPTION_ALREADY_EXISTS", HttpStatus.BAD_REQUEST),
     MODIFIER_OPTION_NOT_IN_TENANT("1034", "MODIFIER_OPTION_NOT_IN_TENANT", HttpStatus.BAD_REQUEST);
