@@ -76,6 +76,9 @@ public class AccountServiceImpl implements AccountService {
         String password= passwordEncoder.encode(signupRequest.getPassword());
         newAccount.setPassword(password);
         newAccount.setRoles(roleRepository.findAllByName(Roles.TENANT_ADMIN.toString()));
+        newAccount.setIsCustomer(false);
+        newAccount.setIsFirstActivity(false);
+        newAccount.setIsEmailVerify(true);
         String token=generateEmailToken(newAccount);
         try {
             sendQrEmail(newAccount.getUsername(),token);
@@ -381,5 +384,31 @@ public class AccountServiceImpl implements AccountService {
     public Integer getTenantIdByUsername(String username) {
         return accountRepository.findTenantIdByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
+    }
+
+    @Override
+    public String deleteAccountAdminTenant(Integer accountId) {
+        Account account= accountRepository.findById(accountId).orElseThrow(()-> new AppException(ErrorCode.ACCOUNT_NOT_EXITS));
+        account.setIsActive(false);
+        accountRepository.save(account);
+        return "delete account admin successfully";
+    }
+
+    @Override
+    public AccountResponse updateAccountAdminTenant(Integer accountId, AccountUpdateRequest updateRequest) {
+        Account account= accountRepository.findById(accountId).orElseThrow(()-> new AppException(ErrorCode.ACCOUNT_NOT_EXITS));
+        if(accountRepository.existsByUsername(updateRequest.getUserName())==true){
+            throw  new AppException(ErrorCode.ACCOUNT_EXISTED);
+        }
+        account.setUsername(updateRequest.getUserName());
+        account.setPassword(passwordEncoder.encode(updateRequest.getPassword()));
+        return accountMapper.toAccountResponse(accountRepository.save(account));
+    }
+
+    @Override
+    public AccountResponse updateActiveAccountAdminTenant(Integer accountId, AccountUpdateIsActiveRequest updateRequest) {
+        Account account= accountRepository.findById(accountId).orElseThrow(()-> new AppException(ErrorCode.ACCOUNT_NOT_EXITS));
+        account.setIsActive(updateRequest.getIsActive());
+        return accountMapper.toAccountResponse(accountRepository.save(account));
     }
 }
