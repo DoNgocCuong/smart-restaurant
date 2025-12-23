@@ -29,4 +29,7 @@ public interface AccountService {
     AccountResponse updateAccount(Integer accountId, AccountUpdateRequest updateRequest, JwtAuthenticationToken jwtAuthenticationToken);
     AccountResponse updateActiveAccount(Integer accountId, AccountUpdateIsActiveRequest updateRequest, JwtAuthenticationToken jwtAuthenticationToken);
     void deleteAccount(Integer accountId, JwtAuthenticationToken jwtAuthenticationToken);
+    String deleteAccountAdminTenant(Integer accountId);
+    AccountResponse updateAccountAdminTenant(Integer accountId,AccountUpdateRequest updateRequest);
+    AccountResponse updateActiveAccountAdminTenant( Integer accountId, AccountUpdateIsActiveRequest updateRequest);
 }

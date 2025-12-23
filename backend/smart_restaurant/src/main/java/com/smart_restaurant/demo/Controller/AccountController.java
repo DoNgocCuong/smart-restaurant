@@ -119,6 +119,26 @@ public class AccountController {
                 .result("Account đã được xóa")
                 .build();
     }
-
+    //pre supper admin
+    @DeleteMapping("/delete-account-admin/{accountId}")
+    public  ApiResponse<String> deleteAccountAdminTenant(@PathVariable Integer accountId) {
+        return ApiResponse.<String>builder()
+                .result(accountService.deleteAccountAdminTenant(accountId))
+                .build();
+    }
+    //pre supper admin
+    @PutMapping("/update-active-account-admin/{accountId}")
+    public ApiResponse<AccountResponse> updateActiveAdminTenant(@PathVariable Integer accountId, @RequestBody AccountUpdateIsActiveRequest accountUpdateRequest){
+        return  ApiResponse.<AccountResponse>builder()
+                .result(accountService.updateActiveAccountAdminTenant(accountId,accountUpdateRequest))
+                .build();
+    }
+    //pre supper admin
+    @PutMapping("/update-account-admin/{accountId}")
+    public ApiResponse<AccountResponse> updateAccountAdminTenant(@PathVariable Integer accountId, @Valid @RequestBody AccountUpdateRequest accountUpdateRequest){
+        return  ApiResponse.<AccountResponse>builder()
+                .result(accountService.updateAccountAdminTenant(accountId,accountUpdateRequest))
+                .build();
+    }
 
 }
