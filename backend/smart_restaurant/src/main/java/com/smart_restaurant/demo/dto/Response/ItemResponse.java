@@ -20,6 +20,7 @@ public class ItemResponse {
     String avatarUrl;
     Boolean status;
     Boolean isKitchen;
+    Integer quantitySold;
     List<CategoryResponse> category;
     List<ModifierGroupResponse> modifierGroup;
 }
