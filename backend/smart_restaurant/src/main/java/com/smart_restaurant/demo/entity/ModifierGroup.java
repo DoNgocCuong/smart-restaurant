@@ -1,5 +1,6 @@
 package com.smart_restaurant.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,10 +23,10 @@ public class ModifierGroup {
     private Integer modifierGroupId;
     private String name;
 
-
+    @JsonBackReference
     @ManyToMany(mappedBy = "modifierGroups", fetch = FetchType.LAZY)
     private List<Item> items = new ArrayList<>();
-
+    @JsonBackReference
     @OneToMany(mappedBy = "modifierGroup",cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ModifierOption> options;
     @ManyToOne
