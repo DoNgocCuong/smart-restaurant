@@ -1,18 +1,14 @@
 package com.smart_restaurant.demo.Service;
 
-import com.smart_restaurant.demo.Repository.ItemRepository;
 import com.smart_restaurant.demo.dto.Request.AvatarRequest;
 import com.smart_restaurant.demo.dto.Request.ItemRequest;
 import com.smart_restaurant.demo.dto.Request.MenuAvailabilityToggleListRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateItemRequest;
-import com.smart_restaurant.demo.dto.Response.ApiResponse;
-import com.smart_restaurant.demo.dto.Response.ImageResponse;
 import com.smart_restaurant.demo.dto.Response.ItemResponse;
-import com.smart_restaurant.demo.entity.Image;
-import com.smart_restaurant.demo.entity.Item;
+import com.smart_restaurant.demo.enums.ItemSortType;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -27,4 +23,5 @@ public interface ItemService {
     String replaceAvatar(AvatarRequest avatarRequest,Integer itemId);
 
     Page<ItemResponse> getAllItemsByChefRecommendation(JwtAuthenticationToken jwtAuthenticationToken);
+    Page<ItemResponse> getAllFilter(int page, int size, String itemName, Integer categoryId, Boolean status, ItemSortType sortType, Sort.Direction direction);
 }

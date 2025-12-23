@@ -3,8 +3,8 @@ package com.smart_restaurant.demo.Service.Impl;
 
 import com.smart_restaurant.demo.Repository.*;
 import com.smart_restaurant.demo.Service.AccountService;
-import com.smart_restaurant.demo.Service.CategoryService;
 import com.smart_restaurant.demo.Service.ItemService;
+import com.smart_restaurant.demo.Service.ItemSpecification;
 import com.smart_restaurant.demo.dto.Request.AvatarRequest;
 import com.smart_restaurant.demo.dto.Request.ItemRequest;
 import com.smart_restaurant.demo.dto.Request.MenuAvailabilityToggleListRequest;
@@ -13,6 +13,7 @@ import com.smart_restaurant.demo.dto.Response.CategoryResponse;
 import com.smart_restaurant.demo.dto.Response.ItemResponse;
 import com.smart_restaurant.demo.dto.Response.ModifierGroupResponse;
 import com.smart_restaurant.demo.entity.*;
+import com.smart_restaurant.demo.enums.ItemSortType;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.smart_restaurant.demo.mapper.ImageMapper;
@@ -25,15 +26,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.springframework.data.jpa.repository.query.KeysetScrollSpecification.createSort;
-import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
@@ -432,5 +430,31 @@ public Page<ItemResponse> getAllItems(int page, int size, String itemName, Integ
 
             return itemResponse;
         });
+    }
+    public Page<ItemResponse> getAllFilter(
+            int page,
+            int size,
+            String name,
+            Integer categoryId,
+            Boolean status,
+            ItemSortType sortBy,
+            Sort.Direction direction
+    ) {
+
+        Specification<Item> spec =
+                ItemSpecification.filter(name, categoryId, status);
+
+        Sort sort = buildSort(sortBy, direction);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Item> pageResult = itemRepository.findAll(spec, pageable);
+        return pageResult.map(itemMapper::toItemResponse);
+    }
+
+    private Sort buildSort(ItemSortType sortBy, Sort.Direction direction) {
+        return switch (sortBy) {
+            case POPULAR -> Sort.by(direction, "quantitySold");   // hoặc viewCount
+            case PRICE -> Sort.by(direction, "price");
+            case CREATED_DATE -> Sort.by(direction, "createAt");
+        };
     }
 }

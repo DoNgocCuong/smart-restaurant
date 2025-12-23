@@ -5,7 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -26,6 +29,8 @@ public class Item {
     @Column(name = "is_kitchen")
     Boolean isKitchen;
     Boolean status;
+    @Column(name = "quantity_sold")
+    Integer quantitySold=0;
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "avatar_id")
     Image avatar;
@@ -46,6 +51,12 @@ public class Item {
             inverseJoinColumns = @JoinColumn(name = "modifierGroupId")
     )
     private List<ModifierGroup> modifierGroups;
+    @CreationTimestamp
+    @Column(name = "create_at", updatable = false)
+    LocalDateTime createAt;
+    @UpdateTimestamp
+    @Column(name = "update_at")
+    LocalDateTime updateAt;
 
 }
 

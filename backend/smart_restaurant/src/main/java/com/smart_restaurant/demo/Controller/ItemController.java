@@ -9,12 +9,14 @@ import com.smart_restaurant.demo.dto.Request.UpdateItemRequest;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.ItemResponse;
 import com.smart_restaurant.demo.entity.Item;
+import com.smart_restaurant.demo.enums.ItemSortType;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,23 +57,29 @@ public class ItemController {
                 .build();
     }
 
-@GetMapping("")
-public ApiResponse<Page<ItemResponse>> getAllItems(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size,
-        @RequestParam(required = false) String itemName,
-        @RequestParam(required = false) Integer categoryId,
-        @RequestParam(defaultValue = "POPULAR") String sortBy,
-        JwtAuthenticationToken jwtAuthenticationToken) {
+    @GetMapping("")
+    public ApiResponse<Page<ItemResponse>> getAllItems(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
 
-    Page<ItemResponse> items = itemService.getAllItems(
-            page, size, itemName, categoryId, sortBy, jwtAuthenticationToken);
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) Boolean status,
 
-    return ApiResponse.<Page<ItemResponse>>builder()
-            .message("Items retrieved successfully")
-            .result(items)
-            .build();
-}
+            @RequestParam(defaultValue = "CREATED_DATE") ItemSortType sortBy,
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction
+    ) {
+
+        Page<ItemResponse> result = itemService.getAllFilter(
+                page, size, name, categoryId, status, sortBy, direction
+        );
+
+        return ApiResponse.<Page<ItemResponse>>builder()
+                .message("Items retrieved successfully")
+                .result(result)
+                .build();
+    }
+
 
     @PutMapping("/availability")
     public ApiResponse<List<ItemResponse>> updateMenuAvailabilityToggle(
