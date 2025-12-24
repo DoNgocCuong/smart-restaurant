@@ -45,7 +45,7 @@ axiosClient.interceptors.response.use(
     if (!error.response) return Promise.reject(error);
 
     // ===== 401 =====
-    if (status === 401 && !originalRequest._retry) {
+    if (status === 500 && !originalRequest._retry) {
       // ❌ LOGIN FAIL → logout
       if (originalRequest.url.startsWith("/auth/login")) {
         localStorage.removeItem("token");

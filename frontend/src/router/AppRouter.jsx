@@ -15,6 +15,7 @@ import Dashboard from "../pages/admin/Dashboard";
 import TableManagement from "../pages/admin/TableManagement";
 import RegisterInforTenant from "../pages/admin/RegisterInforTenant";
 import MenuManagement from "../pages/admin/MenuManagement";
+import StaffManagement from "../pages/admin/StaffManagement";
 
 import GuestLayout from "../components/layout/GuestLayout";
 import Menu from "../pages/guest/Menu";
@@ -51,6 +52,7 @@ export default function AppRouter() {
         <Route path="table-management" element={<TableManagement />} />
         <Route path="tenant-create" element={<RegisterInforTenant />} />
         <Route path="menu-management" element={<MenuManagement />} />
+        <Route path="staff-management" element={<StaffManagement />} />
       </Route>
 
       {/* Guest */}
