@@ -12,7 +12,8 @@ export default function Menu() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [cart, setCart] = useState(() => {
-    const storedCart = localStorage.getItem("cart");
+    const storedCart = sessionStorage.getItem("cart");
+    sessionStorage
     return storedCart ? JSON.parse(storedCart) : {};
   });
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -47,7 +48,7 @@ export default function Menu() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
+    sessionStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
   /* ===== FILTER ===== */

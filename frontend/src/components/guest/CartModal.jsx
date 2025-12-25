@@ -32,7 +32,7 @@ export default function CartModal({ cart, items, onAdd, onRemove, onClose }) {
 
     console.log("ORDER PAYLOAD 👉", orderPayload);
 
-    localStorage.removeItem("cart");
+    sessionStorage.removeItem("cart");
     toast.success("Đặt món thành công");
     onClose();
   };
