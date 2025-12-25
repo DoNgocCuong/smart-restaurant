@@ -14,4 +14,5 @@ public interface ImageMapper {
     @Mapping(source = "Id", target = "id")
     List<ImageResponse> toImageResponse(List<Image> images);
     Image toImage(AvatarRequest avatarRequest);
+
 }

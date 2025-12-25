@@ -50,4 +50,10 @@ public class ImageServiceImpl implements ImageService {
         imageRepository.deleteById(id);
         return "delete successfully";
     }
+
+    @Override
+    public List<ImageResponse> getAllImage(Integer itemId,JwtAuthenticationToken jwtAuthenticationToken) {
+        Item item = itemRepository.findById(itemId).orElseThrow(()->new AppException(ErrorCode.ITEM_NOT_FOUND));
+        return imageMapper.toImageResponse(imageRepository.findAllByItem_ItemId(itemId));
+    }
 }

@@ -7,6 +7,7 @@ import com.smart_restaurant.demo.dto.Response.ImageResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,12 @@ public class ImageController {
     public  ApiResponse<String> deleteImage(@PathVariable Integer imageId){
         return ApiResponse.<String>builder()
                 .result(imageService.deleteImage(imageId))
+                .build();
+    }
+    @GetMapping("{itemId}")
+    public ApiResponse<List<ImageResponse>> getAll(@PathVariable Integer itemId, JwtAuthenticationToken jwtAuthenticationToken){
+        return ApiResponse.<List<ImageResponse>>builder()
+                .result(imageService.getAllImage(itemId,jwtAuthenticationToken))
                 .build();
     }
 }
