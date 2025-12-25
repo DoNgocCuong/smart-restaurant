@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import itemApi from "../../api/itemApi";
+import { Plus } from "lucide-react";
+import AddItemModal from "./AddItemModal";
 
 function ItemManagementCard() {
   const [items, setItems] = useState([]);
@@ -7,8 +9,9 @@ function ItemManagementCard() {
   const [size] = useState(8);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [openAdd, setOpenAdd] = useState(false);
 
-  // ===== FILTER & SORT STATE (NEW) =====
+  // ===== FILTER & SORT STATE =====
   const [sortBy, setSortBy] = useState("CREATED_DATE");
   const [direction, setDirection] = useState("DESC");
   const [status, setStatus] = useState("");
@@ -16,11 +19,15 @@ function ItemManagementCard() {
   const fetchItems = async () => {
     try {
       setLoading(true);
+
+      // ===== FIX STATUS STRING -> BOOLEAN =====
+      const parsedStatus = status === "" ? null : status === "true";
+
       const res = await itemApi.getAllItems(
         page,
         size,
         null,
-        status === "" ? null : status,
+        parsedStatus,
         sortBy,
         direction
       );
@@ -48,54 +55,65 @@ function ItemManagementCard() {
 
   return (
     <div className="bg-white rounded-xl p-6 shadow-md">
-      <h2 className="text-xl font-semibold mb-6 ">Quản lý món ăn</h2>
+      <h2 className="text-xl font-semibold mb-6">Quản lý món ăn</h2>
 
       {/* ===== FILTER + SORT ===== */}
-      <div className="flex flex-wrap  gap-6 mb-6">
-        {/* STATUS */}
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-gray-500">
-            Trạng thái
-          </label>
-          <select
-            value={status}
-            onChange={handleChange(setStatus)}
-            className="min-w-40 border border-gray-300 rounded-lg px-3 py-2 text-sm 
-                 focus:outline-none focus:ring-2 focus:ring-orange-400"
-          >
-            <option value="">Tất cả</option>
-            <option value="true">Đang bán</option>
-            <option value="false">Ngừng bán</option>
-          </select>
-        </div>
-
-        {/* SORT */}
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-gray-500">Sắp xếp</label>
-
-          <div className="flex gap-2">
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
+        <div className="flex flex-wrap gap-6">
+          {/* STATUS */}
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-gray-500">
+              Trạng thái
+            </label>
             <select
-              value={sortBy}
-              onChange={handleChange(setSortBy)}
-              className="min-w-[150px] border border-gray-300 rounded-lg px-3 py-2 text-sm
-                   focus:outline-none focus:ring-2 focus:ring-orange-400"
+              value={status}
+              onChange={handleChange(setStatus)}
+              className="min-w-[140px] border border-gray-300 rounded-lg px-3 py-2 text-sm
+              focus:outline-none focus:ring-2 focus:ring-orange-400"
             >
-              <option value="CREATED_DATE">Ngày tạo</option>
-              <option value="PRICE">Giá</option>
-              <option value="POPULAR">Phổ biến</option>
-            </select>
-
-            <select
-              value={direction}
-              onChange={handleChange(setDirection)}
-              className="min-w-[120px] border border-gray-300 rounded-lg px-3 py-2 text-sm
-                   focus:outline-none focus:ring-2 focus:ring-orange-400"
-            >
-              <option value="DESC">Giảm dần</option>
-              <option value="ASC">Tăng dần</option>
+              <option value="">Tất cả</option>
+              <option value="true">Đang bán</option>
+              <option value="false">Ngừng bán</option>
             </select>
           </div>
+
+          {/* SORT */}
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-gray-500">Sắp xếp</label>
+            <div className="flex gap-2">
+              <select
+                value={sortBy}
+                onChange={handleChange(setSortBy)}
+                className="min-w-[150px] border border-gray-300 rounded-lg px-3 py-2 text-sm
+                focus:outline-none focus:ring-2 focus:ring-orange-400"
+              >
+                <option value="CREATED_DATE">Ngày tạo</option>
+                <option value="PRICE">Giá</option>
+                <option value="POPULAR">Phổ biến</option>
+              </select>
+
+              <select
+                value={direction}
+                onChange={handleChange(setDirection)}
+                className="min-w-[120px] border border-gray-300 rounded-lg px-3 py-2 text-sm
+                focus:outline-none focus:ring-2 focus:ring-orange-400"
+              >
+                <option value="DESC">Giảm dần</option>
+                <option value="ASC">Tăng dần</option>
+              </select>
+            </div>
+          </div>
         </div>
+
+        {/* ADD ITEM */}
+        <button
+          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white
+          px-4 py-2 rounded-lg shadow-sm transition whitespace-nowrap cursor-pointer"
+          onClick={() => setOpenAdd(true)}
+        >
+          <Plus size={18} />
+          Thêm sản phẩm
+        </button>
       </div>
 
       {/* ===== LOADING ===== */}
@@ -105,7 +123,6 @@ function ItemManagementCard() {
         </div>
       ) : (
         <>
-          {/* ===== GRID ===== */}
           {items.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               Không có món ăn
@@ -117,7 +134,6 @@ function ItemManagementCard() {
                   key={item.itemId}
                   className="border border-gray-100 shadow-lg rounded-xl overflow-hidden hover:shadow-xl transition"
                 >
-                  {/* IMAGE */}
                   <div className="relative">
                     <img
                       src={
@@ -127,8 +143,6 @@ function ItemManagementCard() {
                       alt={item.itemName}
                       className="w-full h-40 object-cover"
                     />
-
-                    {/* STATUS BADGE */}
                     <span
                       className={`absolute top-2 right-2 px-3 py-1 text-xs rounded-full text-white
                         ${item.status ? "bg-green-500" : "bg-red-500"}`}
@@ -137,16 +151,13 @@ function ItemManagementCard() {
                     </span>
                   </div>
 
-                  {/* CONTENT */}
                   <div className="p-4">
                     <h3 className="font-semibold text-gray-800 truncate">
                       {item.itemName}
                     </h3>
-
                     <p className="text-sm text-gray-600 mt-1 line-clamp-2">
                       {item.description}
                     </p>
-
                     <div className="mt-3 flex items-center justify-between">
                       <span className="font-bold text-orange-600">
                         {item.price.toLocaleString()} ₫
@@ -158,7 +169,7 @@ function ItemManagementCard() {
             </div>
           )}
 
-          {/* ===== PAGINATION ===== */}
+          {/* PAGINATION */}
           <div className="flex justify-center items-center gap-3 mt-8">
             <button
               disabled={page === 0}
@@ -169,18 +180,21 @@ function ItemManagementCard() {
             </button>
 
             <span className="text-sm text-gray-600">
-              Trang <b>{page + 1}</b> / {totalPages}
+              Trang <b>{totalPages === 0 ? 0 : page + 1}</b> / {totalPages}
             </span>
 
             <button
               disabled={page + 1 >= totalPages}
               onClick={() => setPage(page + 1)}
-              className="px-4 py-2 border rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer "
+              className="px-4 py-2 border rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               Sau →
             </button>
           </div>
         </>
+      )}
+      {openAdd && (
+        <AddItemModal open={openAdd} onClose={() => setOpenAdd(false)} />
       )}
     </div>
   );
