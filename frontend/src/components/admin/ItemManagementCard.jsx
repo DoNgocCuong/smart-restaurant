@@ -137,7 +137,7 @@ function ItemManagementCard() {
                   <div className="relative">
                     <img
                       src={
-                        item.imageUrl ||
+                        item.avatarUrl ||
                         "https://res.cloudinary.com/dznocieoi/image/upload/v1766487761/istockphoto-1396814518-612x612_upvria.jpg"
                       }
                       alt={item.itemName}
