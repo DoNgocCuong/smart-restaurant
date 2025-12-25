@@ -442,16 +442,52 @@ public Page<ItemResponse> getAllItems(int page, int size,
             Integer categoryId,
             Boolean status,
             ItemSortType sortBy,
-            Sort.Direction direction
+            Sort.Direction direction,
+            JwtAuthenticationToken jwtAuthenticationToken
     ) {
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = accountService.getTenantIdByUsername(username);
 
+        tenantRepository.findById(tenantId)
+                .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
         Specification<Item> spec =
-                ItemSpecification.filter(name, categoryId, status);
+                ItemSpecification.filter(name, categoryId, status,tenantId);
 
         Sort sort = buildSort(sortBy, direction);
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Item> pageResult = itemRepository.findAll(spec, pageable);
-        return pageResult.map(itemMapper::toItemResponse);
+        return pageResult.map(item -> {
+            ItemResponse itemResponse = itemMapper.toItemResponse(item);
+
+            if (item.getAvatar() != null) {
+                itemResponse.setAvatarUrl(item.getAvatar().getUrl());
+            }
+
+            List<CategoryResponse> categoryDTOs = item.getCategory().stream()
+                    .filter(c -> c.getTenant().getTenantId().equals(tenantId)) // Lọc category của tenant
+                    .map(c -> new CategoryResponse(
+                            c.getCategoryId(),
+                            c.getCategoryName(),
+                            c.getTenant().getTenantId()
+                    ))
+                    .toList();
+            itemResponse.setCategory(categoryDTOs);
+
+            List<ModifierGroupResponse> modifierGroupDTOs = item.getModifierGroups().stream()
+                    .map(mg -> new ModifierGroupResponse(
+                            mg.getModifierGroupId(),
+                            mg.getName(),
+                            mg.getSelectionType(),
+                            mg.getIsRequired(),
+                            mg.getItems(),
+                            mg.getOptions(),
+                            mg.getTenant().getTenantId()
+                    ))
+                    .toList();
+            itemResponse.setModifierGroup(modifierGroupDTOs);
+
+            return itemResponse;
+        });
     }
 
     private Sort buildSort(ItemSortType sortBy, Sort.Direction direction) {

@@ -67,11 +67,11 @@ public class ItemController {
             @RequestParam(required = false) Boolean status,
 
             @RequestParam(defaultValue = "CREATED_DATE") ItemSortType sortBy,
-            @RequestParam(defaultValue = "DESC") Sort.Direction direction
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction,JwtAuthenticationToken jwtAuthenticationToken
     ) {
 
         Page<ItemResponse> result = itemService.getAllFilter(
-                page, size, name, categoryId, status, sortBy, direction
+                page, size, name, categoryId, status, sortBy, direction,jwtAuthenticationToken
         );
 
         return ApiResponse.<Page<ItemResponse>>builder()

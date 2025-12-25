@@ -15,12 +15,17 @@ public class ItemSpecification {
     public static Specification<Item> filter(
             String name,
             Integer categoryId,
-            Boolean status
+            Boolean status,
+            Integer tenantId
     ) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-
+            if (tenantId != null) {
+                predicates.add(
+                        cb.equal(root.get("tenant").get("tenantId"), tenantId)
+                );
+            }
             if (name != null && !name.isBlank()) {
                 predicates.add(
                         cb.like(

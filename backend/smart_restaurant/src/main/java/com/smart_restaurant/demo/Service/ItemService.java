@@ -23,5 +23,5 @@ public interface ItemService {
     String replaceAvatar(AvatarRequest avatarRequest,Integer itemId);
 
     Page<ItemResponse> getAllItemsByChefRecommendation(JwtAuthenticationToken jwtAuthenticationToken);
-    Page<ItemResponse> getAllFilter(int page, int size, String itemName, Integer categoryId, Boolean status, ItemSortType sortType, Sort.Direction direction);
+    Page<ItemResponse> getAllFilter(int page, int size, String itemName, Integer categoryId, Boolean status, ItemSortType sortType, Sort.Direction direction,JwtAuthenticationToken jwtAuthenticationToken);
 }

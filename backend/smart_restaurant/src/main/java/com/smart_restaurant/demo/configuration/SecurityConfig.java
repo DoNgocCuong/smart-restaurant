@@ -22,7 +22,7 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS = {
             "/users/save", "/api/auth/log-in", "/api/auth/log-out","/api/auth/introspect","/api/auth/refresh-token" ,
-            "/api/auth/signup","/api/auth/verify-email/**"
+            "/api/auth/signup","/api/auth/verify-email/**","/swagger-ui.html", "/swagger-ui/**","/v3/api-docs/**"
     };
     private CustomJwtDecoder customJwtDecoder;
 
@@ -33,7 +33,8 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
