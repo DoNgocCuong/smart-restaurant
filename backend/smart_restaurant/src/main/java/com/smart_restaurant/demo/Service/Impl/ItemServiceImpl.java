@@ -30,6 +30,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,17 +115,10 @@ public class ItemServiceImpl implements ItemService {
                 }).toList();
         itemResponse.setCategory(categoryDTOs);
 
-        // Map MODIFIERGOUP
-        List<ModifierGroupResponse> modifierGroupDTOs = modifierGroup.stream()
-                .map(mg -> {
-                    ModifierGroupResponse mr = new ModifierGroupResponse();
-                    mr.setModifierGroupId(mg.getModifierGroupId());
-                    mr.setName(mg.getName());
-                    mr.setIsRequired(mr.getIsRequired());
-                    mr.setSelectionType(mr.getSelectionType());
-                    return mr;
-                }).toList();
-        itemResponse.setModifierGroup(modifierGroupDTOs);
+        List<Integer> modifierGroupIds = modifierGroup.stream()
+                .map(ModifierGroup::getModifierGroupId)
+                .toList();
+        itemResponse.setModifierGroupId(modifierGroupIds);
         return itemResponse;
     }
 
@@ -221,16 +215,10 @@ public class ItemServiceImpl implements ItemService {
         itemResponse.setCategory(categoryDTOs);
 
         // Map ModifierGroup thủ công
-        List<ModifierGroupResponse> modifierGroupDTOs = modifierGroup.stream()
-                .map(mg -> {
-                    ModifierGroupResponse mr = new ModifierGroupResponse();
-                    mr.setModifierGroupId(mg.getModifierGroupId());
-                    mr.setName(mg.getName());
-                    mr.setIsRequired(mr.getIsRequired());
-                    mr.setSelectionType(mr.getSelectionType());
-                    return mr;
-                }).toList();
-        itemResponse.setModifierGroup(modifierGroupDTOs);
+        List<Integer> modifierGroupIds = modifierGroup.stream()
+                .map(ModifierGroup::getModifierGroupId)
+                .toList();
+        itemResponse.setModifierGroupId(modifierGroupIds);
         return itemResponse;
 
     }
@@ -289,18 +277,13 @@ public Page<ItemResponse> getAllItems(int page, int size,
                 .toList();
         itemResponse.setCategory(categoryDTOs);
 
-        List<ModifierGroupResponse> modifierGroupDTOs = item.getModifierGroups().stream()
-                .map(mg -> new ModifierGroupResponse(
-                        mg.getModifierGroupId(),
-                        mg.getName(),
-                        mg.getSelectionType(),
-                        mg.getIsRequired(),
-                        mg.getItems(),
-                        mg.getOptions(),
-                        mg.getTenant().getTenantId()
-                ))
+
+
+        List<Integer> modifierGroupIds = item.getModifierGroups().stream()
+                .map(ModifierGroup::getModifierGroupId)
                 .toList();
-        itemResponse.setModifierGroup(modifierGroupDTOs);
+        itemResponse.setModifierGroupId(modifierGroupIds);
+
 
         return itemResponse;
     });
@@ -346,14 +329,10 @@ public Page<ItemResponse> getAllItems(int page, int size,
                     }).toList();
             itemResponse.setCategory(categoryDTOs);
 
-            List<ModifierGroupResponse> modifierGroupDTOs = updatedItem.getModifierGroups().stream()
-                    .map(modifierGroup -> {
-                        ModifierGroupResponse modifierGroupResponse = new ModifierGroupResponse();
-                        modifierGroupResponse.setModifierGroupId(modifierGroup.getModifierGroupId());
-                        modifierGroupResponse.setName(modifierGroup.getName());
-                        return modifierGroupResponse;
-                    }).toList();
-            itemResponse.setModifierGroup(modifierGroupDTOs);
+            List<Integer> modifierGroupIds = updatedItem.getModifierGroups().stream()
+                    .map(ModifierGroup::getModifierGroupId)
+                    .toList();
+            itemResponse.setModifierGroupId(modifierGroupIds);
 
 
             return itemResponse;
@@ -419,18 +398,10 @@ public Page<ItemResponse> getAllItems(int page, int size,
                     .toList();
             itemResponse.setCategory(categoryDTOs);
 
-            List<ModifierGroupResponse> modifierGroupDTOs = item.getModifierGroups().stream()
-                    .map(mg -> new ModifierGroupResponse(
-                            mg.getModifierGroupId(),
-                            mg.getName(),
-                            mg.getSelectionType(),
-                            mg.getIsRequired(),
-                            mg.getItems(),
-                            mg.getOptions(),
-                            mg.getTenant().getTenantId()
-                    ))
+            List<Integer> modifierGroupIds = item.getModifierGroups().stream()
+                    .map(ModifierGroup::getModifierGroupId)
                     .toList();
-            itemResponse.setModifierGroup(modifierGroupDTOs);
+            itemResponse.setModifierGroupId(modifierGroupIds);
 
             return itemResponse;
         });
@@ -473,18 +444,10 @@ public Page<ItemResponse> getAllItems(int page, int size,
                     .toList();
             itemResponse.setCategory(categoryDTOs);
 
-            List<ModifierGroupResponse> modifierGroupDTOs = item.getModifierGroups().stream()
-                    .map(mg -> new ModifierGroupResponse(
-                            mg.getModifierGroupId(),
-                            mg.getName(),
-                            mg.getSelectionType(),
-                            mg.getIsRequired(),
-                            mg.getItems(),
-                            mg.getOptions(),
-                            mg.getTenant().getTenantId()
-                    ))
+            List<Integer> modifierGroupIds = item.getModifierGroups().stream()
+                    .map(ModifierGroup::getModifierGroupId)
                     .toList();
-            itemResponse.setModifierGroup(modifierGroupDTOs);
+            itemResponse.setModifierGroupId(modifierGroupIds);
 
             return itemResponse;
         });
@@ -498,44 +461,5 @@ public Page<ItemResponse> getAllItems(int page, int size,
         };
     }
 
-    private ItemResponse buildItemResponse(Item item) {
-        ItemResponse itemResponse = itemMapper.toItemResponse(item);
 
-        if (item.getAvatar() != null) {
-            itemResponse.setAvatarUrl(item.getAvatar().getUrl());
-        }
-
-        // Luôn set list, không bao giờ null
-        if (item.getCategory() != null && !item.getCategory().isEmpty()) {
-            List<CategoryResponse> categoryDTOs = item.getCategory().stream()
-                    .map(c -> new CategoryResponse(
-                            c.getCategoryId(),
-                            c.getCategoryName(),
-                            c.getTenant().getTenantId()
-                    ))
-                    .toList();
-            itemResponse.setCategory(categoryDTOs);
-        } else {
-            itemResponse.setCategory(new ArrayList<>()); // ← Set empty list, không null
-        }
-
-        if (item.getModifierGroups() != null && !item.getModifierGroups().isEmpty()) {
-            List<ModifierGroupResponse> modifierGroupDTOs = item.getModifierGroups().stream()
-                    .map(mg -> new ModifierGroupResponse(
-                            mg.getModifierGroupId(),
-                            mg.getName(),
-                            mg.getSelectionType(),
-                            mg.getIsRequired(),
-                            mg.getItems(),
-                            mg.getOptions(),
-                            mg.getTenant().getTenantId()
-                    ))
-                    .toList();
-            itemResponse.setModifierGroup(modifierGroupDTOs);
-        } else {
-            itemResponse.setModifierGroup(new ArrayList<>()); // ← Set empty list, không null
-        }
-
-        return itemResponse;
-    }
 }

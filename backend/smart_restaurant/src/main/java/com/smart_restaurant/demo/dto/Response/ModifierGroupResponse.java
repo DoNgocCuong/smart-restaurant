@@ -22,8 +22,8 @@ public class ModifierGroupResponse {
     private SelectionType selectionType;
     private Boolean isRequired;
     @JsonManagedReference
-    List<Item> items;
+    List<Integer> item;
     @JsonManagedReference
-    List<ModifierOption> options;
+    List<ModifierOptionSimpleResponse> options;
     Integer tenantId;
 }

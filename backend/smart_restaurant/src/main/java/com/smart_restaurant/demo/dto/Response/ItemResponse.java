@@ -22,5 +22,5 @@ public class ItemResponse {
     Boolean isKitchen;
     Integer quantitySold;
     List<CategoryResponse> category;
-    List<ModifierGroupResponse> modifierGroup;
+    List<Integer> modifierGroupId;
 }

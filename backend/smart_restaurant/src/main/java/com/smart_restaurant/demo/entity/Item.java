@@ -42,8 +42,6 @@ public class Item {
     )
     List<Category> category;
 
-
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "modifier_group_item",

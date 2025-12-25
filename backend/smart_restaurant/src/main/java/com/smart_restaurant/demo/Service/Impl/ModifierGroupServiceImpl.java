@@ -7,12 +7,15 @@ import com.smart_restaurant.demo.Service.ModifierGroupService;
 import com.smart_restaurant.demo.dto.Request.ModifierGroupRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateModifierGroupRequest;
 import com.smart_restaurant.demo.dto.Response.ModifierGroupResponse;
+import com.smart_restaurant.demo.dto.Response.ModifierOptionSimpleResponse;
+import com.smart_restaurant.demo.entity.Item;
 import com.smart_restaurant.demo.entity.ModifierGroup;
 import com.smart_restaurant.demo.entity.Tenant;
 import com.smart_restaurant.demo.enums.SelectionType;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.smart_restaurant.demo.mapper.ModifierGroupMapper;
+import com.smart_restaurant.demo.mapper.ModifierOptionMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -36,6 +39,7 @@ public class ModifierGroupServiceImpl implements ModifierGroupService {
     ModifierGroupRepository modifierGroupRepository;
     ModifierGroupMapper modifierGroupMapper;
     TenantRepository tenantRepository;
+    ModifierOptionMapper modifierOptionMapper;
 
     @Override
     public ModifierGroupResponse createModifierGroup(ModifierGroupRequest request, JwtAuthenticationToken jwtAuthenticationToken) {
@@ -63,8 +67,16 @@ public class ModifierGroupServiceImpl implements ModifierGroupService {
 
         ModifierGroup saveModifierGroup = modifierGroupRepository.save(modifierGroup);
         ModifierGroupResponse modifierGroupResponse = modifierGroupMapper.toModifierGroupResponse(saveModifierGroup);
-        modifierGroupResponse.setItems(saveModifierGroup.getItems());
-        modifierGroupResponse.setOptions(saveModifierGroup.getOptions());
+        List<Integer> itemIds = saveModifierGroup.getItems().stream()
+                .map(Item::getItemId)
+                .toList();
+        modifierGroupResponse.setItem(itemIds);
+
+        List<ModifierOptionSimpleResponse> simpleOptions = saveModifierGroup.getOptions().stream()
+                .map(modifierOptionMapper::toModifierOptionSimpleResponse)
+                .toList();
+        modifierGroupResponse.setOptions(simpleOptions);
+
         modifierGroupResponse.setTenantId(saveModifierGroup.getTenant().getTenantId());
 
 
@@ -84,8 +96,16 @@ public class ModifierGroupServiceImpl implements ModifierGroupService {
         List<ModifierGroupResponse> responses = modifierGroup.stream()
                 .map(group -> {
                     ModifierGroupResponse response = modifierGroupMapper.toModifierGroupResponse(group);
-                    response.setItems(group.getItems());
-                    response.setOptions(group.getOptions());
+                    List<Integer> itemIds = group.getItems().stream()
+                            .map(Item::getItemId)
+                            .toList();
+                    response.setItem(itemIds);
+
+                    List<ModifierOptionSimpleResponse> simpleOptions = group.getOptions().stream()
+                            .map(modifierOptionMapper::toModifierOptionSimpleResponse)
+                            .toList();
+                    response.setOptions(simpleOptions);
+
                     response.setTenantId(group.getTenant().getTenantId());
 
                     return response;
@@ -113,8 +133,16 @@ public class ModifierGroupServiceImpl implements ModifierGroupService {
         }
 
         ModifierGroupResponse response = modifierGroupMapper.toModifierGroupResponse(modifierGroup);
-        response.setItems(modifierGroup.getItems());
-        response.setOptions(modifierGroup.getOptions());
+        List<Integer> itemIds = modifierGroup.getItems().stream()
+                .map(Item::getItemId)
+                .toList();
+        response.setItem(itemIds);
+
+        List<ModifierOptionSimpleResponse> simpleOptions = modifierGroup.getOptions().stream()
+                .map(modifierOptionMapper::toModifierOptionSimpleResponse)
+                .toList();
+        response.setOptions(simpleOptions);
+
         response.setTenantId(modifierGroup.getTenant().getTenantId());
 
         return response;
@@ -148,8 +176,16 @@ public class ModifierGroupServiceImpl implements ModifierGroupService {
         ModifierGroup updatedModifierGroup = modifierGroupRepository.save(modifierGroup);
 
         ModifierGroupResponse response = modifierGroupMapper.toModifierGroupResponse(updatedModifierGroup);
-        response.setItems(updatedModifierGroup.getItems());
-        response.setOptions(updatedModifierGroup.getOptions());
+        List<Integer> itemIds = updatedModifierGroup.getItems().stream()
+                .map(Item::getItemId)
+                .toList();
+        response.setItem(itemIds);
+
+        List<ModifierOptionSimpleResponse> simpleOptions = updatedModifierGroup.getOptions().stream()
+                .map(modifierOptionMapper::toModifierOptionSimpleResponse)
+                .toList();
+        response.setOptions(simpleOptions);
+
         response.setTenantId(updatedModifierGroup.getTenant().getTenantId());
 
         return response;
