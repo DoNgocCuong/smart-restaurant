@@ -22,6 +22,8 @@ const itemApi = {
   },
 
   addNewItem: (data) => axiosClient.post("/menu/items", data),
+
+  update: (id, data) => axiosClient.put(`/menu/items/${id}`, data),
 };
 
 export default itemApi;

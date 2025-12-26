@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import itemApi from "../../api/itemApi";
 import { Plus } from "lucide-react";
 import AddItemModal from "./AddItemModal";
+import DetailItemOverlay from "./DetailItemOverlay";
 
 function ItemManagementCard() {
   const [items, setItems] = useState([]);
@@ -10,6 +11,9 @@ function ItemManagementCard() {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const [isUpdate, setIsUpdate] = useState(0);
 
   // ===== FILTER & SORT STATE =====
   const [sortBy, setSortBy] = useState("CREATED_DATE");
@@ -45,7 +49,7 @@ function ItemManagementCard() {
   // ===== FETCH WHEN CHANGE =====
   useEffect(() => {
     fetchItems();
-  }, [page, sortBy, direction, status, openAdd]);
+  }, [page, sortBy, direction, status, openAdd, isUpdate]);
 
   // ===== RESET PAGE WHEN FILTER CHANGE =====
   const handleChange = (setter) => (e) => {
@@ -132,6 +136,7 @@ function ItemManagementCard() {
               {items.map((item) => (
                 <div
                   key={item.itemId}
+                  onClick={() => setSelectedItem(item)}
                   className="border border-gray-100 shadow-lg rounded-xl overflow-hidden hover:shadow-xl transition"
                 >
                   <div className="relative">
@@ -195,6 +200,13 @@ function ItemManagementCard() {
       )}
       {openAdd && (
         <AddItemModal open={openAdd} onClose={() => setOpenAdd(false)} />
+      )}
+      {selectedItem && (
+        <DetailItemOverlay
+          item={selectedItem}
+          onClose={() => setSelectedItem(null)}
+          onUpdate={() => setIsUpdate(isUpdate + 1)}
+        />
       )}
     </div>
   );

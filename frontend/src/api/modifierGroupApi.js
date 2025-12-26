@@ -5,6 +5,8 @@ const modifierGroupApi = {
   getAll: () => axiosClient.get("/menu/modifier-group"),
   update: (modifierGroupId, data) =>
     axiosClient.put(`/menu/modifier-group/${modifierGroupId}`, data),
+  findById: (modifierGroupId) =>
+    axiosClient.get(`/menu/modifier-group/${modifierGroupId}`),
 };
 
 export default modifierGroupApi;

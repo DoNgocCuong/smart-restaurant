@@ -2,7 +2,7 @@ import { useState } from "react";
 import Overlay from "../common/Overlay";
 import toast from "react-hot-toast";
 import accountApi from "../../api/accountApi";
-
+import { X } from "lucide-react";
 function AddStaffAccount({ onClose, onSuccess }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,10 +50,17 @@ function AddStaffAccount({ onClose, onSuccess }) {
     <Overlay onClose={onClose}>
       <div className="bg-white rounded-2xl p-6 w-[420px] mx-auto shadow-xl animate-slide-down">
         {/* Header */}
-        <h3 className="text-2xl font-semibold mb-6 text-gray-800 border-b pb-3">
-          Thêm tài khoản
-        </h3>
-
+        <div className="border-b border-gray-300 pb-3 mb-6 flex justify-between items-center">
+          <h3 className="text-2xl font-semibold text-gray-800 ">
+            Thêm tài khoản
+          </h3>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-md hover:bg-red-100 cursor-pointer"
+          >
+            <X />
+          </button>
+        </div>
         {/* Form */}
         <form className="space-y-5" onSubmit={handleSubmit}>
           {/* Email */}
@@ -121,14 +128,14 @@ function AddStaffAccount({ onClose, onSuccess }) {
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+              className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition cursor-pointer"
             >
               Hủy
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition"
+              className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition cursor-pointer"
             >
               {loading ? "Đang thêm..." : "Thêm"}
             </button>
