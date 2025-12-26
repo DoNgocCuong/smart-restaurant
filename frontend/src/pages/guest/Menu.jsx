@@ -4,54 +4,65 @@ import MenuItemCard from "../../components/common/MenuItemCard";
 import Logo from "../../assets/images/logo.png";
 import CartModal from "../../components/guest/CartModal";
 import OrderHistoryModal from "../../components/guest/OrderHistoryModal";
+import ModifierModal from "../../components/guest/ModifierModal";
 
 import categoryApi from "../../api/CategoryApi";
 import itemApi from "../../api/itemApi";
+import modifierGroupApi from "../../api/modifierGroupApi";
 
 export default function Menu() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [cart, setCart] = useState(() => {
-    const storedCart = sessionStorage.getItem("cart");
-    sessionStorage
-    return storedCart ? JSON.parse(storedCart) : {};
-  });
-  const [isCartOpen, setIsCartOpen] = useState(false);
+
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
+  const [modifierGroups, setModifierGroups] = useState([]);
+
+  // ===== CART (SAFE INIT) =====
+  const [cart, setCart] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem("cart");
+      const parsed = stored ? JSON.parse(stored) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
-  /* ===== FETCH ===== */
-  const fetchCategories = async () => {
-    try {
-      const res = await categoryApi.getAllCategories();
-      if (res?.result) {
-        setCategories(res.result);
-      }
-    } catch (error) {
-      console.error("Lỗi khi tải danh mục", error);
-    }
-  };
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [isModifierOpen, setIsModifierOpen] = useState(false);
 
-  const fetchItems = async () => {
-    try {
-      const res = await itemApi.getAllItems();
-      setItems(res.result.content || []);
-    } catch (error) {
-      console.error("Fetch items failed", error);
-    }
-  };
-
+  /* ================= FETCH ================= */
   useEffect(() => {
     fetchCategories();
     fetchItems();
+    fetchModifierGroups();
   }, []);
 
+  const fetchCategories = async () => {
+    const res = await categoryApi.getAllCategories();
+    setCategories(res?.result || []);
+  };
+
+  const fetchItems = async () => {
+    const res = await itemApi.getAllItems();
+    setItems(res?.result?.content || []);
+  };
+
+  const fetchModifierGroups = async () => {
+    const res = await modifierGroupApi.getAll();
+    setModifierGroups(res?.result || []);
+  };
+
+  /* ================= CART STORAGE ================= */
   useEffect(() => {
     sessionStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  /* ===== FILTER ===== */
+  /* ================= FILTER ================= */
   const filteredItems = items.filter((item) => {
     const matchesSearch = item.itemName
       ?.toLowerCase()
@@ -59,180 +70,187 @@ export default function Menu() {
 
     const matchesCategory =
       selectedCategory === null ||
-      item.categoryId === selectedCategory ||
-      (selectedCategory === -1 && !item.categoryId);
+      item.category?.[0]?.categoryId === selectedCategory;
 
     return matchesSearch && matchesCategory && item.status === true;
   });
 
-  /* ===== CATEGORY NORMALIZE (THÊM "KHÁC") ===== */
+  /* ================= MODIFIER ================= */
+  const getModifierGroupsOfItem = (item) => {
+    if (!item.modifierGroupId?.length) return [];
+    return modifierGroups.filter((mg) =>
+      item.modifierGroupId.includes(mg.modifierGroupId)
+    );
+  };
+
+  /* ================= ADD TO CART ================= */
+  const handleAddClick = (item) => {
+    const groups = getModifierGroupsOfItem(item);
+    if (groups.length > 0) {
+      setSelectedItem(item);
+      setIsModifierOpen(true);
+    } else {
+      addToCart(item, []);
+    }
+  };
+
+  const addToCart = (item, modifiers) => {
+    setCart((prev) => [
+      ...prev,
+      {
+        cartItemId: crypto.randomUUID(),
+        itemId: item.itemId,
+        itemName: item.itemName,
+        price: item.price,
+        quantity: 1,
+        modifiers,
+      },
+    ]);
+  };
+
+  const updateQuantity = (cartItemId, delta) => {
+    setCart((prev) =>
+      prev
+        .map((c) =>
+          c.cartItemId === cartItemId
+            ? { ...c, quantity: c.quantity + delta }
+            : c
+        )
+        .filter((c) => c.quantity > 0)
+    );
+  };
+
+  const getTotalItems = () =>
+    Array.isArray(cart) ? cart.reduce((sum, c) => sum + c.quantity, 0) : 0;
+
+  /* ================= CATEGORY ================= */
   const normalizedCategories = [
     ...categories,
     { categoryId: -1, categoryName: "Khác" },
   ];
 
-  /* ===== GROUP BY CATEGORY ===== */
-  const groupedItems = normalizedCategories.map((category) => ({
-    ...category,
+  const groupedItems = normalizedCategories.map((cat) => ({
+    ...cat,
     items: filteredItems.filter((item) =>
-      category.categoryId === -1
-        ? !item.categoryId
-        : item.categoryId === category.categoryId
+      cat.categoryId === -1
+        ? !item.category?.length
+        : item.category?.[0]?.categoryId === cat.categoryId
     ),
   }));
-
-  /* ===== CART ===== */
-  const addToCart = (itemId) => {
-    setCart((prev) => ({
-      ...prev,
-      [itemId]: (prev[itemId] || 0) + 1,
-    }));
-  };
-
-  const removeFromCart = (itemId) => {
-    setCart((prev) => {
-      const newCart = { ...prev };
-      if (newCart[itemId] > 1) newCart[itemId]--;
-      else delete newCart[itemId];
-      return newCart;
-    });
-  };
-
-  const getTotalItems = () =>
-    Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
-      {/* ===== HEADER ===== */}
-      <header className="bg-white shadow-sm sticky top-0 z-30">
-        <div className="grid grid-cols-12">
-          <div className="col-start-2 col-end-12 py-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <img
-                  src={Logo}
-                  alt="Logo"
-                  className="w-9 h-9 md:w-10 md:h-10"
-                />
-                <div>
-                  <h1 className="font-bold text-sm md:text-base">
-                    Menu nhà hàng
-                  </h1>
-                  <p className="text-xs md:text-sm text-gray-500">
-                    Chọn món yêu thích của bạn
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <button
-                  onClick={() => setIsHistoryOpen(true)}
-                  className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-medium flex gap-2"
-                >
-                  <History size={20} />
-                  Lịch sử
-                </button>
-
-                <button
-                  onClick={() => setIsCartOpen(true)}
-                  className="relative flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg"
-                >
-                  <ShoppingCart size={20} />
-                  <span className="hidden sm:inline text-sm font-medium">
-                    Giỏ hàng
-                  </span>
-                  {getTotalItems() > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center">
-                      {getTotalItems()}
-                    </span>
-                  )}
-                </button>
-              </div>
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100 pb-36">
+      {/* HEADER */}
+      <header className="bg-white/90 backdrop-blur shadow-sm sticky top-0 z-30">
+        <div className="px-6 py-4 flex justify-between items-center">
+          <div className="flex gap-3 items-center">
+            <img src={Logo} className="w-10 h-10 rounded-lg shadow-sm" />
+            <div>
+              <h1 className="font-bold text-lg text-gray-800">Menu nhà hàng</h1>
+              <p className="text-sm text-gray-500">
+                Chọn món yêu thích của bạn
+              </p>
             </div>
+          </div>
 
-            {/* Search */}
-            <div className="relative mt-4">
-              <Search
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-full text-sm"
-                placeholder="Tìm món ăn..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setIsHistoryOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition text-sm font-medium cursor-pointer"
+            >
+              <History size={18} />
+              Lịch sử
+            </button>
+
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="relative flex items-center gap-2 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 transition text-white text-sm font-medium cursor-pointer"
+            >
+              <ShoppingCart size={18} />
+              Giỏ hàng
+              {getTotalItems() > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-semibold rounded-full w-6 h-6 flex items-center justify-center shadow">
+                  {getTotalItems()}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* SEARCH */}
+        <div className="px-6 pb-4">
+          <div className="relative">
+            <Search
+              size={18}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+            />
+
+            <input
+              className="
+                w-full
+                pl-10 pr-4 py-3
+                text-sm
+                bg-white
+                border border-gray-200
+                rounded-2xl
+                shadow-sm
+                placeholder:text-gray-400
+                focus:outline-none
+                focus:ring-2 focus:ring-black/80
+                focus:border-transparent
+                transition
+              "
+              placeholder="Tìm món ăn..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </div>
       </header>
 
-      {/* ===== CATEGORY FILTER ===== */}
-      <div className="bg-white shadow-sm sticky top-[88px] z-10 grid grid-cols-12">
-        <div className="col-start-2 col-end-12">
-          <div className="px-4 py-3 flex gap-2 overflow-x-auto">
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className={`px-4 py-2 rounded-full text-sm font-medium ${
-                selectedCategory === null
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100"
-              }`}
-            >
-              Tất cả
-            </button>
-
-            {normalizedCategories.map((cat) => (
-              <button
-                key={cat.categoryId}
-                onClick={() => setSelectedCategory(cat.categoryId)}
-                className={`px-4 py-2 rounded-full text-sm font-medium ${
-                  selectedCategory === cat.categoryId
-                    ? "bg-gray-900 text-white"
-                    : "bg-gray-100"
-                }`}
-              >
-                {cat.categoryName}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ===== MENU ===== */}
-      <div className="grid grid-cols-12">
-        <div className="col-start-2 col-end-12 px-4 py-6">
-          {groupedItems.map(
-            (category) =>
-              category.items.length > 0 && (
-                <div key={category.categoryId} className="mb-10">
-                  <h2 className="text-lg md:text-xl font-semibold mb-4 border-l-4 border-blue-600 pl-3">
-                    {category.categoryName}
+      {/* MENU */}
+      <div className="px-6 py-8">
+        {groupedItems.map(
+          (cat) =>
+            cat.items.length > 0 && (
+              <div key={cat.categoryId} className="mb-14">
+                <div className="flex items-center gap-3 mb-5">
+                  <h2 className="text-xl font-semibold text-gray-800">
+                    {cat.categoryName}
                   </h2>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {category.items.map((item) => (
-                      <MenuItemCard
-                        key={item.itemId}
-                        item={item}
-                        quantity={cart[item.itemId] || 0}
-                        onAdd={() => addToCart(item.itemId)}
-                        onRemove={() => removeFromCart(item.itemId)}
-                      />
-                    ))}
-                  </div>
+                  <div className="flex-1 h-px bg-gray-200" />
                 </div>
-              )
-          )}
-        </div>
+
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {cat.items.map((item) => (
+                    <MenuItemCard
+                      key={item.itemId}
+                      item={item}
+                      onAdd={() => handleAddClick(item)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )
+        )}
       </div>
+
+      {/* MODALS */}
+      {isModifierOpen && selectedItem && (
+        <ModifierModal
+          item={selectedItem}
+          groups={getModifierGroupsOfItem(selectedItem)}
+          onClose={() => setIsModifierOpen(false)}
+          onConfirm={(mods) => {
+            addToCart(selectedItem, mods);
+            setIsModifierOpen(false);
+          }}
+        />
+      )}
 
       {isCartOpen && (
         <CartModal
-          cart={cart} // 👈 BẮT BUỘC
-          items={items}
-          onAdd={addToCart}
-          onRemove={removeFromCart}
+          cart={cart}
+          onUpdateQty={updateQuantity}
           onClose={() => setIsCartOpen(false)}
         />
       )}

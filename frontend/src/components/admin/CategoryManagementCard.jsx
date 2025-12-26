@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import categoryApi from "../../api/categoryApi";
+import categoryApi from "../../api/CategoryApi";
 import toast from "react-hot-toast";
 
 function CategoryManagementCard() {
@@ -100,16 +100,20 @@ function CategoryManagementCard() {
 
         <button
           onClick={() => setShowCreate((prev) => !prev)}
-          className="
+          className={`
             px-3 py-2
             text-sm
             rounded-md
-            bg-blue-600
-            text-white
+            ${
+              showCreate
+                ? "bg-gray-100 text-black border border-gray-200"
+                : "bg-blue-600 text-white"
+            }
+            
             hover:bg-blue-700
             transition
             cursor-pointer
-          "
+          `}
         >
           {showCreate ? "Đóng" : "+ Thêm danh mục"}
         </button>
@@ -190,7 +194,7 @@ function CategoryManagementCard() {
             >
               {/* VIEW MODE */}
               {editingId !== category.categoryId ? (
-                <>
+                <div className="flex justify-between w-full">
                   <div className="min-w-0">
                     <p className="font-medium text-gray-800 truncate">
                       {category.categoryName}
@@ -202,11 +206,11 @@ function CategoryManagementCard() {
                       setEditingId(category.categoryId);
                       setEditingName(category.categoryName);
                     }}
-                    className="text-sm text-blue-600 hover:underline"
+                    className=" text-sm text-blue-600 hover:underline"
                   >
                     Chỉnh sửa
                   </button>
-                </>
+                </div>
               ) : (
                 /* EDIT MODE */
                 <div className="flex flex-col sm:flex-row gap-2 w-full">

@@ -117,23 +117,25 @@ function ModifierManagement() {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 w-full space-y-6">
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-5 md:p-6 w-full space-y-6">
       {/* HEADER */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-800">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-800">
           Quản lý tùy chọn sản phẩm
         </h3>
 
         <button
           onClick={() => setShowGroupForm(!showGroupForm)}
-          className={`px-3 py-2 text-sm rounded-md font-medium transition flex items-center gap-1 cursor-pointer
+          className={` px-3 py-2
+            text-sm
+            rounded-md transition flex items-center gap-1 cursor-pointer
           ${
             showGroupForm
               ? "bg-blue-100 text-blue-700"
               : "bg-blue-600 text-white hover:bg-blue-700"
           }`}
         >
-          {showGroupForm ? <X size={18} /> : <Plus size={18} />}
+          {showGroupForm ? <X size={16} /> : <Plus size={18} />}
           {showGroupForm ? "Hủy" : "Thêm loại tùy chọn"}
         </button>
       </div>
@@ -179,7 +181,9 @@ function ModifierManagement() {
 
       {/* LIST GROUPS */}
       <div className="space-y-4">
-        <h4 className="font-semibold text-gray-700">Danh sách loại tùy chọn</h4>
+        <h4 className="font-semibold text-sm text-gray-700">
+          Danh sách loại tùy chọn
+        </h4>
 
         {loading ? (
           <p>Đang tải...</p>
@@ -302,7 +306,7 @@ function ModifierManagement() {
                             <td className="px-4 py-3">
                               {editingOptionId === opt.modifierOptionId ? (
                                 <input
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                                  className="w-20 rounded-lg border border-gray-300 px-3 py-2 text-sm"
                                   value={editOptionName}
                                   onChange={(e) =>
                                     setEditOptionName(e.target.value)
@@ -316,7 +320,7 @@ function ModifierManagement() {
                             <td className="px-4 py-3 text-right">
                               {editingOptionId === opt.modifierOptionId ? (
                                 <input
-                                  className="w-28 ml-auto rounded-lg border border-gray-300 px-3 py-2 text-sm text-right"
+                                  className="w-12 ml-auto rounded-lg border border-gray-300 px-3 py-2 text-sm text-right"
                                   value={editOptionPrice}
                                   onChange={(e) =>
                                     setEditOptionPrice(e.target.value)

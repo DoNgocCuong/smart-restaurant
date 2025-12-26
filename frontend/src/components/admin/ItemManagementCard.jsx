@@ -62,10 +62,10 @@ function ItemManagementCard() {
       <h2 className="text-xl font-semibold mb-6">Quản lý món ăn</h2>
 
       {/* ===== FILTER + SORT ===== */}
-      <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
-        <div className="flex flex-wrap gap-6">
+      <div className=" flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+        <div className="flex flex-col md:flex-row gap-2 md:gap-6">
           {/* STATUS */}
-          <div className="flex flex-col gap-1">
+          <div className=" w-full flex flex-col gap-1">
             <label className="text-xs font-medium text-gray-500">
               Trạng thái
             </label>
@@ -82,9 +82,9 @@ function ItemManagementCard() {
           </div>
 
           {/* SORT */}
-          <div className="flex flex-col gap-1">
+          <div className=" w-full flex flex-col gap-1">
             <label className="text-xs font-medium text-gray-500">Sắp xếp</label>
-            <div className="flex gap-2">
+            <div className="flex flex-col md:flex-row gap-2">
               <select
                 value={sortBy}
                 onChange={handleChange(setSortBy)}
