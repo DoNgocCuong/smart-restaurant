@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import categoryApi from "../../api/CategoryApi";
+import categoryApi from "../../api/categoryApi";
 import toast from "react-hot-toast";
 
 function CategoryManagementCard() {
