@@ -1,29 +1,11 @@
-import { useEffect, useState } from "react";
 import { Plus, Minus, X } from "lucide-react";
 import Overlay from "../common/Overlay";
 import toast from "react-hot-toast";
-export default function CartModal({ items, onClose, onAdd, onRemove }) {
-  const [cart, setCart] = useState({});
 
-  // Load cart from localStorage
-  useEffect(() => {
-    const storedCart = localStorage.getItem("cart");
-    setCart(storedCart ? JSON.parse(storedCart) : {});
-  }, []);
-
-  // Sync when cart changes (same tab)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const storedCart = localStorage.getItem("cart");
-      setCart(storedCart ? JSON.parse(storedCart) : {});
-    }, 300);
-
-    return () => clearInterval(interval);
-  }, []);
-
+export default function CartModal({ cart, items, onAdd, onRemove, onClose }) {
   const cartItems = Object.keys(cart)
     .map((itemId) => {
-      const item = items.find((i) => i.item_id === itemId);
+      const item = items.find((i) => i.itemId === Number(itemId));
       return item ? { ...item, quantity: cart[itemId] } : null;
     })
     .filter(Boolean);
@@ -34,40 +16,24 @@ export default function CartModal({ items, onClose, onAdd, onRemove }) {
   );
 
   const handleOrder = () => {
-    const storedCart = localStorage.getItem("cart");
-    if (!storedCart) return;
-
-    const cartData = JSON.parse(storedCart);
-
-    // Convert cart object -> order items array
-    const orderItems = Object.keys(cartData).map((itemId) => {
-      const item = items.find((i) => i.item_id === itemId);
-      return {
-        item_id: itemId,
-        item_name: item?.item_name,
-        price: item?.price,
-        quantity: cartData[itemId],
-        total: item?.price * cartData[itemId],
-      };
-    });
+    const orderItems = cartItems.map((item) => ({
+      itemId: item.itemId,
+      itemName: item.itemName,
+      price: item.price,
+      quantity: item.quantity,
+      total: item.price * item.quantity,
+    }));
 
     const orderPayload = {
       items: orderItems,
-      totalAmount: orderItems.reduce((sum, item) => sum + item.total, 0),
+      totalAmount: totalPrice,
       createdAt: new Date().toISOString(),
     };
 
     console.log("ORDER PAYLOAD 👉", orderPayload);
 
-    /* ===== CALL API HERE =====
-  await createOrder(orderPayload);
-  */
-
-    // Clear cart
-    localStorage.removeItem("cart");
-    setCart({});
+    sessionStorage.removeItem("cart");
     toast.success("Đặt món thành công");
-    // Close modal
     onClose();
   };
 
@@ -77,10 +43,7 @@ export default function CartModal({ items, onClose, onAdd, onRemove }) {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">🛒 Giỏ hàng</h2>
-          <button
-            onClick={onClose}
-            className="cursor-pointer hover:bg-red-100 rounded-sm"
-          >
+          <button onClick={onClose}>
             <X />
           </button>
         </div>
@@ -94,11 +57,11 @@ export default function CartModal({ items, onClose, onAdd, onRemove }) {
           <div className="space-y-4 max-h-[50vh] overflow-auto">
             {cartItems.map((item) => (
               <div
-                key={item.item_id}
+                key={item.itemId}
                 className="flex items-center justify-between"
               >
                 <div>
-                  <p className="font-medium">{item.item_name}</p>
+                  <p className="font-medium">{item.itemName}</p>
                   <p className="text-sm text-gray-500">
                     {item.price.toLocaleString()} đ
                   </p>
@@ -106,8 +69,8 @@ export default function CartModal({ items, onClose, onAdd, onRemove }) {
 
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => onRemove(item.item_id)}
-                    className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-gray-200"
+                    onClick={() => onRemove(item.itemId)}
+                    className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
                   >
                     <Minus size={14} />
                   </button>
@@ -115,8 +78,8 @@ export default function CartModal({ items, onClose, onAdd, onRemove }) {
                   <span className="w-6 text-center">{item.quantity}</span>
 
                   <button
-                    onClick={() => onAdd(item.item_id)}
-                    className="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center cursor-pointer hover:bg-gray-800"
+                    onClick={() => onAdd(item.itemId)}
+                    className="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center"
                   >
                     <Plus size={14} />
                   </button>
@@ -137,8 +100,8 @@ export default function CartModal({ items, onClose, onAdd, onRemove }) {
             </div>
 
             <button
-              onClick={() => handleOrder()}
-              className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-xl font-medium cursor-pointer"
+              onClick={handleOrder}
+              className="w-full bg-gray-900 text-white py-3 rounded-xl"
             >
               Đặt món
             </button>

@@ -49,6 +49,6 @@ cloudinary:
   api-key: ${CLOUDINARY_API_KEY}
   api-secret: ${CLOUDINARY_API_SECRET}
 qr:
-  base-url: qr.base-url=http://172.17.128.1:8080/qr?t=
+  base-url: http://${LOCAL_IP}:${PORT}/api/qr/verify?t=
   width: 300
   height: 300

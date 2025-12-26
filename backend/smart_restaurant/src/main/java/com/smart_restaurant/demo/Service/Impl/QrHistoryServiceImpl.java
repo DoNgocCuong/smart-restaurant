@@ -162,7 +162,7 @@ public class QrHistoryServiceImpl implements QrHistoryService {
 
         Integer tenantId = Integer.parseInt(parts[0]);
         Integer tableId = Integer.parseInt(parts[1]);
-        String redirectUrl = ok ? "http://192.168.1.77:8080/api/order/"+tenantId+"/tables/"+tableId : "http://192.168.1.77:8080/api/qr/error";
+        String redirectUrl = ok ? "http://localhost:5173/guest/menu/"+tenantId+"/tables/"+tableId : "http://localhost:5173/qr/error";
         response.sendRedirect(redirectUrl);
     }
 

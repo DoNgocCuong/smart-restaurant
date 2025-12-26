@@ -6,15 +6,18 @@ export default function MenuItemCard({ item, quantity, onAdd, onRemove }) {
       {/* IMAGE */}
       <div className="h-48 bg-gray-100">
         <img
-          src={item.image_url || "/placeholder.svg"}
-          alt={item.item_name}
+          src={
+            item.avatarUrl ||
+            "https://res.cloudinary.com/dznocieoi/image/upload/v1766487761/istockphoto-1396814518-612x612_upvria.jpg"
+          }
+          alt={item.itemName}
           className="w-full h-full object-cover"
         />
       </div>
 
       {/* INFO */}
       <div className="p-4">
-        <h3 className="font-semibold text-lg mb-1">{item.item_name}</h3>
+        <h3 className="font-semibold text-lg mb-1">{item.itemName}</h3>
         <p className="text-sm text-gray-500 mb-3 line-clamp-2">
           {item.description}
         </p>
