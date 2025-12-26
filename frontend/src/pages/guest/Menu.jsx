@@ -6,7 +6,7 @@ import CartModal from "../../components/guest/CartModal";
 import OrderHistoryModal from "../../components/guest/OrderHistoryModal";
 import ModifierModal from "../../components/guest/ModifierModal";
 
-import categoryApi from "../../api/CategoryApi";
+import categoryApi from "../../api/categoryApi";
 import itemApi from "../../api/itemApi";
 import modifierGroupApi from "../../api/modifierGroupApi";
 
