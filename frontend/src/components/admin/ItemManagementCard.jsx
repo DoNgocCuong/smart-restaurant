@@ -137,7 +137,7 @@ function ItemManagementCard() {
                 <div
                   key={item.itemId}
                   onClick={() => setSelectedItem(item)}
-                  className="border border-gray-100 shadow-lg rounded-xl overflow-hidden hover:shadow-xl transition"
+                  className="border border-gray-100 shadow-lg rounded-xl overflow-hidden hover:shadow-xl transition cursor-pointer"
                 >
                   <div className="relative">
                     <img

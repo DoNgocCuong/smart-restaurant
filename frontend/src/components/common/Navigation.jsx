@@ -4,7 +4,7 @@ import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { ChevronDown, LogOut, Menu, X } from "lucide-react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
-import authApi from "../../api/authApi"; // path chính xác tới authApi.js
+import authApi from "../../api/authApi";
 
 function Navigation() {
   const navigate = useNavigate();
