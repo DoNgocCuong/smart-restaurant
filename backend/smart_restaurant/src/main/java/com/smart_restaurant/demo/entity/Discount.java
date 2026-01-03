@@ -1,28 +1,27 @@
 package com.smart_restaurant.demo.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.smart_restaurant.demo.enums.OrderStatus;
+import com.smart_restaurant.demo.enums.DiscountType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Entity
-@Table(name = "status")
+@Table(name = "Discount")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Status {
-
+public class Discount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer statusId;
+    Integer discountId;
+    Integer value;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private OrderStatus orderStatus;
-
+    DiscountType discountType=DiscountType.Fixed;
+    @ManyToOne
+    @JoinColumn(name = "tenant_id")
+    Tenant tenant;
 }
