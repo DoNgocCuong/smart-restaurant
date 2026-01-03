@@ -6,14 +6,12 @@ import lombok.experimental.FieldDefaults;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class OrderRequest {
-
-    private String customerName;
-    private Integer tableId;
-    private String special;
-    private List<DetailOrderRequest> detailOrders;
+public class DetailOrderRequest {
+    private Integer itemId;
+    private Integer quantity;
+    private List<Integer> modifierOptionIds;
 }
