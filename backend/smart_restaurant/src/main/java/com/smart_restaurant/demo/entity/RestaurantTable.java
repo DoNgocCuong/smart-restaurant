@@ -43,4 +43,7 @@ public class RestaurantTable {
     private Tenant tenant;
     @OneToMany(mappedBy = "table" ,cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Order> orders;
+    @ManyToMany(mappedBy = "restaurantTables")
+    List<Employee> employees;
+
 }

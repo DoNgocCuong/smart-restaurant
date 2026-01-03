@@ -55,6 +55,9 @@ public class Item {
     @UpdateTimestamp
     @Column(name = "update_at")
     LocalDateTime updateAt;
+    @ManyToOne
+    @JoinColumn(name = "discount_id")
+    Discount discount;
 
 }
 
