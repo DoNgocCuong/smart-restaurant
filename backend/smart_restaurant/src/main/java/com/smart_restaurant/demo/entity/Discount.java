@@ -18,6 +18,8 @@ public class Discount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer discountId;
     Integer value;
+    Integer minApply;
+    Integer maxApply;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     DiscountType discountType=DiscountType.Fixed;
