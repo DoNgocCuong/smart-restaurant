@@ -23,7 +23,7 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer orderId;
-    @JoinColumn(name = "customer_name")
+    @Column(name = "customer_name")
     String customerName;
     String special;
     float subtotal;
