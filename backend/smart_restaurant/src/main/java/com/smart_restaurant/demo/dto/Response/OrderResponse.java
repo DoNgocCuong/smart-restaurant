@@ -1,5 +1,6 @@
 package com.smart_restaurant.demo.dto.Response;
 
+import com.smart_restaurant.demo.enums.OrderStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -19,5 +20,6 @@ public class OrderResponse {
     private LocalDateTime createAt;
     private List<DetailOrderResponse> detailOrders;
     private String special;
+    private OrderStatus oderStatus;
 
 }

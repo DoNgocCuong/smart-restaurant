@@ -9,6 +9,7 @@ import com.smart_restaurant.demo.dto.Response.DetailOrderResponse;
 import com.smart_restaurant.demo.dto.Response.ModifierOptionResponse;
 import com.smart_restaurant.demo.dto.Response.OrderResponse;
 import com.smart_restaurant.demo.entity.*;
+import com.smart_restaurant.demo.enums.OrderStatus;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.smart_restaurant.demo.mapper.DetailOrderMapper;
@@ -46,82 +47,124 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponse createOrder(OrderRequest orderRequest, JwtAuthenticationToken jwtAuthenticationToken) {
         String username = null;
-        Integer customerId = null;
+        Customer customer = null;
+        String customerName = null;
+        boolean isHaveName = true; // Mặc định: không đăng nhập
 
-        // Check no dang nhap hay khong
+        // Check đăng nhập
         if (jwtAuthenticationToken != null) {
-            username = jwtAuthenticationToken.getName();
-            Customer customer = customerRepository.findByAccount_Username(username).orElse(null);
-            if (customer != null) {
-                customerId = customer.getCustomerId();
+            try {
+                isHaveName = false;
+                username = jwtAuthenticationToken.getName();
+
+                if (username == null || username.isEmpty()) {
+                    System.out.println("⚠️ ERROR: Username từ JWT là null hoặc rỗng!");
+                    throw new AppException(ErrorCode.INVALID_TOKEN_FORMAT);
+                }
+
+                // Tìm Account bằng username
+                Account account = accountRepository.findByUsername(username)
+                        .orElseThrow(() -> {
+                            return new AppException(ErrorCode.ACCOUNT_NOT_FOUND);
+                        });
+
+
+                // Tìm Customer bằng Account ID
+                customer = customerRepository.findByAccountAccountId(account.getAccountId())
+                        .orElseThrow(() -> {
+                            return new AppException(ErrorCode.ACCOUNT_NOT_FOUND);
+                        });
+
+                // Lấy tên từ Customer
+                customerName = customer.getName();
+                System.out.println("✅ CustomerId: " + customer.getCustomerId());
+                System.out.println("✅ CustomerName từ DB: " + customerName);
+
+            } catch (AppException e) {
+                System.out.println("❌ Lỗi khi lấy thông tin customer: " + e.getMessage());
+                throw e;
             }
+        } else {
+
+            customerName = orderRequest.getCustomerName();
+            System.out.println("⏸️ Không đăng nhập - CustomerName từ request: " + customerName);
         }
 
         // Lấy bàn
         RestaurantTable restaurantTable = tableRepository.findById(orderRequest.getTableId())
                 .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
 
+        // Kiểm tra bàn này đã có order chưa
+        List<Order> existingOrders = orderRepository.findByTable_TableId(orderRequest.getTableId());
+        if (existingOrders != null && !existingOrders.isEmpty()) {
+            throw new AppException(ErrorCode.TABLE_ALREADY_HAS_ORDER);
+        }
+
         // Tính tiền
         float subTotal = 0;
         List<DetailOrder> detailOrders = new ArrayList<>();
 
-        for(DetailOrderRequest detailOrderRequest :orderRequest.getDetailOrders())
-        {
-
+        for (DetailOrderRequest detailOrderRequest : orderRequest.getDetailOrders()) {
             // Kiểm tra item
             Item item = itemRepository.findById(detailOrderRequest.getItemId())
                     .orElseThrow(() -> new AppException(ErrorCode.ITEM_NOT_FOUND));
 
             double itemPrice = item.getPrice();
+            double itemTotal = itemPrice * detailOrderRequest.getQuantity();
 
             List<ModifierOption> modifierOptions = new ArrayList<>();
-            if (detailOrderRequest.getModifierOptionIds() != null && !detailOrderRequest.getModifierOptionIds().isEmpty())
-            {
+            if (detailOrderRequest.getModifierOptionIds() != null && !detailOrderRequest.getModifierOptionIds().isEmpty()) {
                 modifierOptions = modifierOptionRepository.findAllById(detailOrderRequest.getModifierOptionIds());
 
-                // Lấy danh sách modifierGroup của item
                 List<ModifierGroup> itemModifierGroups = item.getModifierGroups();
 
                 for (ModifierOption modifier : modifierOptions) {
-
-                    // Kiểm tra modifier có thuộc modifierGroup nào của item không
                     boolean isValidModifier = itemModifierGroups.stream()
                             .anyMatch(group -> group.getOptions() != null &&
-                                        group.getOptions().contains(modifier));
+                                    group.getOptions().contains(modifier));
 
                     if (!isValidModifier) {
                         throw new AppException(ErrorCode.MODIFIER_NOT_VALID_FOR_ITEM);
                     }
 
-                    itemPrice += modifier.getPrice();
+                    itemTotal += modifier.getPrice();
                 }
             }
 
-            double itemTotal = itemPrice * detailOrderRequest.getQuantity();
             subTotal += itemTotal;
 
             DetailOrder detailOrder = detailOrderMapper.toDetailOrder(detailOrderRequest);
             detailOrder.setItem(item);
             detailOrder.setPrice(itemPrice);
             detailOrder.setModifies(modifierOptions);
-
-            // thêm vào danh sách
-
             detailOrders.add(detailOrder);
         }
 
-        // lưu order
+        // Lưu order
         Order order = orderMapper.toOrder(orderRequest);
+        OrderStatus pendingStatusEnum = OrderStatus.valueOf("Pending_approval"); // Hoặc OrderStatus.PENDING_APPROVAL
+
+        Status pendingStatus = statusRepository.findByOrderStatus(pendingStatusEnum)
+                .orElseThrow(() -> new RuntimeException("Status not found"));
+
+        order.setStatus(pendingStatus);
+        order.setIsHaveName(isHaveName);
+        order.setCustomerName(customerName);
         order.setTable(restaurantTable);
+        order.setCustomer(customer);
+
+        System.out.println("📝 Lưu order - isHaveName: " + isHaveName + ", customerName: " + customerName
+                + ", customerId: " + (customer != null ? customer.getCustomerId() : "null"));
+
         Order savedOrder = orderRepository.save(order);
 
-        // lưu detailOrder trong cái danh sách
+        // Lưu detailOrder
         for (DetailOrder detail : detailOrders) {
             detail.setOrder(savedOrder);
         }
         detailOrderRepository.saveAll(detailOrders);
 
-        // Cập nhật quantity_sold của item ( ban duoc bao nhiu )
+        // Cập nhật quantity_sold của item
         for (DetailOrderRequest detailOrderRequest : orderRequest.getDetailOrders()) {
             Item item = itemRepository.findById(detailOrderRequest.getItemId()).orElse(null);
             if (item != null) {
@@ -130,29 +173,37 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-
+        // Tạo response
         OrderResponse response = orderMapper.toOrderResponse(savedOrder);
         response.setSubtotal(subTotal);
+        response.setOderStatus(savedOrder.getStatus().getOrderStatus());
         response.setCustomerName(savedOrder.getCustomerName());
         response.setTableId(savedOrder.getTable().getTableId());
         response.setDetailOrders(toDetailOrderResponses(detailOrders));
-        return response;
 
+        return response;
     }
 
     @Override
-    public List<OrderResponse> getAllOrder(JwtAuthenticationToken jwtAuthenticationToken) {
-        String username = null;
+    public List<OrderResponse> getAllMyOrder(JwtAuthenticationToken jwtAuthenticationToken) {
+        String username = jwtAuthenticationToken.getName();
+        // lay account tu username
+        Account account = accountRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
+        Integer accountId = account.getAccountId();
 
-        if (jwtAuthenticationToken != null) {
-            username = jwtAuthenticationToken.getName();
-        }
+        // Tim customer boi account
+        Customer customer = customerRepository.findByAccountAccountId(accountId)
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
+        Integer customerId = customer.getCustomerId();
+
 
         // Lấy tất cả order
-        List<Order> orders = orderRepository.findAll();
+        List<Order> orders = orderRepository.findByCustomerCustomerId(customerId);
 
         // Convert sang OrderResponse dùng mapper
         return orders.stream()
+                .filter(order -> !"Deleted".equals(order.getStatus().getOrderStatus()))
                 .map(this::toFullOrderResponse)
                 .collect(Collectors.toList());
     }
@@ -180,6 +231,7 @@ public class OrderServiceImpl implements OrderService {
         if (order.getTable() != null) {
             response.setTableId(order.getTable().getTableId());
         }
+        response.setOderStatus(order.getStatus().getOrderStatus());
 
         // Map chi tiết đơn hàng với đầy đủ thông tin item và modifier
         List<DetailOrderResponse> detailResponses = order.getDetailOrders().stream()

@@ -9,6 +9,6 @@ import java.util.List;
 public interface OrderService {
 
     OrderResponse createOrder(OrderRequest orderRequest, JwtAuthenticationToken jwtAuthenticationToken);
-    List<OrderResponse> getAllOrder(JwtAuthenticationToken jwtAuthenticationToken);
+    List<OrderResponse> getAllMyOrder(JwtAuthenticationToken jwtAuthenticationToken);
     List<OrderResponse> getAllTenantOrder(JwtAuthenticationToken jwtAuthenticationToken);
 }

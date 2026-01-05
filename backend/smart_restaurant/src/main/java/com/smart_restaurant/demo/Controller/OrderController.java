@@ -8,7 +8,10 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,18 +24,24 @@ import java.util.List;
 public class OrderController {
     OrderService orderService;
 
+    @PreAuthorize("permitAll()")
     @PostMapping("")
-    public ApiResponse<OrderResponse> createOrder(@Valid @RequestBody OrderRequest orderRequest, @AuthenticationPrincipal JwtAuthenticationToken jwtToken){
+    public ApiResponse<OrderResponse> createOrder(
+            @Valid @RequestBody OrderRequest orderRequest,
+            @AuthenticationPrincipal(errorOnInvalidType = false) JwtAuthenticationToken jwtToken) {
+
+        // jwtToken sẽ tự động null nếu chưa đăng nhập
         OrderResponse orderResponse = orderService.createOrder(orderRequest, jwtToken);
+
         return ApiResponse.<OrderResponse>builder()
                 .result(orderResponse)
-                .message("Tạo order thành cong")
+                .message("Tạo order thành công")
                 .build();
     }
 
     @GetMapping("")
-    public ApiResponse<List<OrderResponse>> getAllOrder(JwtAuthenticationToken jwtToken){
-        List<OrderResponse> orderResponse = orderService.getAllOrder( jwtToken);
+    public ApiResponse<List<OrderResponse>> getAllMyOrder(JwtAuthenticationToken jwtToken){
+        List<OrderResponse> orderResponse = orderService.getAllMyOrder( jwtToken);
         return ApiResponse.<List<OrderResponse>>builder()
                 .result(orderResponse)
                 .message("Get all order thành cong")
