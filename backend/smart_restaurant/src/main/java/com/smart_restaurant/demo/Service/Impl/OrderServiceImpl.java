@@ -1,8 +1,20 @@
 package com.smart_restaurant.demo.Service.Impl;
 
+import com.smart_restaurant.demo.Repository.DiscountRepository;
+import com.smart_restaurant.demo.Repository.OrderRepository;
+import com.smart_restaurant.demo.Repository.StatusRepository;
 import com.smart_restaurant.demo.Repository.*;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.OrderService;
+import com.smart_restaurant.demo.dto.Response.InvoiceResponse;
+import com.smart_restaurant.demo.entity.Discount;
+import com.smart_restaurant.demo.entity.Order;
+import com.smart_restaurant.demo.entity.Status;
+import com.smart_restaurant.demo.enums.DiscountType;
+import com.smart_restaurant.demo.enums.OrderStatus;
+import com.smart_restaurant.demo.exception.AppException;
+import com.smart_restaurant.demo.exception.ErrorCode;
+import com.smart_restaurant.demo.mapper.OrderMapper;
 import com.smart_restaurant.demo.dto.Request.DetailOrderRequest;
 import com.smart_restaurant.demo.dto.Request.OrderRequest;
 import com.smart_restaurant.demo.dto.Response.DetailOrderResponse;
@@ -25,12 +37,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OrderServiceImpl implements OrderService {
-    OrderRepository orderRepository;
     DetailOrderRepository detailOrderRepository;
     ItemRepository itemRepository;
     ModifierOptionRepository modifierOptionRepository;
@@ -42,6 +55,66 @@ public class OrderServiceImpl implements OrderService {
     OrderMapper orderMapper;
     TenantRepository tenantRepository;
     AccountService accountService;
+    DiscountRepository discountRepository;
+    OrderRepository orderRepository;
+    @Override
+    public InvoiceResponse createInvoice(Integer orderId ,JwtAuthenticationToken jwtAuthenticationToken){
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXISTED));
+
+        List<Discount> discountList = discountRepository.findAll();
+
+        Discount discountApply = null;
+        Account account=accountRepository.findByUsername(jwtAuthenticationToken.getName()).orElseThrow(()->new AppException(ErrorCode.ACCOUNT_EXISTED));
+        Tenant tenant=account.getTenant();
+        for (Discount discount : discountList) {
+            if (discount.getMinApply() <= order.getSubtotal()
+                    && discount.getMaxApply() >= order.getSubtotal()
+                    && Boolean.TRUE.equals(discount.getIsActive())
+                    &&discount.getTenant()==tenant) {
+                discountApply = discount;
+                break;
+            }
+        }
+
+        float subtotal = order.getSubtotal();
+        float discountAmount = 0;
+        Integer taxRate = 5;
+        float taxAmount;
+        float total;
+
+        if (discountApply != null) {
+            if (discountApply.getDiscountType() == DiscountType.Percent) {
+                discountAmount = subtotal * discountApply.getValue() / 100;
+            } else if (discountApply.getDiscountType() == DiscountType.Fixed) {
+                discountAmount = discountApply.getValue();
+            }
+        }
+
+        float afterDiscount = subtotal - discountAmount;
+
+        taxAmount = afterDiscount * taxRate / 100;
+
+        total = afterDiscount + taxAmount;
+
+        order.setTax(taxRate);
+        order.setTotal(total);
+        order.setDiscount(discountAmount);
+        Status status=order.getStatus();
+        status.setOrderStatus(OrderStatus.Pending_payment);
+        statusRepository.save(status);
+        InvoiceResponse invoiceResponse=orderMapper.toInvoiceResponse(orderRepository.save(order));
+        invoiceResponse.setTableName(order.getTable().getTableName());
+        invoiceResponse.setDetailOrders(toDetailOrderResponses(order.getDetailOrders()));
+        System.out.println("name:"+ order.getCustomerName());
+        if(order.getIsHaveName()==true){
+            invoiceResponse.setCustomerName(order.getCustomerName());
+        }else {
+            invoiceResponse.setCustomerName(order.getCustomer().getName());
+        }
+        return invoiceResponse;
+    }
+
 
     @Override
     public OrderResponse createOrder(OrderRequest orderRequest, JwtAuthenticationToken jwtAuthenticationToken) {
@@ -136,6 +209,7 @@ public class OrderServiceImpl implements OrderService {
         response.setCustomerName(savedOrder.getCustomerName());
         response.setTableId(savedOrder.getTable().getTableId());
         response.setDetailOrders(toDetailOrderResponses(detailOrders));
+
         return response;
 
     }

@@ -20,6 +20,7 @@ public class Discount {
     Integer value;
     Integer minApply;
     Integer maxApply;
+    Boolean isActive;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     DiscountType discountType=DiscountType.Fixed;

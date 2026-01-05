@@ -23,13 +23,15 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer orderId;
-    @JoinColumn(name = "customer_name")
+    @Column(name = "customer_name")
     String customerName;
     @JoinColumn(name = "is_have_name")
     Boolean isHaveName;
 
     String special;
+    float discount;
     float subtotal;
+
     Integer tax;
     Float total;
     @CreationTimestamp

@@ -1,5 +1,7 @@
 package com.smart_restaurant.demo.Service;
 
+import com.smart_restaurant.demo.dto.Response.InvoiceResponse;
+
 import com.smart_restaurant.demo.dto.Request.OrderRequest;
 import com.smart_restaurant.demo.dto.Response.OrderResponse;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -7,6 +9,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import java.util.List;
 
 public interface OrderService {
+    InvoiceResponse createInvoice(Integer orderId ,JwtAuthenticationToken jwtAuthenticationToken);
 
     OrderResponse createOrder(OrderRequest orderRequest, JwtAuthenticationToken jwtAuthenticationToken);
     List<OrderResponse> getAllOrder(JwtAuthenticationToken jwtAuthenticationToken);

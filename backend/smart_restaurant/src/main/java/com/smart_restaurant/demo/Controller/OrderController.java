@@ -3,6 +3,7 @@ package com.smart_restaurant.demo.Controller;
 import com.smart_restaurant.demo.Service.OrderService;
 import com.smart_restaurant.demo.dto.Request.OrderRequest;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
+import com.smart_restaurant.demo.dto.Response.InvoiceResponse;
 import com.smart_restaurant.demo.dto.Response.OrderResponse;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -13,6 +14,10 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -49,4 +54,12 @@ public class OrderController {
     }
 
 
+//    @PostMapping("")
+//    public ApiResponse<OrderResponse> createOrder()
+    @PostMapping("/{orderId}")
+    public ApiResponse<InvoiceResponse>createInvoice(@PathVariable Integer orderId,JwtAuthenticationToken jwtAuthenticationToken){
+        return ApiResponse.<InvoiceResponse>builder()
+                .result(orderService.createInvoice(orderId,jwtAuthenticationToken))
+                .build();
+    }
 }
