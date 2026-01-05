@@ -9,6 +9,9 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
@@ -54,7 +57,7 @@ public class OrderController {
     }
 
 
-//    @PostMapping("")
+//    @PostMapping("")Q
 //    public ApiResponse<OrderResponse> createOrder()
     @PostMapping("/{orderId}")
     public ApiResponse<InvoiceResponse>createInvoice(@PathVariable Integer orderId,JwtAuthenticationToken jwtAuthenticationToken){
@@ -62,4 +65,18 @@ public class OrderController {
                 .result(orderService.createInvoice(orderId,jwtAuthenticationToken))
                 .build();
     }
+    @GetMapping("/{orderId}/invoice/pdf")
+    public ResponseEntity<byte[]> exportInvoicePdf(
+            @PathVariable Integer orderId,
+            JwtAuthenticationToken jwtAuthenticationToken
+    ) {
+        byte[] pdfBytes = orderService.generateInvoicePdf(orderId, jwtAuthenticationToken);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=invoice_" + orderId + ".pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
+    }
+
 }
