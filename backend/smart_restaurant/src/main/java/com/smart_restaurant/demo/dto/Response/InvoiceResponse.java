@@ -22,7 +22,9 @@ public class InvoiceResponse {
     Integer orderId;
     String customerName;
     String special;
+    float discount;
     float subtotal;
+
     Integer tax;
     Float total;
     String tableName;

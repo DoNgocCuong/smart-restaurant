@@ -48,7 +48,7 @@ public class Item {
             joinColumns = @JoinColumn(name = "item_id"),
             inverseJoinColumns = @JoinColumn(name = "modifierGroupId")
     )
-    private List<ModifierGroup> modifierGroups;
+    List<ModifierGroup> modifierGroups;
     @CreationTimestamp
     @Column(name = "create_at", updatable = false)
     LocalDateTime createAt;
