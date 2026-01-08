@@ -1,5 +1,6 @@
 import { Search, ShoppingCart, History } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
+import { useParams } from "react-router-dom";
 import Fuse from "fuse.js";
 
 import MenuItemCard from "../../components/common/MenuItemCard";
@@ -7,10 +8,12 @@ import Logo from "../../assets/images/logo.png";
 import CartModal from "../../components/guest/CartModal";
 import OrderHistoryModal from "../../components/guest/OrderHistoryModal";
 import ModifierModal from "../../components/guest/ModifierModal";
+import RegisterModal from "../../components/guest/RegisterModal";
 
 import categoryApi from "../../api/categoryApi";
 import itemApi from "../../api/itemApi";
 import modifierGroupApi from "../../api/modifierGroupApi";
+import authApi from "../../api/authApi";
 
 export default function Menu() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,6 +22,7 @@ export default function Menu() {
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
   const [modifierGroups, setModifierGroups] = useState([]);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
   /* ================= CART (SAFE INIT) ================= */
   const [cart, setCart] = useState(() => {
@@ -37,6 +41,7 @@ export default function Menu() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModifierOpen, setIsModifierOpen] = useState(false);
 
+  const { tenantId, tableId } = useParams();
   /* ================= FETCH ================= */
   useEffect(() => {
     fetchCategories();
@@ -193,6 +198,12 @@ export default function Menu() {
                 <History size={18} />
                 Lịch sử
               </button>
+              <button
+                onClick={() => setIsRegisterOpen(true)}
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 transition text-white text-xs sm:text-sm font-medium"
+              >
+                Đăng ký
+              </button>
 
               <button
                 onClick={() => setIsCartOpen(true)}
@@ -277,6 +288,13 @@ export default function Menu() {
 
       {isHistoryOpen && (
         <OrderHistoryModal onClose={() => setIsHistoryOpen(false)} />
+      )}
+
+      {isRegisterOpen && (
+        <RegisterModal
+          onClose={() => setIsRegisterOpen(false)}
+          tenantId={tenantId}
+        />
       )}
     </div>
   );
