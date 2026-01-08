@@ -17,5 +17,5 @@ public class UpdateTableRequest {
     @NotNull(message = "Sức chứa không được để trống")
     @Min(value = 1, message = "Sức chứa phải lớn hơn 0")
     Integer capacity;
-    boolean is_active;
+    Boolean is_active;
 }

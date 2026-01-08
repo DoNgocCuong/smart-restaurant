@@ -27,7 +27,7 @@ public class TableResponse {
     Boolean is_active;
     StatusTable statusTable;
     Integer tenantId;
-    List<Order> orders;
+    List<OrderResponse> orders;
     LocalDateTime createAt;
     LocalDateTime updateAt;
 }

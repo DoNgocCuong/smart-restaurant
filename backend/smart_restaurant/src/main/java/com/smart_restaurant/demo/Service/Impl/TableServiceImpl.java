@@ -9,13 +9,15 @@ import com.smart_restaurant.demo.Service.TableService;
 import com.smart_restaurant.demo.dto.Request.TableRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateIsActiveTableRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateTableRequest;
-import com.smart_restaurant.demo.dto.Response.TableResponse;
-import com.smart_restaurant.demo.dto.Response.TableResponseActive;
+import com.smart_restaurant.demo.dto.Response.*;
 import com.smart_restaurant.demo.entity.Account;
+import com.smart_restaurant.demo.entity.Order;
 import com.smart_restaurant.demo.entity.RestaurantTable;
 import com.smart_restaurant.demo.entity.Tenant;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
+import com.smart_restaurant.demo.mapper.DetailOrderMapper;
+import com.smart_restaurant.demo.mapper.OrderMapper;
 import com.smart_restaurant.demo.mapper.TableMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -42,6 +45,8 @@ public class TableServiceImpl implements TableService {
     AccountService accountService;
     TenantRepository tenantRepository;
     AccountRepository accountRepository;
+    OrderMapper orderMapper;
+    DetailOrderMapper detailOrderMapper;
 
 
 
@@ -53,9 +58,6 @@ public class TableServiceImpl implements TableService {
         Tenant tenant = tenantRepository.findById(tenantId)
                 .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
 
-
-        tableRepository.findByTableName(tableRequest.getTableName())
-                .ifPresent(t -> { throw new AppException(ErrorCode.TABLE_NOT_FOUND); });
 
         RestaurantTable restaurantTable = tableMapper.toTable(tableRequest);
         restaurantTable.setTenant(tenant);
@@ -70,7 +72,11 @@ public class TableServiceImpl implements TableService {
         TableResponse tableResponse = tableMapper.toTableResponse(restaurantTable);
         tableResponse.setIs_active(restaurantTable.getIs_active());
         tableResponse.setTenantId(restaurantTable.getTenant().getTenantId());
-        tableResponse.setOrders(restaurantTable.getOrders());
+        List<OrderResponse> orderResponses = restaurantTable.getOrders()
+                .stream()
+                .map(this::toFullOrderResponse)
+                .collect(Collectors.toList());
+        tableResponse.setOrders(orderResponses);
         tableResponse.setStatusTable(restaurantTable.getStatusTable());
         return tableResponse;
     }
@@ -82,7 +88,11 @@ public class TableServiceImpl implements TableService {
         return restaurantTables.map(restaurantTable -> {
             TableResponse response = tableMapper.toTableResponse(restaurantTable);
             response.setTenantId(restaurantTable.getTenant().getTenantId());
-            response.setOrders(restaurantTable.getOrders());
+            List<OrderResponse> orderResponses = restaurantTable.getOrders()
+                    .stream()
+                    .map(this::toFullOrderResponse)
+                    .collect(Collectors.toList());
+            response.setOrders(orderResponses);
             response.setStatusTable(restaurantTable.getStatusTable());
             return response;
         });
@@ -107,9 +117,13 @@ public class TableServiceImpl implements TableService {
         restaurantTable = tableRepository.save(restaurantTable);
         TableResponse updateTableResponse = tableMapper.toTableResponse(restaurantTable);
         updateTableResponse.setTenantId(restaurantTable.getTenant().getTenantId());
-        updateTableResponse.setOrders(restaurantTable.getOrders());
+        List<OrderResponse> orderResponses = restaurantTable.getOrders()
+                .stream()
+                .map(this::toFullOrderResponse)
+                .collect(Collectors.toList());
+        updateTableResponse.setOrders(orderResponses);
 
-        return tableMapper.toTableResponse(restaurantTable);
+        return updateTableResponse;
     }
 
     @Override
@@ -131,10 +145,14 @@ public class TableServiceImpl implements TableService {
         restaurantTable = tableRepository.save(restaurantTable);
         TableResponse updateTableResponse = tableMapper.toTableResponse(restaurantTable);
         updateTableResponse.setTenantId(restaurantTable.getTenant().getTenantId());
-        updateTableResponse.setOrders(restaurantTable.getOrders());
+        List<OrderResponse> orderResponses = restaurantTable.getOrders()
+                .stream()
+                .map(this::toFullOrderResponse)
+                .collect(Collectors.toList());
+        updateTableResponse.setOrders(orderResponses);
         updateTableResponse.setStatusTable(restaurantTable.getStatusTable());
 
-        return tableMapper.toTableResponse(restaurantTable);
+        return updateTableResponse;
     }
 
     @Override
@@ -147,6 +165,50 @@ public class TableServiceImpl implements TableService {
                 .map(tableMapper::toTableResponseActive)
                 .toList();
 
+    }
+
+    private OrderResponse toFullOrderResponse(Order order) {
+        OrderResponse response = orderMapper.toOrderResponse(order);
+
+        // Set tableId (vì mapper cơ bản có thể không map trường này)
+        if (order.getTable() != null) {
+            response.setTableId(order.getTable().getTableId());
+        }
+
+        response.setOderStatus(order.getStatus().getOrderStatus());
+
+        // Map chi tiết đơn hàng với đầy đủ thông tin item và modifier
+        List<DetailOrderResponse> detailResponses = order.getDetailOrders().stream()
+                .map(detail -> {
+                    DetailOrderResponse detailResponse = detailOrderMapper.toDetailOrderResponse(detail);
+
+                    // Thêm thông tin item
+                    if (detail.getItem() != null) {
+                        detailResponse.setItemId(detail.getItem().getItemId());
+                        detailResponse.setItemName(detail.getItem().getItemName());
+                    }
+
+                    // Map modifiers chi tiết (vì mapper mặc định có thể không làm phần này)
+                    List<ModifierOptionResponse> modifierResponses = detail.getModifies().stream()
+                            .map(m -> {
+                                ModifierOptionResponse modResp = new ModifierOptionResponse();
+                                modResp.setModifierOptionId(m.getModifierOptionId());
+                                modResp.setName(m.getName());
+                                modResp.setPrice(m.getPrice());
+                                modResp.setModifierGroupId(m.getModifierGroup().getModifierGroupId());
+                                modResp.setModifierGroupName(m.getModifierGroup().getName());
+                                return modResp;
+                            })
+                            .collect(Collectors.toList());
+
+                    detailResponse.setModifiers(modifierResponses);
+                    return detailResponse;
+                })
+                .collect(Collectors.toList());
+
+        response.setDetailOrders(detailResponses);
+
+        return response;
     }
 }
 
