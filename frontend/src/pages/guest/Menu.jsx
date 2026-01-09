@@ -5,10 +5,13 @@ import Fuse from "fuse.js";
 
 import MenuItemCard from "../../components/common/MenuItemCard";
 import Logo from "../../assets/images/logo.png";
+
 import CartModal from "../../components/guest/CartModal";
 import OrderHistoryModal from "../../components/guest/OrderHistoryModal";
 import ModifierModal from "../../components/guest/ModifierModal";
 import RegisterModal from "../../components/guest/RegisterModal";
+import SuccessModal from "../../components/guest/SuccessModal";
+import LoginModal from "../../components/guest/LoginModal";
 
 import categoryApi from "../../api/categoryApi";
 import itemApi from "../../api/itemApi";
@@ -23,6 +26,8 @@ export default function Menu() {
   const [items, setItems] = useState([]);
   const [modifierGroups, setModifierGroups] = useState([]);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   /* ================= CART (SAFE INIT) ================= */
   const [cart, setCart] = useState(() => {
@@ -190,29 +195,74 @@ export default function Menu() {
             </div>
 
             {/* ACTIONS */}
-            <div className="flex gap-2 sm:gap-3 justify-end">
+            <div
+              className="
+    grid grid-cols-2 gap-2
+    sm:flex sm:gap-3 sm:justify-end
+  "
+            >
+              {/* HISTORY */}
               <button
                 onClick={() => setIsHistoryOpen(true)}
-                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition text-xs sm:text-sm font-medium"
+                className="
+      flex items-center justify-center gap-2
+      px-3 py-2 rounded-xl
+      bg-gray-100 hover:bg-gray-200
+      transition text-xs sm:text-sm font-medium
+    "
               >
                 <History size={18} />
                 Lịch sử
               </button>
+
+              {/* LOGIN */}
+              <button
+                onClick={() => setIsLoginOpen(true)}
+                className="
+      flex items-center justify-center gap-2
+      px-3 py-2 rounded-xl
+      bg-white border border-gray-300 hover:bg-gray-100
+      transition text-xs sm:text-sm font-medium text-gray-700
+    "
+              >
+                Đăng nhập
+              </button>
+
+              {/* REGISTER */}
               <button
                 onClick={() => setIsRegisterOpen(true)}
-                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 transition text-white text-xs sm:text-sm font-medium"
+                className="
+      flex items-center justify-center gap-2
+      px-3 py-2 rounded-xl
+      bg-green-500 hover:bg-green-600
+      transition text-white text-xs sm:text-sm font-medium
+    "
               >
                 Đăng ký
               </button>
 
+              {/* CART */}
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative flex items-center gap-2 px-4 sm:px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 transition text-white text-xs sm:text-sm font-medium"
+                className="
+      relative flex items-center justify-center gap-2
+      px-3 py-2 rounded-xl
+      bg-blue-600 hover:bg-blue-700
+      transition text-white text-xs sm:text-sm font-medium
+    "
               >
                 <ShoppingCart size={18} />
                 Giỏ hàng
                 {getTotalItems() > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] sm:text-xs font-semibold rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center shadow">
+                  <span
+                    className="
+          absolute -top-2 -right-2
+          bg-red-500 text-white
+          text-[10px] sm:text-xs font-semibold
+          rounded-full w-5 h-5 sm:w-6 sm:h-6
+          flex items-center justify-center shadow
+        "
+                  >
                     {getTotalItems()}
                   </span>
                 )}
@@ -294,6 +344,36 @@ export default function Menu() {
         <RegisterModal
           onClose={() => setIsRegisterOpen(false)}
           tenantId={tenantId}
+          onSuccess={() => {
+            setIsRegisterOpen(false);
+            setShowSuccess(true);
+          }}
+          onLoginModal={() => {
+            setIsRegisterOpen(false);
+            setIsLoginOpen(true);
+          }}
+        />
+      )}
+
+      {showSuccess && (
+        <SuccessModal
+          message="Email xác nhận đã được gửi tới email của bạn, vui lòng xác nhận để tiếp tục."
+          onClose={() => setShowSuccess(false)}
+        />
+      )}
+
+      {isLoginOpen && (
+        <LoginModal
+          onClose={() => setIsLoginOpen(false)}
+          tenantId={tenantId}
+          onSuccess={() => {
+            setIsLoginOpen(false);
+            // có thể fetch lại user / cart nếu cần
+          }}
+          onRegisterModal={() => {
+            setIsLoginOpen(false);
+            setIsRegisterOpen(true);
+          }}
         />
       )}
     </div>
