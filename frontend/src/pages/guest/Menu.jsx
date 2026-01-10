@@ -1,6 +1,7 @@
 import { Search, ShoppingCart, History } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState, useMemo, useContext } from "react";
+import { useParams, useLocation } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 import Fuse from "fuse.js";
 
 import MenuItemCard from "../../components/common/MenuItemCard";
@@ -46,13 +47,26 @@ export default function Menu() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModifierOpen, setIsModifierOpen] = useState(false);
 
+  const { setAuthFromToken } = useContext(AuthContext); // 👈 lấy hàm này
   const { tenantId, tableId } = useParams();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const accessToken = queryParams.get("accessToken");
   /* ================= FETCH ================= */
   useEffect(() => {
-    fetchCategories();
-    fetchItems();
-    fetchModifierGroups();
-  }, []);
+    // ✅ Nếu token có trong URL → cập nhật vào AuthContext
+    if (accessToken) {
+      setAuthFromToken(accessToken);
+      localStorage.setItem("token", accessToken);
+    }
+
+    // ✅ Khi token đã có → fetch data
+    if (accessToken) {
+      fetchCategories();
+      fetchItems();
+      fetchModifierGroups();
+    }
+  }, [accessToken]);
 
   const fetchCategories = async () => {
     const res = await categoryApi.getAllCategories();

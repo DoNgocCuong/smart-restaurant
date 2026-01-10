@@ -1,5 +1,6 @@
 import { useState } from "react";
 import tenantApi from "../../api/tenantApi";
+import accountApi from "../../api/accountApi";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router";
 import { Upload } from "lucide-react";
@@ -71,15 +72,37 @@ function RegisterInforTenant() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       setLoading(true);
-      await tenantApi.createInforTenant(formData);
 
+      // 1️⃣ Tạo tenant
+      const res = await tenantApi.createInforTenant(formData);
+      const tenantId = res.result.tenantId;
       toast.success("Đăng ký nhà hàng thành công");
 
-      // Sang trang Dashboard
+      // 2️⃣ Tạo tài khoản khách mặc định (guest)
+      const guestAccount = {
+        username: `guest_tenant_${tenantId}@gmail.com`,
+        password: "123456",
+        name: "Guest",
+        phone: "00000000000",
+        address: "Hồ Chí Minh",
+        gender: "Male",
+      };
+
+      try {
+        await accountApi.createCustomerAccount(tenantId, guestAccount);
+        toast.success("Tạo tài khoản khách mặc định thành công");
+      } catch (err) {
+        console.error("Lỗi tạo tài khoản guest:", err);
+        toast.error("Không thể tạo tài khoản khách mặc định");
+      }
+
+      // 3️⃣ Chuyển đến trang Dashboard
       navigate(`/tenant-admin/dashboard`, { replace: true });
     } catch (error) {
+      console.error("Lỗi đăng ký tenant:", error);
       toast.error(
         error?.response?.data?.message || "Đăng ký nhà hàng thất bại"
       );
