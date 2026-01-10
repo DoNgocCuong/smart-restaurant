@@ -49,10 +49,29 @@ public enum ErrorCode {
 
     MODIFIER_OPTION_ALREADY_EXISTS("1035","MODIFIER_OPTION_ALREADY_EXISTS", HttpStatus.BAD_REQUEST),
     MODIFIER_OPTION_NOT_IN_TENANT("1034", "MODIFIER_OPTION_NOT_IN_TENANT", HttpStatus.BAD_REQUEST),
-    MODIFIER_NOT_VALID_FOR_ITEM("1038", "MODIFIER_NOT_VALID_FOR_ITEM", HttpStatus.BAD_REQUEST),
+//    MODIFIER_NOT_VALID_FOR_ITEM("1038", "MODIFIER_NOT_VALID_FOR_ITEM", HttpStatus.BAD_REQUEST),
     TABLE_ALREADY_HAS_ORDER("1039", "TABLE_ALREADY_HAS_ORDER", HttpStatus.BAD_REQUEST),
+
     ORDER_NOT_EXISTED("1035","order not existed",HttpStatus.BAD_REQUEST),
+
+    MODIFIER_NOT_VALID_FOR_ITEM("1038", "MODIFIER_NOT_VALID_FOR_ITEM", HttpStatus.BAD_REQUEST),
+
+    ORDER_NOT_FOUND("1040", "ORDER_NOT_FOUND", HttpStatus.BAD_REQUEST),
+    INVALID_REQUEST("1041", "INVALID_REQUEST", HttpStatus.BAD_REQUEST),
+    STATUS_NOT_FOUND("1042", "STATUS_NOT_FOUND", HttpStatus.BAD_REQUEST),
+    REQUIRED_MODIFIER_GROUP_NOT_SELECTED("1043", "Người dùng chưa chọn nhóm modifier bắt buộc", HttpStatus.BAD_REQUEST),
+    MODIFIER_GROUP_ONLY_SINGLE_SELECTION("1044", "Người dùng đã chọn quá nhiều tùy chọn trong một nhóm mà chỉ được chọn 1", HttpStatus.BAD_REQUEST),
+    UNAUTHORIZED_ORDER_ACCESS("1045", "Order không thuọc quyền của bạn", HttpStatus.BAD_REQUEST),
+    INVALID_ORDER_STATUS("1046", "OrderStatus không phai là Pendding_payment, Order phải ở trạng thái chưa thanh toán mới có quyền thêm", HttpStatus.BAD_REQUEST),
+    TABLE_NOT_AVAILABLE("1047",  "Table đã ngừng hoat dong", HttpStatus.BAD_REQUEST),
+    INVALID_QUANTITY("1048", "Quatity phải > 0", HttpStatus.BAD_REQUEST),
+    CANNOT_DECREASE_QUANTITY("4001", "Không thể giảm số lượng. Chỉ có thể thêm hoặc tăng quantity.", HttpStatus.BAD_REQUEST),
+    CANNOT_REMOVE_MODIFIERS("4002", "Không thể xóa modifiers. Chỉ có thể thêm modifiers mới.", HttpStatus.BAD_REQUEST),
+    CANNOT_REMOVE_ITEMS("4003", "Không thể xóa items khỏi order. Chỉ có thể thêm items mới.", HttpStatus.BAD_REQUEST),
+    MODIFIER_NOT_FOUND("4004", "MODIFIER_NOT_FOUND)", HttpStatus.BAD_REQUEST),
+    ORDER_UPDATE_FAILED("4005", "ORDER_UPDATE_FAILED", HttpStatus.BAD_REQUEST);
     ;
+
 
     ErrorCode(String code, String message, HttpStatus httpStatusCode) {
         this.code = code;

@@ -36,6 +36,15 @@ spring:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
 
+
+  cloud:
+    openfeign:
+      compression:
+        request:
+          enabled: false
+        response:
+          enabled: false
+
 jwt:
   secret: ${SECRET_KEY}
   EMAIL_KEY: ${EMAIL_KEY}
@@ -52,3 +61,13 @@ qr:
   base-url: http://${LOCAL_IP}:${PORT}/api/qr/verify?t=
   width: 300
   height: 300
+
+momo:
+  partner-code: MOMO
+  access-key: F8BBA842ECF85
+  secret-key: K951B6PE1waDMi640xX08PD3vg6EkVlz
+  request-type: captureWallet
+  return-url: http://localhost:8080/
+  end-point: https://test-payment.momo.vn/v2/gateway/api
+  ipn-url: http://localhost:8080/api/momo/ipn-handler
+

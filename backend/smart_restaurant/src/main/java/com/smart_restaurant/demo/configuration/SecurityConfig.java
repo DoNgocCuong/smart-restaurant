@@ -22,8 +22,8 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS = {
             "/users/save", "/api/auth/log-in", "/api/auth/log-out","/api/auth/introspect","/api/auth/refresh-token" ,
-            "/api/orders", "/api/orders/**","/ws/**",
-            "/api/auth/signup","/api/auth/verify-email/**","/swagger-ui.html", "/swagger-ui/**","/v3/api-docs/**","/api/qr/verify","/api/orders/*/invoice/pdf"
+            "/api/auth/signup","/api/auth/verify-email/**","/swagger-ui.html", "/swagger-ui/**","/v3/api-docs/**","/api/qr/verify","/api/orders/*/invoice/pdf",
+            "/api/orders", "/api/orders/**", "/api/payment/**", "/api/payment", "/api/momo/**","/ws/**",
     };
     private CustomJwtDecoder customJwtDecoder;
 
@@ -66,6 +66,7 @@ public class SecurityConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.addAllowedOrigin("http://localhost:5173");
+        corsConfiguration.addAllowedOrigin("http://127.0.0.1:5500");
         corsConfiguration.addAllowedMethod("*"); // cho phép tất cả các method (GET, POST, PUT, DELETE, ...)
         corsConfiguration.addAllowedHeader("*"); // cho phép tất cả các header
         corsConfiguration.setAllowCredentials(true); // cho phép gửi cookie

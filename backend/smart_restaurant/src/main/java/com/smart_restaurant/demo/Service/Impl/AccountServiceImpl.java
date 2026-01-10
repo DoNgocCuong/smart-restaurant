@@ -1,12 +1,13 @@
 package com.smart_restaurant.demo.Service.Impl;
 
 
-import com.smart_restaurant.demo.Repository.AccountRepository;
-import com.smart_restaurant.demo.Repository.TenantRepository;
+import com.smart_restaurant.demo.Repository.*;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.dto.Request.AccountUpdateIsActiveRequest;
 import com.smart_restaurant.demo.dto.Request.AccountUpdateRequest;
+import com.smart_restaurant.demo.dto.Request.SignupCustomerRequest;
 import com.smart_restaurant.demo.dto.Response.AccountResponse;
+import com.smart_restaurant.demo.entity.Customer;
 import com.smart_restaurant.demo.entity.Tenant;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
@@ -16,7 +17,6 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.smart_restaurant.demo.Repository.AccountRepository;
-import com.smart_restaurant.demo.Repository.RoleRepository;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.dto.Request.SignupRequest;
 import com.smart_restaurant.demo.dto.Response.ConfirmEmailResponse;
@@ -27,6 +27,7 @@ import com.smart_restaurant.demo.enums.Roles;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.smart_restaurant.demo.mapper.AccountMapper;
+import com.smart_restaurant.demo.mapper.CustomerMapper;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.ParseException;
@@ -67,9 +68,11 @@ public class AccountServiceImpl implements AccountService {
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
     TenantRepository tenantRepository;
+    CustomerMapper customerMapper;
+    CustomerRepository customerRepository;
 
     @Override
-    public SignupResponse createAccountCustomer(SignupRequest signupRequest,Integer tenantId) throws JOSEException {
+    public SignupResponse createAccountCustomer(SignupCustomerRequest signupRequest, Integer tenantId) throws JOSEException {
         Tenant tenant= tenantRepository.findById(tenantId).orElseThrow(()->new AppException(ErrorCode.TENANT_NOT_FOUND));
 
         if(accountRepository.existsByUsernameAndTenant_TenantId(signupRequest.getUsername(),tenantId))
@@ -77,11 +80,12 @@ public class AccountServiceImpl implements AccountService {
         Account newAccount=accountMapper.toAccount(signupRequest);
         String password= passwordEncoder.encode(signupRequest.getPassword());
         newAccount.setPassword(password);
-        newAccount.setRoles(roleRepository.findAllByName(Roles.TENANT_ADMIN.toString()));
+        newAccount.setRoles(roleRepository.findAllByName(Roles.CUSTOMER.toString()));
         newAccount.setIsCustomer(true);
         newAccount.setIsFirstActivity(true);
         newAccount.setIsEmailVerify(false);
         newAccount.setTenant(tenant);
+        newAccount.setIsActive(true);
         String token=generateEmailToken(newAccount);
         try {
             sendQrEmail(newAccount.getUsername(),token);
@@ -89,7 +93,12 @@ public class AccountServiceImpl implements AccountService {
             System.out.println("email loi ");
             throw new AppException(ErrorCode.JWT_ERROR);
         }
-        return accountMapper.toSignupResponse(accountRepository.save(newAccount));
+        Customer customer= customerMapper.toCustomer(signupRequest);
+        System.out.println("Gender from request = " + signupRequest.getGender());
+        Account account=accountRepository.save(newAccount);
+        customer.setAccount(account);
+        customerRepository.save(customer);
+        return accountMapper.toSignupResponse(account);
     }
 
     @Override

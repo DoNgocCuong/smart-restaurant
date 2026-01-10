@@ -1,7 +1,10 @@
 package com.smart_restaurant.demo.Controller;
 
 import com.smart_restaurant.demo.Service.OrderService;
+import com.smart_restaurant.demo.dto.Request.DetailOrderRequest;
 import com.smart_restaurant.demo.dto.Request.OrderRequest;
+import com.smart_restaurant.demo.dto.Request.UpdateDetailOrderRequest;
+import com.smart_restaurant.demo.dto.Request.UpdateOrderStatusRequest;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.InvoiceResponse;
 import com.smart_restaurant.demo.dto.Response.OrderResponse;
@@ -29,6 +32,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
@@ -90,6 +94,32 @@ public class OrderController {
                 .build();
     }
 
+    @PutMapping("/{orderId}")
+    public ApiResponse<OrderResponse> updateOrderAddItems(
+            @PathVariable Integer orderId,
+            @RequestBody List<UpdateDetailOrderRequest> updateDetailOrderRequests,
+            JwtAuthenticationToken jwtAuthenticationToken) {
+
+        OrderResponse response = orderService.updateOrderAddItems(orderId, updateDetailOrderRequests, jwtAuthenticationToken);
+        return ApiResponse.<OrderResponse>builder()
+                .result(response)
+                .message("Update thành cong đơn hàng")
+                .build();
+    }
+
+
+    /*
+    - Staff chấp nhận / từ chối order : [ status = Pending_approval,Approved]
+    - Khách hàng yêu cầu thành toán : [ Status = Pending_approval]
+     */
+    @PatchMapping("/status/{id}")
+    public ApiResponse<OrderResponse> updateOrderStatusToPendingPayment(@PathVariable Integer id, @RequestBody UpdateOrderStatusRequest updateOrderStatusRequest){
+        OrderResponse orderResponse = orderService.updateOrderStatus(id, updateOrderStatusRequest);
+        return ApiResponse.<OrderResponse>builder()
+                .result(orderResponse)
+                .message("Order yêu cầu thanh toán")
+                .build();
+    }
 
 
     // [STAFF]

@@ -1,5 +1,6 @@
 package com.smart_restaurant.demo.entity;
 
+import com.smart_restaurant.demo.enums.Genders;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +20,8 @@ public class Customer {
     String name;
     String phone;
     String address;
-    String gender;
+    @Enumerated(EnumType.STRING)
+    Genders gender;
     @OneToOne
     @JoinColumn(name="account_id")
     Account account;

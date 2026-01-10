@@ -4,6 +4,7 @@ import com.nimbusds.jose.JOSEException;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.dto.Request.AccountUpdateIsActiveRequest;
 import com.smart_restaurant.demo.dto.Request.AccountUpdateRequest;
+import com.smart_restaurant.demo.dto.Request.SignupCustomerRequest;
 import com.smart_restaurant.demo.dto.Request.SignupRequest;
 import com.smart_restaurant.demo.dto.Response.AccountResponse;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
@@ -140,5 +141,13 @@ public class AccountController {
                 .result(accountService.updateAccountAdminTenant(accountId,accountUpdateRequest))
                 .build();
     }
+    @PostMapping("/customer/{tenantId}")
+    public  ApiResponse<SignupResponse> createAccountCustomer(@RequestBody SignupCustomerRequest signupRequest, @PathVariable Integer tenantId) throws MessagingException, JOSEException {
+        return  ApiResponse.<SignupResponse>builder()
+                .result(accountService.createAccountCustomer(signupRequest,tenantId))
+                .build();
+    }
+
+
 
 }
