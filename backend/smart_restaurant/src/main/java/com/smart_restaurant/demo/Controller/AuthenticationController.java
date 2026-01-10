@@ -4,6 +4,7 @@ import com.nimbusds.jose.JOSEException;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.AuthenticationService;
 import com.smart_restaurant.demo.dto.Request.AuthenticateRequest;
+import com.smart_restaurant.demo.dto.Request.SignupCustomerRequest;
 import com.smart_restaurant.demo.dto.Request.SignupRequest;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.AuthenticationResponse;
@@ -48,7 +49,7 @@ public class AuthenticationController {
                 .build();
     }
     @PostMapping("/signup/{tenantId}")
-    ApiResponse<SignupResponse> signup(@RequestBody @Valid SignupRequest request,@PathVariable Integer tenantId) throws MessagingException, JOSEException {
+    ApiResponse<SignupResponse> signup(@RequestBody @Valid SignupCustomerRequest request, @PathVariable Integer tenantId) throws MessagingException, JOSEException {
         return ApiResponse.<SignupResponse>builder()
                 .message("sign up successfully")
                 .result(accountService.createAccountCustomer(request,tenantId))
