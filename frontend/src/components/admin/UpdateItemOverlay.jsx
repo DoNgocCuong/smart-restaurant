@@ -307,7 +307,7 @@ function UpdateItemOverlay({ item, onClose, onSuccess }) {
             {/* Upload ảnh */}
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Ảnh sản phẩm
+                Ảnh bìa sản phẩm
               </label>
 
               <div className="mt-2 flex flex-col items-center">

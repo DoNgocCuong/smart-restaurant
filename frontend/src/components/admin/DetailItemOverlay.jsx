@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, Pencil } from "lucide-react";
+import { X, Pencil, Plus } from "lucide-react";
 import Overlay from "../common/Overlay";
 import UpdateItemOverlay from "./UpdateItemOverlay";
 import UploadImagesOverlay from "./uploadImagesOverlay";
@@ -55,11 +55,6 @@ function DetailItemOverlay({ item, onClose, onUpdate }) {
 
   if (!item) return null;
 
-  /* ================= SLIDESHOW DATA ================= */
-  // const allImages = [
-  //   ...(item.avatarUrl ? [{ id: "avatar", url: item.avatarUrl }] : []),
-  //   ...images,
-  // ];
   /* ================= SLIDESHOW DATA ================= */
   const allImages = Array.isArray(images) ? images : [];
 
@@ -175,16 +170,16 @@ function DetailItemOverlay({ item, onClose, onUpdate }) {
                 <button
                   onClick={() => setShowUploadImages(true)}
                   className="w-full md:w-auto px-3 py-2 bg-green-500 text-white rounded-lg
-                 hover:bg-green-600 text-sm font-medium"
+                 hover:bg-green-600 text-sm font-medium flex justify-center items-center gap-1 cursor-pointer"
                 >
-                  + Ảnh
+                  <Plus size={16} /> Ảnh
                 </button>
 
                 <button
                   onClick={() => setShowUpdate(true)}
                   className="w-full md:w-auto flex items-center justify-center gap-1
                  px-3 py-2 bg-blue-500 text-white rounded-lg
-                 hover:bg-blue-600 text-sm font-medium"
+                 hover:bg-blue-600 text-sm font-medium cursor-pointer"
                 >
                   <Pencil size={16} /> Cập nhật
                 </button>

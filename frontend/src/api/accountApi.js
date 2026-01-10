@@ -16,6 +16,8 @@ const accountApi = {
       return Promise.reject(new Error("Role không hợp lệ"));
     }
   },
+  createCustomerAccount: (tenantId, data) =>
+    axiosClient.post(`/v1/accounts/customer/${tenantId}`, data),
 };
 
 export default accountApi;

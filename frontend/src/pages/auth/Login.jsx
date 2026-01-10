@@ -8,72 +8,40 @@ import toast from "react-hot-toast";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState(""); // ⚡ Thêm state lưu lỗi
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     const res = await authApi.login({
-  //       userName: email,
-  //       password: password,
-  //     });
-
-  //     localStorage.setItem("userName", email);
-  //     const accessToken = res.result.acessToken;
-
-  //     // login vào context (context tự lo decode + lưu)
-  //     login(accessToken);
-
-  //     console.log(localStorage.getItem("token"));
-
-  //     // lấy role từ localStorage (do AuthContext set)
-  //     const role = localStorage.getItem("role");
-  //     // redirect
-  //     getTenantProfile();
-  //     if (role === "SUPER_ADMIN") {
-  //       navigate("/super-admin/accounts", { replace: true });
-  //     } else {
-  //       navigate(`/${role.toLowerCase()}/dashboard`, { replace: true });
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //     toast.error("Không thể đăng nhập");
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage(""); // reset lỗi cũ
 
     try {
       const res = await authApi.login({
         userName: email,
         password,
       });
-      localStorage.setItem("userName", email);
 
+      localStorage.setItem("userName", email);
       const accessToken = res.result.acessToken;
 
-      // 1. login vào context (set token + role)
       await login(accessToken);
 
       const role = localStorage.getItem("role");
 
-      // 2. gọi profile và bắt riêng lỗi 403
-      if (role == "TENANT_ADMIN") {
+      if (role === "TENANT_ADMIN") {
         try {
-          const profile = await tenantApi.getTenantProfile();
+          await tenantApi.getTenantProfile();
         } catch (profileError) {
           if (profileError?.response?.status === 403) {
             toast.error("Bạn cần tạo nhà hàng trước khi sử dụng hệ thống.");
             navigate("/tenant-admin/tenant-create", { replace: true });
             return;
           }
-          throw profileError; // nếu lỗi khác, ném lên catch ngoài
+          throw profileError;
         }
       }
-      // 3. redirect
+
       if (role === "SUPER_ADMIN") {
         navigate("/super-admin/accounts", { replace: true });
       } else {
@@ -81,6 +49,12 @@ function Login() {
       }
     } catch (error) {
       console.error(error);
+      // Nếu có response cụ thể từ server
+      if (error?.response?.data?.message) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage("Tên đăng nhập hoặc mật khẩu không đúng.");
+      }
       toast.error("Không thể đăng nhập");
     }
   };
@@ -99,7 +73,10 @@ function Login() {
             <input
               type="text"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setErrorMessage(false);
+              }}
               required
               className="w-full border border-[#5B94FF]/30 h-10 rounded px-2"
             />
@@ -110,11 +87,21 @@ function Login() {
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setErrorMessage(false);
+              }}
               required
               className="w-full border border-[#5B94FF]/30 h-10 rounded px-2"
             />
           </label>
+
+          {/* ⚠️ Hiển thị lỗi đăng nhập ngay trong form */}
+          {errorMessage && (
+            <p className="text-red-500 text-sm text-left font-medium">
+              Sai tên đăng nhập hoặc mật khẩu
+            </p>
+          )}
 
           <div className="w-full flex flex-col items-center gap-2">
             <button

@@ -345,7 +345,16 @@ public class AccountServiceImpl implements AccountService {
 
 
     private void sendQrEmail(String toEmail, String token) throws MessagingException {
-        String confirmUrl = "http://172.17.128.1:8080/api/auth/verify-email?token=" + token;
+        String localIp = System.getenv("LOCAL_IP");
+        String port = System.getenv("PORT");
+        // Giá trị fallback trong trường hợp biến không tồn tại
+        if (localIp == null || localIp.isEmpty()) {
+            localIp = "localhost";
+        }
+        if (port == null || port.isEmpty()) {
+            port = "8080";
+        }
+        String confirmUrl = "http://" + localIp + ":" + port + "/api/auth/verify-email?token=" + token;
 
         String htmlMsg = "<h3>Chào mừng bạn!</h3>"
                 + "<p>Bạn vừa đăng ký web quản lý nhà hàng của mình.</p>"
