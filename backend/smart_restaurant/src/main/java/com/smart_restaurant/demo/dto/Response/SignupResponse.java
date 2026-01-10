@@ -14,8 +14,9 @@ import java.util.List;
 @Builder
 public class SignupResponse {
     String username;
-    boolean is_first_activity;
-    boolean is_email_verify;
+    Boolean isFirstActivity;
+    Boolean isEmailVerify;
+    Boolean isActive;
     List<Role> roles;
     LocalDateTime createAt;
     LocalDateTime updateAt;

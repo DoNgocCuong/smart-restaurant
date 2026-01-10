@@ -4,6 +4,7 @@ package com.smart_restaurant.demo.Service;
 import com.nimbusds.jose.JOSEException;
 import com.smart_restaurant.demo.dto.Request.AccountUpdateIsActiveRequest;
 import com.smart_restaurant.demo.dto.Request.AccountUpdateRequest;
+import com.smart_restaurant.demo.dto.Request.SignupCustomerRequest;
 import com.smart_restaurant.demo.dto.Request.SignupRequest;
 import com.smart_restaurant.demo.dto.Response.AccountResponse;
 import com.smart_restaurant.demo.dto.Response.ConfirmEmailResponse;
@@ -17,7 +18,7 @@ import java.util.List;
 public interface AccountService {
     public Integer getTenantIdByUsername(String username);
 
-    SignupResponse createAccountCustomer(SignupRequest signupRequest, Integer tenantId) throws JOSEException, MessagingException;
+    SignupResponse createAccountCustomer(SignupCustomerRequest signupRequest, Integer tenantId) throws JOSEException, MessagingException;
     ConfirmEmailResponse verifyEmail(String token) throws ParseException, java.text.ParseException, JOSEException;
     SignupResponse createAccountAdmin(SignupRequest signupRequest) throws JOSEException, MessagingException;
     SignupResponse createAccountStaff(SignupRequest signupRequest, JwtAuthenticationToken jwtAuthenticationToken) throws JOSEException, MessagingException;

@@ -1,5 +1,6 @@
 package com.smart_restaurant.demo.mapper;
 
+import com.smart_restaurant.demo.dto.Request.SignupCustomerRequest;
 import com.smart_restaurant.demo.dto.Request.SignupRequest;
 import com.smart_restaurant.demo.dto.Response.AccountResponse;
 import com.smart_restaurant.demo.dto.Response.SignupResponse;
@@ -14,8 +15,6 @@ public interface AccountMapper {
     Account toAccount(SignupRequest signupRequest);
     SignupResponse toSignupResponse(Account account);
 
-    @Mapping(source = "isFirstActivity", target = "is_first_activity")
-    @Mapping(source = "isEmailVerify", target = "is_email_verify")
-    @Mapping(source = "isActive", target = "is_active")
     AccountResponse toAccountResponse(Account account);
+    Account toAccount(SignupCustomerRequest signupRequest);
 }
