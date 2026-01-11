@@ -18,5 +18,5 @@ public class ReviewResponse {
     LocalDateTime createAt;
     LocalDateTime updateAt;
     CustomerResponse customer;
-    ItemResponse item;
+    ItemResponseDTO item;
 }

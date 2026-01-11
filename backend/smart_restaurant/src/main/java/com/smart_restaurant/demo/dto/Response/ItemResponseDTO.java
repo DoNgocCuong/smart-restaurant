@@ -10,5 +10,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class ItemResponseDTO {
-    String name;
+    String itemName;
+    String description;
+    Double price;
 }

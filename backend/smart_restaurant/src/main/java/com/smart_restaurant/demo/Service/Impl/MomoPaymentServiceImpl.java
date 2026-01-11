@@ -1,7 +1,6 @@
 package com.smart_restaurant.demo.Service.Impl;
 
-import com.google.gson.Gson;
-import com.smart_restaurant.demo.Controller.MomoApi;
+import com.smart_restaurant.demo.client.MomoApi;
 import com.smart_restaurant.demo.Service.MomoPaymentService;
 import com.smart_restaurant.demo.Service.PaymentService;
 import com.smart_restaurant.demo.dto.Request.MomoPaymentRequest;
@@ -11,14 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.Cipher;
 import javax.crypto.Mac;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.UUID;
-import okhttp3.*;
 
 @Slf4j
 @Service

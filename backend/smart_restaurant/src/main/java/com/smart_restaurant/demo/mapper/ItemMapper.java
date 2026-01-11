@@ -4,6 +4,7 @@ package com.smart_restaurant.demo.mapper;
 import com.smart_restaurant.demo.dto.Request.ItemRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateItemRequest;
 import com.smart_restaurant.demo.dto.Response.ItemResponse;
+import com.smart_restaurant.demo.dto.Response.ItemResponseDTO;
 import com.smart_restaurant.demo.entity.Item;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -26,4 +27,7 @@ public interface ItemMapper {
     @Mapping(target = "category", ignore = true)
     @Mapping(source = "isKitchen", target = "isKitchen")
     void updateItem(@MappingTarget Item item, UpdateItemRequest updateItemRequest);
+
+
+    ItemResponseDTO toItemResponseDTO(Item item);
 }

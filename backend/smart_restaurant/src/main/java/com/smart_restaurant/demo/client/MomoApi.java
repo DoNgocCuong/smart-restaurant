@@ -1,4 +1,4 @@
-package com.smart_restaurant.demo.Controller;
+package com.smart_restaurant.demo.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import com.smart_restaurant.demo.dto.Request.MomoPaymentRequest;
