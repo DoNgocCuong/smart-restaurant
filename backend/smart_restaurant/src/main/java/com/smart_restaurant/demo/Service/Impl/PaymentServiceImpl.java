@@ -1,18 +1,13 @@
 package com.smart_restaurant.demo.Service.Impl;
 
 
-import com.smart_restaurant.demo.Repository.OrderRepository;
-import com.smart_restaurant.demo.Repository.PaymentRepository;
-import com.smart_restaurant.demo.Repository.StatusRepository;
-import com.smart_restaurant.demo.Repository.TypePaymentRepository;
+import com.smart_restaurant.demo.Repository.*;
 import com.smart_restaurant.demo.Service.PaymentService;
 import com.smart_restaurant.demo.constant.MomoParameter;
 import com.smart_restaurant.demo.dto.Request.TypePaymentResquest;
+import com.smart_restaurant.demo.dto.Response.PaymentHistoryResponse;
 import com.smart_restaurant.demo.dto.Response.PaymentResponse;
-import com.smart_restaurant.demo.entity.Order;
-import com.smart_restaurant.demo.entity.Payment;
-import com.smart_restaurant.demo.entity.Status;
-import com.smart_restaurant.demo.entity.TypePayment;
+import com.smart_restaurant.demo.entity.*;
 import com.smart_restaurant.demo.enums.OrderStatus;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
@@ -22,8 +17,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -36,7 +34,9 @@ public class PaymentServiceImpl implements PaymentService {
     private final OrderRepository orderRepository;
     private final StatusRepository statusRepository;
     private final TypePaymentRepository typePaymentRepository;
+    AccountRepository accountRepository;
     PaymentMapper paymentMapper;
+    CustomerRepository customerRepository;
 
     @Override
     @Transactional
@@ -109,5 +109,19 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment=order.getPayments();
         payment.setTypePayment(typePayment);
         return  paymentMapper.toPaymentResponse(paymentRepository.save(payment));
+    }
+
+    @Override
+    public List<PaymentHistoryResponse> getPaymentHistory(JwtAuthenticationToken jwtAuthenticationToken) {
+        Customer customer=customerRepository.findByAccount_Username(jwtAuthenticationToken.getName()).orElseThrow(()-> new AppException(ErrorCode.ACCOUNT_EXISTED));
+        List<Order> orders=orderRepository.findAllByCustomer_CustomerId(customer.getCustomerId());
+        List<Payment> payments = new ArrayList<>();
+        for(Order order : orders){
+            if(order.getStatus().getOrderStatus().equals(OrderStatus.Paid)) {
+                payments.add(order.getPayments());
+            }
+        }
+        return paymentMapper.toPaymentHistoryResponse(payments);
+
     }
 }

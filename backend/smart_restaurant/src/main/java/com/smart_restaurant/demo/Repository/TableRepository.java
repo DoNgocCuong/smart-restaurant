@@ -16,4 +16,5 @@ public interface TableRepository extends JpaRepository<RestaurantTable,Integer> 
     Optional<RestaurantTable> findByTableName(String tableName);
     Page<RestaurantTable> findAllByTenant_TenantId(Integer tenantId, Pageable pageable);
     List<RestaurantTable> findAllByTenant_TenantId(Integer tenantId);
+    List<RestaurantTable> findAllByEmployees_EmployeeId(Integer employeeId);
 }
