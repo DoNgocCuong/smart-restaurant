@@ -61,6 +61,7 @@ qr:
   base-url: http://${LOCAL_IP}:${PORT}/api/qr/verify?t=
   width: 300
   height: 300
+  FE_URL: ${FE_URL}
 
 momo:
   partner-code: MOMO

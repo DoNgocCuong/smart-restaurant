@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface QrHistoryService {
     QrResponse generateTableQRCode(Integer tableId, JwtAuthenticationToken jwtAuthenticationToken) throws Exception;
     boolean verifyTableQRCode(String token) throws NoSuchAlgorithmException, InvalidKeyException;
-    void verify(String token, HttpServletResponse response) throws NoSuchAlgorithmException, InvalidKeyException, IOException;
+    void verify(String token, HttpServletResponse response) throws Exception;
 
     public List<QrResponse> getAllTableQRCode(JwtAuthenticationToken jwtAuthenticationToken);
 
