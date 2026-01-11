@@ -17,6 +17,8 @@ import RegisterInforTenant from "../pages/admin/RegisterInforTenant";
 import MenuManagement from "../pages/admin/MenuManagement";
 import StaffManagement from "../pages/admin/StaffManagement";
 
+import WaiterDashboard from "../pages/waiter/Dashboard";
+
 import GuestLayout from "../components/layout/GuestLayout";
 import Menu from "../pages/guest/Menu";
 export default function AppRouter() {
@@ -58,6 +60,11 @@ export default function AppRouter() {
       {/* Guest */}
       <Route path="/guest" element={<GuestLayout />}>
         <Route path="menu/:tenantId/tables/:tableId" element={<Menu />} />
+      </Route>
+
+      {/* Waiter */}
+      <Route path="/waiter">
+        <Route path="dashboard" element={<WaiterDashboard />} />
       </Route>
 
       {/* QR Error */}

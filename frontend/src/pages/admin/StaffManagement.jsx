@@ -16,6 +16,7 @@ function StaffManagement() {
     try {
       setLoading(true);
       const res = await accountApi.getAllStaff();
+      console.log(res.result);
       setStaffs(res.result || []);
     } catch (error) {
       console.error(error);

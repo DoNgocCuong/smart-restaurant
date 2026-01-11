@@ -44,8 +44,10 @@ function Login() {
 
       if (role === "SUPER_ADMIN") {
         navigate("/super-admin/accounts", { replace: true });
-      } else {
+      } else if (role === "TENANT_ADMIN") {
         navigate(`/tenant-admin/dashboard`, { replace: true });
+      } else if (role === "STAFF") {
+        navigate(`/waiter/dashboard`, { replace: true });
       }
     } catch (error) {
       console.error(error);

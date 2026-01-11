@@ -1,9 +1,18 @@
 import Overlay from "../common/Overlay";
 import { X, Minus, Plus, ShoppingCart } from "lucide-react";
+import orderApi from "../../api/orderApi";
+import { useState } from "react";
 
-export default function CartModal({ cart, onUpdateQty, onClose }) {
+export default function CartModal({
+  cart,
+  onUpdateQty,
+  onClose,
+  onOrderSuccess,
+  tableId,
+}) {
   const safeCart = Array.isArray(cart) ? cart : [];
-
+  const [special, setSpecial] = useState("");
+  /* ================== TÍNH GIÁ ================== */
   const calcItemTotal = (item) => {
     const modifiers = Array.isArray(item.modifiers) ? item.modifiers : [];
 
@@ -21,6 +30,39 @@ export default function CartModal({ cart, onUpdateQty, onClose }) {
 
   const total = safeCart.reduce((sum, item) => sum + calcItemTotal(item), 0);
 
+  /* ================== MAP CART → API ================== */
+  const mapCartToDetailOrders = (cart) => {
+    return cart.map((item) => ({
+      itemId: item.itemId,
+      quantity: item.quantity,
+      modifierOptionIds: (item.modifiers || [])
+        .flatMap((g) => g.options || [])
+        .map((o) => o.modifierOptionId),
+    }));
+  };
+
+  /* ================== MAKE ORDER ================== */
+  const handleMakeOrder = async () => {
+    if (safeCart.length === 0) return;
+
+    const payload = {
+      customerName: "Khách tại quán",
+      tableId: Number(tableId),
+      special: special.trim(),
+      detailOrders: mapCartToDetailOrders(safeCart),
+    };
+    console.log(JSON.stringify(payload));
+
+    try {
+      await orderApi.makeOrder(payload);
+      onOrderSuccess?.();
+      onClose(); // đóng modal sau khi tạo order
+    } catch (err) {
+      console.error("Make order failed:", err);
+    }
+  };
+
+  /* ================== UI ================== */
   return (
     <Overlay onClose={onClose}>
       <div className="bg-white rounded-2xl shadow-2xl w-[560px] max-w-[95%] overflow-hidden relative">
@@ -99,16 +141,32 @@ export default function CartModal({ cart, onUpdateQty, onClose }) {
 
         {/* ===== FOOTER ===== */}
         <div className="shadow-top px-6 py-4 space-y-3">
+          {/* ===== SPECIAL NOTE ===== */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Ghi chú cho nhà bếp
+            </label>
+            <textarea
+              value={special}
+              onChange={(e) => setSpecial(e.target.value)}
+              placeholder="Ví dụ: ít cay, không hành, lên món sau 10 phút..."
+              rows={3}
+              className="w-full resize-none rounded-xl border border-gray-300 
+                 px-3 py-2 text-sm focus:outline-none 
+                 focus:ring-2 focus:ring-gray-900/80"
+            />
+          </div>
           <div className="flex justify-between font-semibold text-lg">
             <span>Tổng cộng</span>
             <span className="text-gray-900">{total.toLocaleString()}₫</span>
           </div>
 
           <button
-            onClick={onClose}
-            className="w-full bg-gray-900 text-white py-3 rounded-xl hover:bg-gray-800 transition font-medium"
+            onClick={handleMakeOrder}
+            disabled={safeCart.length === 0}
+            className="w-full bg-gray-900 text-white py-3 rounded-xl hover:bg-gray-800 transition font-medium disabled:opacity-50"
           >
-            Đóng
+            Đặt món
           </button>
         </div>
       </div>

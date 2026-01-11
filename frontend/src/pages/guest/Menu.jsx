@@ -383,6 +383,11 @@ export default function Menu() {
           cart={cart}
           onUpdateQty={updateQuantity}
           onClose={() => setIsCartOpen(false)}
+          onOrderSuccess={() => {
+            setCart([]); // clear state
+            sessionStorage.removeItem("cart"); // clear storage
+          }}
+          tableId={tableId}
         />
       )}
 
