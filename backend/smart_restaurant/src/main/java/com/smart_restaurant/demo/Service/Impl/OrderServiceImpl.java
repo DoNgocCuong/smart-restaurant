@@ -189,9 +189,14 @@ public class OrderServiceImpl implements OrderService {
         RestaurantTable restaurantTable = tableRepository.findById(orderRequest.getTableId())
                 .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
 
-        // Kiểm tra bàn này đã có order chưa
-        List<Order> activeOrders = orderRepository.findByTable_TableIdAndStatus_OrderStatusNot(orderRequest.getTableId(), OrderStatus.Deleted);
-        if (!activeOrders.isEmpty()) {
+
+
+        boolean exists = orderRepository.existsByTable_TableIdAndStatus_OrderStatusNotIn(
+                orderRequest.getTableId(),
+                List.of(OrderStatus.Rejected, OrderStatus.Paid)
+        );
+
+        if (exists) {
             throw new AppException(ErrorCode.TABLE_ALREADY_HAS_ORDER);
         }
 
@@ -236,7 +241,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Lưu order
         Order order = orderMapper.toOrder(orderRequest);
-        OrderStatus pendingStatusEnum = OrderStatus.valueOf("Pending_approval"); // Hoặc OrderStatus.PENDING_APPROVAL
+        OrderStatus pendingStatusEnum = OrderStatus.valueOf("Pending_approval");
 
         Status pendingStatus = statusRepository.findByOrderStatus(pendingStatusEnum)
                 .orElseThrow(() -> new RuntimeException("Status not found"));
@@ -298,7 +303,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Convert sang OrderResponse dùng mapper
         return orders.stream()
-                .filter(order -> !"Deleted".equals(order.getStatus().getOrderStatus()))
+                .filter(order -> !"Rejected".equals(order.getStatus().getOrderStatus()))
                 .map(this::toFullOrderResponse)
                 .collect(Collectors.toList());
     }
@@ -353,6 +358,17 @@ public class OrderServiceImpl implements OrderService {
         return orders.stream()
                 .map(this::toFullOrderResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Order getOrderEntityById(Integer id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order không tồn tại"));
+
+        if ("Deleted".equals(order.getStatus().getOrderStatus())) {
+            throw new RuntimeException("Order đã bị xóa");
+        }
+        return order;
     }
 
     @Override
@@ -437,7 +453,7 @@ public class OrderServiceImpl implements OrderService {
                 throw new AppException(ErrorCode.INVALID_REQUEST);
             }
 
-            // 7.2. ❌ KHÔNG CHO PHÉP GIẢM QUANTITY (quantity <= 0 hoặc âm)
+            // 7.2. KHÔNG CHO PHÉP GIẢM QUANTITY (quantity <= 0 hoặc âm)
             if (detailOrderRequest.getQuantity() <= 0) {
                 throw new AppException(ErrorCode.CANNOT_DECREASE_QUANTITY);
             }
@@ -478,7 +494,7 @@ public class OrderServiceImpl implements OrderService {
                         .map(ModifierOption::getModifierOptionId)
                         .collect(Collectors.toSet());
 
-                // 7.7. ❌ KIỂM TRA CÓ Ý ĐỊNH XÓA MODIFIERS KHÔNG
+                // 7.7. KIỂM TRA CÓ Ý ĐỊNH XÓA MODIFIERS KHÔNG
                 Set<Integer> requestModifierIds = requestModifiers.stream()
                         .map(ModifierOption::getModifierOptionId)
                         .collect(Collectors.toSet());
@@ -488,7 +504,7 @@ public class OrderServiceImpl implements OrderService {
                 removedModifierIds.removeAll(requestModifierIds);
 
                 if (!removedModifierIds.isEmpty()) {
-                    // ❌ CÓ MODIFIERS BỊ THIẾU → BÁO LỖI
+                    // CÓ MODIFIERS BỊ THIẾU → BÁO LỖI
                     throw new AppException(ErrorCode.CANNOT_REMOVE_MODIFIERS);
                 }
 
@@ -549,7 +565,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        // 8. ❌ KIỂM TRA CÓ Ý ĐỊNH XÓA DETAILORDER KHÔNG
+        // 8. KIỂM TRA CÓ Ý ĐỊNH XÓA DETAILORDER KHÔNG
         // Lấy tất cả itemIds từ request
         Set<Integer> requestItemIds = detailOrderRequests.stream()
                 .map(UpdateDetailOrderRequest::getItemId)
@@ -627,6 +643,7 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderResponse toFullOrderResponse(Order order) {
         OrderResponse response = orderMapper.toOrderResponse(order);
+        response.setCustomerName(order.getCustomerName());
 
         // Set tableId (vì mapper cơ bản có thể không map trường này)
         if (order.getTable() != null) {

@@ -15,6 +15,10 @@ public interface AccountMapper {
     Account toAccount(SignupRequest signupRequest);
     SignupResponse toSignupResponse(Account account);
 
+
+    @Mapping(target = "is_active", source = "isActive")
+    @Mapping(target = "is_first_activity", source = " isFirstActivity")
+    @Mapping(target = "is_email_verify", source = "isEmailVerify")
     AccountResponse toAccountResponse(Account account);
     Account toAccount(SignupCustomerRequest signupRequest);
 }

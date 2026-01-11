@@ -25,6 +25,8 @@ public class Payment {
     String momoTransId;
     @JoinColumn(name = "momo_request_id")
     String momoRequestId;
+    @JoinColumn(name = "momo_order_id")
+    private String momoOrderId;
 
     @CreationTimestamp
     LocalDateTime createAt;
