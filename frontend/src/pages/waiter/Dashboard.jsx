@@ -132,6 +132,7 @@ function Dashboard() {
     stompClient.onConnect = () => {
       stompClient.subscribe("/topic/orders", (message) => {
         const order = JSON.parse(message.body);
+        console.log("Received order update via WebSocket:", order);
         handleNewOrder(order);
       });
     };
@@ -294,7 +295,7 @@ function Dashboard() {
         <div className="grid gap-4">
           {filteredOrders.map((order) => {
             const meta = STATUS_META[order.oderStatus];
-            const Icon = meta.icon;
+            const Icon = Bell;
 
             return (
               <div
@@ -306,9 +307,9 @@ function Dashboard() {
                   <strong>
                     Order #{order.orderId} – Bàn {order.tableId}
                   </strong>
-                  <span className={`px-3 py-1 rounded-xl border ${meta.color}`}>
+                  <span className={`px-3 py-1 rounded-xl border`}>
                     <Icon size={14} className="inline mr-1" />
-                    {meta.label}
+                    
                   </span>
                 </div>
               </div>
