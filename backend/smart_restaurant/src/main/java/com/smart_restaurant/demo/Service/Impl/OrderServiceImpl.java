@@ -17,8 +17,7 @@ import com.smart_restaurant.demo.entity.Discount;
 import com.smart_restaurant.demo.entity.Image;
 import com.smart_restaurant.demo.entity.Order;
 import com.smart_restaurant.demo.entity.Status;
-import com.smart_restaurant.demo.enums.DiscountType;
-import com.smart_restaurant.demo.enums.OrderStatus;
+import com.smart_restaurant.demo.enums.*;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.smart_restaurant.demo.mapper.OrderMapper;
@@ -31,7 +30,6 @@ import com.smart_restaurant.demo.dto.Response.ModifierOptionResponse;
 import com.smart_restaurant.demo.dto.Response.OrderResponse;
 import com.smart_restaurant.demo.entity.*;
 import com.smart_restaurant.demo.enums.OrderStatus;
-import com.smart_restaurant.demo.enums.SelectionType;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 
@@ -182,6 +180,21 @@ public class OrderServiceImpl implements OrderService {
         } else {
 
             customerName = orderRequest.getCustomerName();
+            String phone = orderRequest.getPhone();
+            String address = null;
+            Genders gender = null;
+            Account account = null;
+
+            Customer customer_not_log_in = Customer.builder()
+                    .name(customerName)
+                    .phone(phone)
+                    .address(address)
+                    .gender(gender)
+                    .account(null)
+                    .build();
+
+            customer = customerRepository.save(customer_not_log_in);
+
             System.out.println("⏸️ Không đăng nhập - CustomerName từ request: " + customerName);
         }
 
