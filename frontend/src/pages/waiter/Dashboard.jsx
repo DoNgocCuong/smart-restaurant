@@ -119,7 +119,7 @@ function Dashboard() {
   /* ===== WEBSOCKET ===== */
   const connectWebSocket = () => {
     const socket = new SockJS(
-      `http://localhost:${import.meta.env.VITE_SERVER_PORT}/ws`
+      `https://localhost:${import.meta.env.VITE_SERVER_PORT}/ws`
     );
 
     const stompClient = new Client({
