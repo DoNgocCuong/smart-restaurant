@@ -67,7 +67,7 @@ public class OrderController {
 
 
     // Xem tất cả đơn hàng , xem được luôn chi tiết đơn hàng
-    @GetMapping("")
+    @GetMapping("/me")
     public ApiResponse<List<OrderResponse>> getAllMyOrder(JwtAuthenticationToken jwtToken){
         List<OrderResponse> orderResponse = orderService.getAllMyOrder( jwtToken);
         return ApiResponse.<List<OrderResponse>>builder()
