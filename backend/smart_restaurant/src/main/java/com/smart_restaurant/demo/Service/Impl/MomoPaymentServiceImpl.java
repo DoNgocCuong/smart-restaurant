@@ -50,15 +50,15 @@ public class MomoPaymentServiceImpl implements MomoPaymentService {
     private final PaymentService paymentService;
 
     @Override
-    public MomoPaymentResponse createQR(String orderId, Long amount, String orderInfo) {
+    public MomoPaymentResponse createQR(Integer orderId, Long amount, String orderInfo) {
 
-            orderId = UUID.randomUUID().toString();
+            String momoOrderId = orderId + "_" + System.currentTimeMillis();
             String requestId = UUID.randomUUID().toString();
             String extraData = "";
 
             String rawSignature = String.format(
                     "accessKey=%s&amount=%s&extraData=%s&ipnUrl=%s&orderId=%s&orderInfo=%s&partnerCode=%s&redirectUrl=%s&requestId=%s&requestType=%s",
-                    ACCESS_KEY, amount, extraData, IPN_URL, orderId, orderInfo, PARTNER_CODE, REDIRECT_URL, requestId, REQUEST_TYPE);
+                    ACCESS_KEY, amount, extraData, IPN_URL, momoOrderId, orderInfo, PARTNER_CODE, REDIRECT_URL, requestId, REQUEST_TYPE);
 
 
             String prettySignature = "";
@@ -79,7 +79,7 @@ public class MomoPaymentServiceImpl implements MomoPaymentService {
                     .requestType(REQUEST_TYPE)
                     .ipnUrl(IPN_URL)
                     .redirectUrl(REDIRECT_URL)
-                    .orderId(orderId)
+                    .orderId(momoOrderId)
                     .orderInfo(orderInfo)
                     .requestId(requestId)
                     .extraData(extraData)
@@ -93,7 +93,7 @@ public class MomoPaymentServiceImpl implements MomoPaymentService {
         // Save payment record with PENDING status
         if (response != null && response.getResultCode() == 0) {
             try {
-                paymentService.createPayment(Integer.parseInt(orderId), amount, requestId);
+                paymentService.createPayment(orderId, amount, requestId);
                 log.info("Payment record created successfully for orderId: {}", orderId);
             } catch (Exception e) {
                 log.error("Error creating payment record: ", e);

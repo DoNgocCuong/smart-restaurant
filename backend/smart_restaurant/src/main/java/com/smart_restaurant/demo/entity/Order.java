@@ -26,7 +26,8 @@ public class Order {
 
     @Column(name = "customer_name")
     String customerName;
-    @JoinColumn(name = "is_have_name")
+
+    @Column(name = "is_have_name")
     Boolean isHaveName;
 
     String special;

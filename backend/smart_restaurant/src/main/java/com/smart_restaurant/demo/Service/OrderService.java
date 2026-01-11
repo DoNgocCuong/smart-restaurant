@@ -26,6 +26,7 @@ public interface OrderService {
     List<OrderResponse> getAllTenantOrder(JwtAuthenticationToken jwtAuthenticationToken);
     OrderResponse getOrderById(Integer id);
     List<OrderResponse> getAllOrderTenantStatusPendingApproval(JwtAuthenticationToken jwtToken);
+    Order getOrderEntityById(Integer id);
 
     byte[] generateInvoicePdf(Integer orderId,JwtAuthenticationToken jwtAuthenticationToken);
 
