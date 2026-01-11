@@ -181,7 +181,7 @@ public class QrHistoryServiceImpl implements QrHistoryService {
         String username="guest_tenant_"+tenantId+"@gmail.com";
         Account account=accountRepository.findByTenant_TenantIdAndUsername(tenantId,username).orElseThrow(()->new AppException(ErrorCode.ACCOUNT_EXISTED));
 
-        String accessToken = generateTokenHS512(tenantId,tableId);
+        String accessToken = authenticationService.generalToken(account);
 
         // ✅ Gửi token qua URL param
         String redirectUrl = String.format(

@@ -130,7 +130,7 @@ function Dashboard() {
     });
 
     stompClient.onConnect = () => {
-      stompClient.subscribe("/topic/order", (message) => {
+      stompClient.subscribe("/topic/orders", (message) => {
         const order = JSON.parse(message.body);
         handleNewOrder(order);
       });
