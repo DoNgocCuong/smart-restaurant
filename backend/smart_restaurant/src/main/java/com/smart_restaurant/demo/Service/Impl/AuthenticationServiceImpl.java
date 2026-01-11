@@ -109,7 +109,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         return null;
     }
-
+    @Override
     public String generalToken(Account account) {
 
         JWSHeader header= new JWSHeader(JWSAlgorithm.HS512);

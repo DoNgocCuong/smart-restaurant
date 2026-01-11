@@ -70,6 +70,7 @@ public enum ErrorCode {
     CANNOT_REMOVE_ITEMS("4003", "Không thể xóa items khỏi order. Chỉ có thể thêm items mới.", HttpStatus.BAD_REQUEST),
     MODIFIER_NOT_FOUND("4004", "MODIFIER_NOT_FOUND)", HttpStatus.BAD_REQUEST),
     ORDER_UPDATE_FAILED("4005", "ORDER_UPDATE_FAILED", HttpStatus.BAD_REQUEST),
+    TYPE_PAYMENT_NOT_FOUND("1049","Type payment not exist",HttpStatus.BAD_REQUEST),
     MOMO_QR_CREATION_FAILED("4006", "Failed to create MoMo QR", HttpStatus.BAD_REQUEST);
     ;
 

@@ -21,6 +21,4 @@ public class TypePayment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer typePaymentId;
     String name;
-    @OneToOne(mappedBy = "typePayment",cascade = CascadeType.REMOVE, orphanRemoval = true)
-    Payment payments;
 }

@@ -7,11 +7,16 @@ import com.smart_restaurant.demo.Repository.StatusRepository;
 import com.smart_restaurant.demo.Repository.TypePaymentRepository;
 import com.smart_restaurant.demo.Service.PaymentService;
 import com.smart_restaurant.demo.constant.MomoParameter;
+import com.smart_restaurant.demo.dto.Request.TypePaymentResquest;
+import com.smart_restaurant.demo.dto.Response.PaymentResponse;
 import com.smart_restaurant.demo.entity.Order;
 import com.smart_restaurant.demo.entity.Payment;
 import com.smart_restaurant.demo.entity.Status;
 import com.smart_restaurant.demo.entity.TypePayment;
 import com.smart_restaurant.demo.enums.OrderStatus;
+import com.smart_restaurant.demo.exception.AppException;
+import com.smart_restaurant.demo.exception.ErrorCode;
+import com.smart_restaurant.demo.mapper.PaymentMapper;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +36,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final OrderRepository orderRepository;
     private final StatusRepository statusRepository;
     private final TypePaymentRepository typePaymentRepository;
+    PaymentMapper paymentMapper;
 
     @Override
     @Transactional
@@ -94,5 +100,14 @@ public class PaymentServiceImpl implements PaymentService {
     public Payment findByOrderId(Integer orderId) {
         return paymentRepository.findByOrder_OrderId(orderId)
                 .orElseThrow(() -> new RuntimeException("Payment not found for order: " + orderId));
+    }
+
+    @Override
+    public PaymentResponse updatePaymentType(TypePaymentResquest typePaymentResquest, Integer orderId) {
+        Order order=orderRepository.findById(orderId).orElseThrow(()-> new AppException(ErrorCode.ORDER_NOT_EXISTED));
+        TypePayment typePayment=typePaymentRepository.findByName(typePaymentResquest.getPaymentType()).orElseThrow(()-> new AppException(ErrorCode.TYPE_PAYMENT_NOT_FOUND));
+        Payment payment=order.getPayments();
+        payment.setTypePayment(typePayment);
+        return  paymentMapper.toPaymentResponse(paymentRepository.save(payment));
     }
 }

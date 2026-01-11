@@ -9,6 +9,7 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.smart_restaurant.demo.Repository.AccountRepository;
 import com.smart_restaurant.demo.Repository.QrHistoryRepository;
 import com.smart_restaurant.demo.Repository.TableRepository;
+import com.smart_restaurant.demo.Service.AuthenticationService;
 import com.smart_restaurant.demo.Service.QrHistoryService;
 import com.smart_restaurant.demo.Service.TableService;
 import com.smart_restaurant.demo.Service.TenantService;
@@ -74,8 +75,7 @@ public class QrHistoryServiceImpl implements QrHistoryService {
     QrHistoryMapper qrHistoryMapper;
     AccountRepository accountRepository;
     TableService tableService;
-    @Autowired
-    private AuthenticationServiceImpl authenticationServiceImpl;
+    AuthenticationService authenticationService;
 
 
 
@@ -175,19 +175,9 @@ public class QrHistoryServiceImpl implements QrHistoryService {
             response.sendRedirect("http://localhost:5173/qr/error");
             return;
         }
+        Account account=accountRepository.findByTenant_TenantId(tenantId).orElseThrow(()->new AppException(ErrorCode.ACCOUNT_EXISTED));
 
-        // ✅ Tạo tài khoản tạm đại diện cho khách
-        Account guest = new Account();
-        guest.setUsername("guest_tenant_" + tenantId + "@gmail.com");
-        guest.setIsFirstActivity(false);
-
-        // ✅ Gán ROLE_CUSTOMER để khi sinh JWT có scope đúng
-        Role roleCustomer = new Role();
-        roleCustomer.setName("CUSTOMER");
-        guest.setRoles(List.of(roleCustomer));
-
-        // ✅ Sinh access token JWT (chuẩn HS512)
-        String accessToken = authenticationServiceImpl.generalToken(guest);
+        String accessToken = authenticationService.generalToken(account);
 
         // ✅ Gửi token qua URL param
         String redirectUrl = String.format(
