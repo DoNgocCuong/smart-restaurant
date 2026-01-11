@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { X, Pencil, Plus } from "lucide-react";
 import Overlay from "../common/Overlay";
 import UpdateItemOverlay from "./UpdateItemOverlay";
-import UploadImagesOverlay from "./uploadImagesOverlay";
+import UploadImagesOverlay from "./UpdateItemOverlay";
 import modifierGroupApi from "../../api/modifierGroupApi";
 import imageApi from "../../api/imageApi";
 
