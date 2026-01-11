@@ -36,4 +36,13 @@ public class ReviewController {
                 .build();
     }
 
+    @DeleteMapping("/tenant/{reviewId}")
+    public ApiResponse<ReviewResponse> deleteReviewByTenant(@PathVariable Integer reviewId){
+        ReviewResponse reviewResponse = reviewService.deleteReviewByTent(reviewId);
+        return ApiResponse.<ReviewResponse>builder()
+                .message("Xóa thanh cong")
+                .result(reviewResponse)
+                .build();
+    }
+
 }

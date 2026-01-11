@@ -8,6 +8,7 @@ import java.util.List;
 public interface ReviewService {
     List<ReviewResponse> getAllReviewByItem(Integer itemId);
     ReviewResponse deleteReview(Integer reviewId, JwtAuthenticationToken jwtAuthenticationToken);
+    ReviewResponse deleteReviewByTent(Integer reviewId);
 
 
 }

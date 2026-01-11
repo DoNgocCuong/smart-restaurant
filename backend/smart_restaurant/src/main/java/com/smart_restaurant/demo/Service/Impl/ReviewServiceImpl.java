@@ -68,4 +68,12 @@ public class ReviewServiceImpl implements ReviewService {
         return reviewMapper.toReviewResponse(review);
 
     }
+
+    @Override
+    public ReviewResponse deleteReviewByTent(Integer reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
+        reviewRepository.deleteById(reviewId);
+        return reviewMapper.toReviewResponse(review);
+    }
 }
