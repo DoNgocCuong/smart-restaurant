@@ -1,7 +1,9 @@
 package com.smart_restaurant.demo.mapper;
 
 import com.smart_restaurant.demo.dto.Request.SignupCustomerRequest;
+import com.smart_restaurant.demo.dto.Request.SignupKitchenRequest;
 import com.smart_restaurant.demo.dto.Request.SignupRequest;
+import com.smart_restaurant.demo.dto.Request.SignupStaffRequest;
 import com.smart_restaurant.demo.dto.Response.AccountResponse;
 import com.smart_restaurant.demo.dto.Response.SignupResponse;
 import com.smart_restaurant.demo.entity.Account;
@@ -21,4 +23,7 @@ public interface AccountMapper {
     @Mapping(target = "is_email_verify", source = "isEmailVerify")
     AccountResponse toAccountResponse(Account account);
     Account toAccount(SignupCustomerRequest signupRequest);
+
+    Account toAccountStaff(SignupStaffRequest signupStaffRequest);
+    Account toAccountKitchen(SignupKitchenRequest signupKitchenRequest);
 }
