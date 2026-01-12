@@ -27,10 +27,16 @@ public class Review {
     @UpdateTimestamp
     @Column(name = "update_at")
     LocalDateTime updateAt;
+
+    @Column(name = "is_active")
+    Boolean isActive;
+
     @ManyToOne
     @JoinColumn(name = "customer_id")
     Customer customer;
     @ManyToOne
     @JoinColumn(name = "item_id")
     Item item;
+
+
 }
