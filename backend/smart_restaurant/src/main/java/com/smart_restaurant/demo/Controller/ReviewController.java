@@ -1,6 +1,7 @@
 package com.smart_restaurant.demo.Controller;
 
 import com.smart_restaurant.demo.Service.ReviewService;
+import com.smart_restaurant.demo.dto.Request.ReviewRequest;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.ReviewResponse;
 import lombok.AccessLevel;
@@ -44,5 +45,11 @@ public class ReviewController {
                 .result(reviewResponse)
                 .build();
     }
-
+    //customer
+    @PostMapping("/{customerId}")
+    public ApiResponse<ReviewResponse> createReview(@PathVariable Integer customerId,@RequestBody ReviewRequest reviewRequest){
+        return ApiResponse.<ReviewResponse>builder()
+                .result(reviewService.createReview(customerId,reviewRequest))
+                .build();
+    }
 }

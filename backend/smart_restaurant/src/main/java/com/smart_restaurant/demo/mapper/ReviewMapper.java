@@ -1,5 +1,6 @@
 package com.smart_restaurant.demo.mapper;
 
+import com.smart_restaurant.demo.dto.Request.ReviewRequest;
 import com.smart_restaurant.demo.dto.Response.ReviewResponse;
 import com.smart_restaurant.demo.entity.Review;
 import org.mapstruct.Mapper;
@@ -14,4 +15,6 @@ public interface ReviewMapper {
     ReviewResponse toReviewResponse(Review review);
 
     List<ReviewResponse> toReviewResponseList(List<Review> reviews);
+
+    Review toReview(ReviewRequest reviewRequest);
 }

@@ -1,15 +1,10 @@
 package com.smart_restaurant.demo.Service.Impl;
 
-import com.smart_restaurant.demo.Repository.AccountRepository;
-import com.smart_restaurant.demo.Repository.CustomerRepository;
-import com.smart_restaurant.demo.Repository.ItemRepository;
-import com.smart_restaurant.demo.Repository.ReviewRepository;
+import com.smart_restaurant.demo.Repository.*;
 import com.smart_restaurant.demo.Service.ReviewService;
+import com.smart_restaurant.demo.dto.Request.ReviewRequest;
 import com.smart_restaurant.demo.dto.Response.ReviewResponse;
-import com.smart_restaurant.demo.entity.Account;
-import com.smart_restaurant.demo.entity.Customer;
-import com.smart_restaurant.demo.entity.Item;
-import com.smart_restaurant.demo.entity.Review;
+import com.smart_restaurant.demo.entity.*;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.smart_restaurant.demo.mapper.ReviewMapper;
@@ -20,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -33,6 +29,8 @@ public class ReviewServiceImpl implements ReviewService {
     ReviewMapper reviewMapper;
     CustomerRepository customerRepository;
     AccountRepository accountRepository;
+    OrderRepository orderRepository;
+    DetailOrderRepository detailOrderRepository;
     @Override
     public List<ReviewResponse> getAllReviewByItem(Integer itemId) {
         Item item = itemRepository.findById(itemId)
@@ -75,5 +73,25 @@ public class ReviewServiceImpl implements ReviewService {
                 .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
         reviewRepository.deleteById(reviewId);
         return reviewMapper.toReviewResponse(review);
+    }
+
+    @Override
+    public ReviewResponse createReview(Integer customerId, ReviewRequest reviewRequest) {
+        Customer customer=customerRepository.findById(customerId).orElseThrow(()->new AppException(ErrorCode.CUSTOMER_NOT_FOUND));
+        List<Order> orders=orderRepository.findAllByCustomer_CustomerId(customerId);
+        Item item=itemRepository.findById(reviewRequest.getItemId()).orElseThrow(()->new AppException(ErrorCode.ITEM_NOT_FOUND));
+        boolean hasBoughtItem = false;
+        for(Order order:orders){
+            if(detailOrderRepository.existsByOrder_OrderIdAndItem_ItemId(order.getOrderId(),reviewRequest.getItemId())){
+                hasBoughtItem=true;
+                break;
+            }
+        }
+        if (hasBoughtItem == false)
+            throw new AppException(ErrorCode.CUSTOMER_NOT_ORDER_ITEM);
+        Review review=reviewMapper.toReview(reviewRequest);
+        review.setCustomer(customer);
+        review.setItem(item);
+        return reviewMapper.toReviewResponse(reviewRepository.save(review));
     }
 }
