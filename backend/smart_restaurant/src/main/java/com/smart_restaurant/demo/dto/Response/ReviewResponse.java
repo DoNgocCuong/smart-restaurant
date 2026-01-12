@@ -16,8 +16,11 @@ import java.time.LocalDateTime;
 public class ReviewResponse {
     Integer reviewId;
     String message;
+    Boolean isActive;
     LocalDateTime createAt;
     LocalDateTime updateAt;
     CustomerResponse customer;
     ItemResponseDTO item;
+
+
 }
