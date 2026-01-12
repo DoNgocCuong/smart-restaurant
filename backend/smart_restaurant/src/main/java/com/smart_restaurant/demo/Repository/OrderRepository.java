@@ -17,8 +17,24 @@ public interface OrderRepository extends JpaRepository<Order , Integer> {
 
     List<Order> findByStatusOrderByCreateAtDesc(Status status);
 
+    // Tim order cua 1 ban cụ thể
     List<Order> findByTable_TableId(Integer tableId);
+
+    // Tìm order của 1 list bàn
+    List<Order> findByTable_TableIdIn(List<Integer> tableIds);
+
+    // Tìm order cua 1 list bàn và lọc theo order
+    List<Order> findByTable_TableIdInAndStatus_OrderStatus(List<Integer> tableIds, OrderStatus status);
+
+    // Tim order cua 1 tenant
     List<Order> findByTableTenantTenantId(Integer tenantId);
+
+    // Tìm order của 1 tent của nhân viên đó quản trị
+    List<Order> findByTable_Tenant_TenantIdAndTable_TableIdIn(Integer tenantId, List<Integer> tableIds);
+    // Tìm order của 1 tent của nhân viên đó quản trị vaf loc theo trang thai
+    List<Order> findByTable_Tenant_TenantIdAndTable_TableIdInAndStatus_OrderStatus(Integer tenantId, List<Integer> tableIds, OrderStatus status);
+
+    // Tìm order cua Customer
     List<Order> findByCustomerCustomerId(Integer customerId);
     List<Order> findByTable_Tenant_TenantIdAndStatus_OrderStatusNot(
             Integer tenantId,

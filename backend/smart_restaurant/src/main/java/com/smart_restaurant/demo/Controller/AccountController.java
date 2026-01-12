@@ -2,10 +2,7 @@ package com.smart_restaurant.demo.Controller;
 
 import com.nimbusds.jose.JOSEException;
 import com.smart_restaurant.demo.Service.AccountService;
-import com.smart_restaurant.demo.dto.Request.AccountUpdateIsActiveRequest;
-import com.smart_restaurant.demo.dto.Request.AccountUpdateRequest;
-import com.smart_restaurant.demo.dto.Request.SignupCustomerRequest;
-import com.smart_restaurant.demo.dto.Request.SignupRequest;
+import com.smart_restaurant.demo.dto.Request.*;
 import com.smart_restaurant.demo.dto.Response.AccountResponse;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.SignupResponse;
@@ -45,19 +42,19 @@ public class AccountController {
 
     @PreAuthorize("hasRole('TENANT_ADMIN')")
     @PostMapping("/create-account-staff")
-    ApiResponse<SignupResponse> createAccountSatff(@RequestBody @Valid SignupRequest signupRequest, JwtAuthenticationToken jwtAuthenticationToken) throws MessagingException, JOSEException{
+    ApiResponse<SignupResponse> createAccountSatff(@RequestBody @Valid SignupStaffRequest signupStaffRequest, JwtAuthenticationToken jwtAuthenticationToken) throws MessagingException, JOSEException{
         return ApiResponse.<SignupResponse>builder()
                 .message("Tạo thành công account Staff")
-                .result(accountService.createAccountStaff(signupRequest, jwtAuthenticationToken))
+                .result(accountService.createAccountStaff(signupStaffRequest, jwtAuthenticationToken))
                 .build();
     }
 
     @PreAuthorize("hasRole('TENANT_ADMIN')")
     @PostMapping("/create-account-kitchen")
-    ApiResponse<SignupResponse> createAccountKitchen(@RequestBody @Valid SignupRequest signupRequest, JwtAuthenticationToken jwtAuthenticationToken) throws MessagingException, JOSEException{
+    ApiResponse<SignupResponse> createAccountKitchen(@RequestBody @Valid SignupKitchenRequest signupKitchenRequest, JwtAuthenticationToken jwtAuthenticationToken) throws MessagingException, JOSEException{
         return ApiResponse.<SignupResponse>builder()
                 .message("Tạo thành công account kitchen staff")
-                .result(accountService.createAccountKitchen(signupRequest,jwtAuthenticationToken))
+                .result(accountService.createAccountKitchen(signupKitchenRequest,jwtAuthenticationToken))
                 .build();
     }
 

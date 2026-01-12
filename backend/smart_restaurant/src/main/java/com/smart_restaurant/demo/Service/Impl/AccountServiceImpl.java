@@ -3,12 +3,9 @@ package com.smart_restaurant.demo.Service.Impl;
 
 import com.smart_restaurant.demo.Repository.*;
 import com.smart_restaurant.demo.Service.AccountService;
-import com.smart_restaurant.demo.dto.Request.AccountUpdateIsActiveRequest;
-import com.smart_restaurant.demo.dto.Request.AccountUpdateRequest;
-import com.smart_restaurant.demo.dto.Request.SignupCustomerRequest;
+import com.smart_restaurant.demo.dto.Request.*;
 import com.smart_restaurant.demo.dto.Response.AccountResponse;
-import com.smart_restaurant.demo.entity.Customer;
-import com.smart_restaurant.demo.entity.Tenant;
+import com.smart_restaurant.demo.entity.*;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.nimbusds.jose.*;
@@ -18,16 +15,14 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.smart_restaurant.demo.Repository.AccountRepository;
 import com.smart_restaurant.demo.Service.AccountService;
-import com.smart_restaurant.demo.dto.Request.SignupRequest;
 import com.smart_restaurant.demo.dto.Response.ConfirmEmailResponse;
 import com.smart_restaurant.demo.dto.Response.SignupResponse;
-import com.smart_restaurant.demo.entity.Account;
-import com.smart_restaurant.demo.entity.Role;
 import com.smart_restaurant.demo.enums.Roles;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.smart_restaurant.demo.mapper.AccountMapper;
 import com.smart_restaurant.demo.mapper.CustomerMapper;
+import com.smart_restaurant.demo.mapper.EmployeeMapper;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.ParseException;
@@ -70,6 +65,10 @@ public class AccountServiceImpl implements AccountService {
     TenantRepository tenantRepository;
     CustomerMapper customerMapper;
     CustomerRepository customerRepository;
+    EmployeeMapper employeeMapper;
+    EmployeeRepository employeeRepository;
+    TableRepository tableRepository;
+
 
     @Override
     public SignupResponse createAccountCustomer(SignupCustomerRequest signupRequest, Integer tenantId) throws JOSEException {
@@ -128,7 +127,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public SignupResponse createAccountStaff(SignupRequest signupRequest, JwtAuthenticationToken jwtAuthenticationToken) throws JOSEException, MessagingException {
+    public SignupResponse createAccountStaff(SignupStaffRequest signupStaffRequest, JwtAuthenticationToken jwtAuthenticationToken) throws JOSEException, MessagingException {
 
         String username = jwtAuthenticationToken.getName();
         Integer tenantId = this.getTenantIdByUsername(username);
@@ -137,26 +136,51 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
 
         if (accountRepository.existsByUsernameAndTenant_TenantId(
-                signupRequest.getUsername(), tenantId)) {
+                signupStaffRequest.getUsername(), tenantId)) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
 
-        Account newAccount=accountMapper.toAccount(signupRequest);
-        String password= passwordEncoder.encode(signupRequest.getPassword());
+        Account newAccount=accountMapper.toAccountStaff(signupStaffRequest);
+        String password= passwordEncoder.encode(signupStaffRequest.getPassword());
         newAccount.setPassword(password);
         newAccount.setRoles(roleRepository.findAllByName(Roles.STAFF.toString()));
         newAccount.setIsEmailVerify(true);
         newAccount.setIsActive(true);
         newAccount.setTenant(tenant);
-        String token=generateEmailToken(newAccount);
-        return accountMapper.toSignupResponse(accountRepository.save(newAccount));
+
+        Employee employee = employeeMapper.toEmployee(signupStaffRequest);
+        employee.setIsEmployee(true);
+        if (signupStaffRequest.getRestaurantTableId() != null && !signupStaffRequest.getRestaurantTableId().isEmpty()) {
+            List<RestaurantTable> restaurantTables = tableRepository.findAllById(signupStaffRequest.getRestaurantTableId());
+
+            // Validate: số lượng bàn truy vấn phải = số lượng ID gửi lên
+            if (restaurantTables.size() != signupStaffRequest.getRestaurantTableId().size()) {
+                throw new AppException(ErrorCode.TABLE_NOT_FOUND);
+            }
+
+            // Validate: tất cả bàn phải thuộc về cùng tenant
+            boolean allBelongToTenant = restaurantTables.stream()
+                    .allMatch(table -> table.getTenant().getTenantId().equals(tenantId));
+
+            if (!allBelongToTenant) {
+                throw new AppException(ErrorCode.TABLE_NOT_BELONGS_TO_TENANT);
+            }
+
+
+            employee.setRestaurantTables(restaurantTables);
+
+        }
+
+        Account account=accountRepository.save(newAccount);
+        employee.setAccount(account);
+        employeeRepository.save(employee);
+        return accountMapper.toSignupResponse(account);
     }
 
     @Override
-    public SignupResponse createAccountKitchen(SignupRequest signupRequest, JwtAuthenticationToken jwtAuthenticationToken) throws JOSEException, MessagingException {
-        if(accountRepository.existsByUsername(signupRequest.getUsername()))
-            throw new AppException(ErrorCode.USER_EXISTED);
+    public SignupResponse createAccountKitchen(SignupKitchenRequest signupKitchenRequest, JwtAuthenticationToken jwtAuthenticationToken) throws JOSEException, MessagingException {
+
 
         String username = jwtAuthenticationToken.getName();
         Integer tenantId = this.getTenantIdByUsername(username);
@@ -165,20 +189,26 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
 
         if (accountRepository.existsByUsernameAndTenant_TenantId(
-                signupRequest.getUsername(), tenantId)) {
+                signupKitchenRequest.getUsername(), tenantId)) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
 
-        Account newAccount=accountMapper.toAccount(signupRequest);
-        String password= passwordEncoder.encode(signupRequest.getPassword());
+        Account newAccount=accountMapper.toAccountKitchen(signupKitchenRequest);
+        String password= passwordEncoder.encode(signupKitchenRequest.getPassword());
         newAccount.setPassword(password);
         newAccount.setRoles(roleRepository.findAllByName(Roles.KITCHEN_STAFF.toString()));
         newAccount.setIsEmailVerify(true);
         newAccount.setIsActive(true);
         newAccount.setTenant(tenant);
-        String token=generateEmailToken(newAccount);
-        return accountMapper.toSignupResponse(accountRepository.save(newAccount));
+
+        Employee employee = employeeMapper.toEmployeeKitchen(signupKitchenRequest);
+        employee.setIsEmployee(false);
+        employee.setRestaurantTables(null);
+        Account account=accountRepository.save(newAccount);
+        employee.setAccount(account);
+        employeeRepository.save(employee);
+        return accountMapper.toSignupResponse(account);
     }
 
     @Override

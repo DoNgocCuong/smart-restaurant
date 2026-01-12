@@ -31,7 +31,7 @@ public enum ErrorCode {
     MODIFIER_GROUP_ALREADY_EXISTS_FOR_TENANT("1024", "MODIFIER GROUP already exists for this tenant", HttpStatus.BAD_REQUEST),
   
 
-    TABLE_NOT_FOUND("1027", "NOT_FOUND", HttpStatus.BAD_REQUEST),
+    TABLE_NOT_FOUND("1027", "TABLE NOT_FOUND", HttpStatus.BAD_REQUEST),
     TABLE_NOT_BELONGS_TO_TENANT("1028", "TABLE_NOT_BELONGS_TO_TENANT", HttpStatus.BAD_REQUEST),
 
     TABLE_ALREADY_EXISTS("1025", "table name already exists", HttpStatus.BAD_REQUEST),
@@ -72,7 +72,8 @@ public enum ErrorCode {
     ORDER_UPDATE_FAILED("4005", "ORDER_UPDATE_FAILED", HttpStatus.BAD_REQUEST),
     MOMO_QR_CREATION_FAILED("4006", "Failed to create MoMo QR", HttpStatus.BAD_REQUEST),
     REVIEW_NOT_FOUND("4007", "REVIEW_NOT_FOUND", HttpStatus.BAD_REQUEST),
-    TYPE_PAYMENT_NOT_FOUND("1049","Type payment not exist",HttpStatus.BAD_REQUEST);
+    TYPE_PAYMENT_NOT_FOUND("1049","Type payment not exist",HttpStatus.BAD_REQUEST),
+    EMPLOYEE_NOT_FOUND("4008", "EMPLOYEE_NOT_FOUND", HttpStatus.BAD_REQUEST);
 
 
     ErrorCode(String code, String message, HttpStatus httpStatusCode) {

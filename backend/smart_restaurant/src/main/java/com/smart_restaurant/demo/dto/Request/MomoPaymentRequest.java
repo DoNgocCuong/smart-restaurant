@@ -20,4 +20,5 @@ public class MomoPaymentRequest {
     private String lang;
     private String extraData;
     private String signature;
+    private Long expireTime;
 }
