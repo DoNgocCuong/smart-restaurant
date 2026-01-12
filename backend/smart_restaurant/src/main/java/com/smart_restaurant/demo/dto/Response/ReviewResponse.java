@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class ReviewResponse {
+    Integer reviewId;
     String message;
     LocalDateTime createAt;
     LocalDateTime updateAt;
