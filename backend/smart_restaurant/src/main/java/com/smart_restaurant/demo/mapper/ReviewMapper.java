@@ -1,6 +1,8 @@
 package com.smart_restaurant.demo.mapper;
 
 import com.smart_restaurant.demo.dto.Request.UpdateStatusReview;
+
+import com.smart_restaurant.demo.dto.Request.ReviewRequest;
 import com.smart_restaurant.demo.dto.Response.ReviewResponse;
 import com.smart_restaurant.demo.entity.Review;
 import org.hibernate.sql.ast.tree.expression.Star;
@@ -20,4 +22,6 @@ public interface ReviewMapper {
 
     @Mapping(target = "isActive", source = "isActive")
     List<ReviewResponse> toReviewResponseList(List<Review> reviews);
+
+    Review toReview(ReviewRequest reviewRequest);
 }

@@ -18,6 +18,7 @@ import org.hibernate.sql.Update;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -33,6 +34,8 @@ public class ReviewServiceImpl implements ReviewService {
     AccountRepository accountRepository;
     AccountService accountService;
     TenantRepository tenantRepository;
+    OrderRepository orderRepository;
+    DetailOrderRepository detailOrderRepository;
     @Override
     public List<ReviewResponse> getAllReviewByItem(Integer itemId) {
         Item item = itemRepository.findById(itemId)
@@ -129,6 +132,23 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
     }
-
-
+    @Override
+    public ReviewResponse createReview(Integer customerId, ReviewRequest reviewRequest) {
+        Customer customer=customerRepository.findById(customerId).orElseThrow(()->new AppException(ErrorCode.CUSTOMER_NOT_FOUND));
+        List<Order> orders=orderRepository.findAllByCustomer_CustomerId(customerId);
+        Item item=itemRepository.findById(reviewRequest.getItemId()).orElseThrow(()->new AppException(ErrorCode.ITEM_NOT_FOUND));
+        boolean hasBoughtItem = false;
+        for(Order order:orders){
+            if(detailOrderRepository.existsByOrder_OrderIdAndItem_ItemId(order.getOrderId(),reviewRequest.getItemId())){
+                hasBoughtItem=true;
+                break;
+            }
+        }
+        if (hasBoughtItem == false)
+            throw new AppException(ErrorCode.CUSTOMER_NOT_ORDER_ITEM);
+        Review review=reviewMapper.toReview(reviewRequest);
+        review.setCustomer(customer);
+        review.setItem(item);
+        return reviewMapper.toReviewResponse(reviewRepository.save(review));
+    }
 }

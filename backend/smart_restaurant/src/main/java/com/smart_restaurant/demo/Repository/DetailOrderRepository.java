@@ -9,4 +9,5 @@ import java.util.List;
 public interface DetailOrderRepository extends JpaRepository<DetailOrder,Integer> {
     List<DetailOrder> findByOrder(Order order);
     List<DetailOrder> findByOrder_OrderId(Integer orderId);
+    Boolean existsByOrder_OrderIdAndItem_ItemId(Integer orderId,Integer itemId);
 }
