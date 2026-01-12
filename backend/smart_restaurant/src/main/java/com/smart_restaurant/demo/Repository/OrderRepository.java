@@ -1,6 +1,7 @@
 package com.smart_restaurant.demo.Repository;
 
 import com.smart_restaurant.demo.entity.Order;
+import com.smart_restaurant.demo.entity.Payment;
 import com.smart_restaurant.demo.entity.Status;
 import com.smart_restaurant.demo.enums.OrderStatus;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -47,6 +48,7 @@ public interface OrderRepository extends JpaRepository<Order , Integer> {
             Integer tableId,
             OrderStatus status
     );
+    List<Order>findAllByCustomer_CustomerId(Integer customerId);
 
     boolean existsByTable_TableIdAndStatus_OrderStatusNotIn(
             Integer tableId,

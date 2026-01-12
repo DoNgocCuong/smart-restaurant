@@ -34,7 +34,7 @@ public class QrHistoryController {
                 .build();
     }
     @GetMapping("/verify")
-    void verify(@RequestParam(name = "t") String token,HttpServletResponse response) throws NoSuchAlgorithmException, IOException, InvalidKeyException {
+    void verify(@RequestParam(name = "t") String token,HttpServletResponse response) throws Exception {
         qrHistoryService.verify(token,  response);
     }
     @GetMapping("/error")

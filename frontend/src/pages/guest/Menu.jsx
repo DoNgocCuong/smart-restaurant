@@ -50,11 +50,12 @@ export default function Menu() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModifierOpen, setIsModifierOpen] = useState(false);
 
-  const { setAuthFromToken } = useContext(AuthContext); // 👈 lấy hàm này
   const { tenantId, tableId } = useParams();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const accessToken = queryParams.get("accessToken");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   /* ================= FETCH ================= */
   useEffect(() => {
     const handleStorageChange = () => {
@@ -62,10 +63,8 @@ export default function Menu() {
       setUserName(storedName);
     };
 
-    // Lắng nghe sự thay đổi sessionStorage
     window.addEventListener("storage", handleStorageChange);
 
-    // Cập nhật lại khi modal đóng (ví dụ reload nội bộ)
     handleStorageChange();
 
     return () => {
@@ -74,19 +73,20 @@ export default function Menu() {
   }, []);
 
   useEffect(() => {
-    // ✅ Nếu token có trong URL → cập nhật vào AuthContext
-    if (accessToken) {
-      setAuthFromToken(accessToken);
-      localStorage.setItem("token", accessToken);
-    }
+    if (!accessToken) return;
 
-    // ✅ Khi token đã có → fetch data
-    if (accessToken) {
-      fetchCategories();
-      fetchItems();
-      fetchModifierGroups();
-    }
+    localStorage.setItem("token", accessToken);
+
+    console.log(localStorage.getItem("token"));
+
+    window.history.replaceState({}, document.title, window.location.pathname);
   }, [accessToken]);
+
+  useEffect(() => {
+    fetchCategories();
+    fetchItems();
+    fetchModifierGroups();
+  }, [isAuthenticated]);
 
   const fetchCategories = async () => {
     const res = await categoryApi.getAllCategories();

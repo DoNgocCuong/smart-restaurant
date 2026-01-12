@@ -25,5 +25,6 @@ public interface TableMapper {
 
 
     TableResponseActive toTableResponseActive(RestaurantTable restaurantTable);
+    List<TableResponseActive> toListTableResponseActive(List<RestaurantTable> restaurantTables);
 }
     

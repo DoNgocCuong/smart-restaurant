@@ -12,6 +12,7 @@ import com.smart_restaurant.demo.Repository.StatusRepository;
 import com.smart_restaurant.demo.Repository.*;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.OrderService;
+import com.smart_restaurant.demo.dto.Request.*;
 import com.smart_restaurant.demo.dto.Response.InvoiceResponse;
 import com.smart_restaurant.demo.entity.Discount;
 import com.smart_restaurant.demo.entity.Image;
@@ -21,10 +22,6 @@ import com.smart_restaurant.demo.enums.*;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.smart_restaurant.demo.mapper.OrderMapper;
-import com.smart_restaurant.demo.dto.Request.DetailOrderRequest;
-import com.smart_restaurant.demo.dto.Request.OrderRequest;
-import com.smart_restaurant.demo.dto.Request.UpdateDetailOrderRequest;
-import com.smart_restaurant.demo.dto.Request.UpdateOrderStatusRequest;
 import com.smart_restaurant.demo.dto.Response.DetailOrderResponse;
 import com.smart_restaurant.demo.dto.Response.ModifierOptionResponse;
 import com.smart_restaurant.demo.dto.Response.OrderResponse;
@@ -79,6 +76,8 @@ public class OrderServiceImpl implements OrderService {
     DiscountRepository discountRepository;
     OrderRepository orderRepository;
     EmployeeRepository employeeRepository;
+    NotificationService notificationService;
+
     @Override
     public InvoiceResponse createInvoice(Integer orderId ,JwtAuthenticationToken jwtAuthenticationToken){
         Order order = orderRepository.findById(orderId)
@@ -270,6 +269,16 @@ public class OrderServiceImpl implements OrderService {
                 + ", customerId: " + (customer != null ? customer.getCustomerId() : "null"));
 
         Order savedOrder = orderRepository.save(order);
+        // ================== SEND SOCKET NOTIFICATION ==================
+        OrderNotification noti = new OrderNotification(
+                savedOrder.getOrderId(),
+                restaurantTable.getTableId(),
+                "🔔 Có đơn hàng mới tại bàn " + restaurantTable.getTableId()
+        );
+
+        notificationService.notifyNewOrder(noti);
+// =============================================================
+
 
         // Lưu detailOrder
         for (DetailOrder detail : detailOrders) {

@@ -74,8 +74,6 @@ public enum ErrorCode {
     REVIEW_NOT_FOUND("4007", "REVIEW_NOT_FOUND", HttpStatus.BAD_REQUEST),
     TYPE_PAYMENT_NOT_FOUND("1049","Type payment not exist",HttpStatus.BAD_REQUEST),
     EMPLOYEE_NOT_FOUND("4008", "EMPLOYEE_NOT_FOUND", HttpStatus.BAD_REQUEST);
-//    MOMO_QR_CREATION_FAILED("4006", "Failed to create MoMo QR", HttpStatus.BAD_REQUEST);
-
 
 
     ErrorCode(String code, String message, HttpStatus httpStatusCode) {

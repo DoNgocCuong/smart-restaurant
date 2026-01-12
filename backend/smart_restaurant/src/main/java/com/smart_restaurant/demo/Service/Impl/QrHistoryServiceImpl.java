@@ -67,6 +67,9 @@ public class QrHistoryServiceImpl implements QrHistoryService {
     @NonFinal
     @Value("${qr.height}")
     protected int qrHeight;
+    @NonFinal
+    @Value(("${qr.FE_URL}"))
+    protected String fe_url;
 
     private final Cloudinary cloudinary; // inject từ CloudinaryConfig
     private final TenantService tenantService;
@@ -162,7 +165,7 @@ public class QrHistoryServiceImpl implements QrHistoryService {
 
 
     public void verify(String token, HttpServletResponse response)
-            throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+            throws Exception {
         boolean ok = verifyTableQRCode(token);
         String[] parts = token.split("\\.");
         if (parts.length != 4)
@@ -172,16 +175,17 @@ public class QrHistoryServiceImpl implements QrHistoryService {
         Integer tableId = Integer.parseInt(parts[1]);
 
         if (!ok) {
-            response.sendRedirect("http://localhost:5173/qr/error");
+            response.sendRedirect(fe_url+"/qr/error");
             return;
         }
-        Account account=accountRepository.findByTenant_TenantId(tenantId).orElseThrow(()->new AppException(ErrorCode.ACCOUNT_EXISTED));
+        String username="guest_tenant_"+tenantId+"@gmail.com";
+        Account account=accountRepository.findByTenant_TenantIdAndUsername(tenantId,username).orElseThrow(()->new AppException(ErrorCode.ACCOUNT_EXISTED));
 
         String accessToken = authenticationService.generalToken(account);
 
         // ✅ Gửi token qua URL param
         String redirectUrl = String.format(
-                "http://localhost:5173/guest/menu/%d/tables/%d?accessToken=%s",
+                fe_url+"/guest/menu/%d/tables/%d?accessToken=%s",
                 tenantId,
                 tableId,
                 URLEncoder.encode(accessToken, StandardCharsets.UTF_8)
