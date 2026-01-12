@@ -69,6 +69,8 @@ public class MomoPaymentServiceImpl implements MomoPaymentService {
                 return null;
             }
 
+        long expireTime = System.currentTimeMillis() + 15 * 60 * 1000;
+
             MomoPaymentRequest request = MomoPaymentRequest.builder()
                     .partnerCode(PARTNER_CODE)
                     .requestType(REQUEST_TYPE)
@@ -80,6 +82,7 @@ public class MomoPaymentServiceImpl implements MomoPaymentService {
                     .extraData(extraData)
                     .amount(amount)
                     .signature(prettySignature)
+                    .expireTime(expireTime)
                     .lang("vi")
                     .build();
 

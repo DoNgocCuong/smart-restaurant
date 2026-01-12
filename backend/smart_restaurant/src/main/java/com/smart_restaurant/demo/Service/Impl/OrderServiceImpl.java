@@ -78,6 +78,7 @@ public class OrderServiceImpl implements OrderService {
     AccountService accountService;
     DiscountRepository discountRepository;
     OrderRepository orderRepository;
+    EmployeeRepository employeeRepository;
     @Override
     public InvoiceResponse createInvoice(Integer orderId ,JwtAuthenticationToken jwtAuthenticationToken){
         Order order = orderRepository.findById(orderId)
@@ -382,6 +383,75 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Order đã bị xóa");
         }
         return order;
+    }
+
+    @Override
+    public List<OrderResponse> getAllOrderTenantStatusPendingApprovalByStaff(JwtAuthenticationToken jwtToken) {
+        String username = jwtToken.getName();
+        Account account = accountRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
+        if (account.getTenant() == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED); // Chặn CUSTOMER hoặc SUPER_ADMIN
+        }
+        Integer tenantId = accountService.getTenantIdByUsername(username);
+
+        Employee employee = employeeRepository.findByAccount_AccountId(account.getAccountId())
+                .orElseThrow(() -> new AppException(ErrorCode.EMPLOYEE_NOT_FOUND));
+
+        // Lấy các bàn mà staff quản trị
+        List<RestaurantTable> staffTables = employee.getRestaurantTables();
+
+        if (staffTables == null || staffTables.isEmpty()) {
+            return List.of(); // Không có bàn nào
+        }
+
+        // Lấy danh sách tableId
+        List<Integer> tableIds = staffTables.stream()
+                .map(RestaurantTable::getTableId)
+                .collect(Collectors.toList());
+
+        // Query Orders từ các bàn đó
+        List<Order> orders = orderRepository.findByTable_Tenant_TenantIdAndTable_TableIdInAndStatus_OrderStatus(tenantId, tableIds ,OrderStatus.Pending_approval);
+        return orders.stream()
+                .map(this::toFullOrderResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<OrderResponse> getAllTenantOrderByStaff(JwtAuthenticationToken jwtAuthenticationToken) {
+
+        String username = jwtAuthenticationToken.getName();
+        Account account = accountRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+        if (account.getTenant() == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED); // Chặn CUSTOMER hoặc SUPER_ADMIN
+        }
+        Integer tenantId = accountService.getTenantIdByUsername(username);
+
+
+        Employee employee = employeeRepository.findByAccount_AccountId(account.getAccountId())
+                .orElseThrow(() -> new AppException(ErrorCode.EMPLOYEE_NOT_FOUND));
+
+        // [1] Lấy các bàn mà staff quản trị
+        List<RestaurantTable> staffTables = employee.getRestaurantTables();
+
+        if (staffTables == null || staffTables.isEmpty()) {
+            return List.of(); // Không có bàn nào
+        }
+
+        //[2] Lấy danh sách tableId từ cái list bàn
+        List<Integer> tableIds = staffTables.stream()
+                .map(RestaurantTable::getTableId)
+                .collect(Collectors.toList());
+
+        // [3] Tìm Orders từ các bàn đó ma nhan vien do quan tri
+        List<Order> orders = orderRepository.findByTable_Tenant_TenantIdAndTable_TableIdIn(tenantId, tableIds);
+
+
+        return orders.stream()
+                .map(this::toFullOrderResponse)
+                .collect(Collectors.toList());
     }
 
     @Override

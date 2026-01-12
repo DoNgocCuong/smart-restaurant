@@ -65,7 +65,6 @@ public class OrderController {
                 .build();
     }
 
-
     // Xem tất cả đơn hàng , xem được luôn chi tiết đơn hàng
     @GetMapping("/me")
     public ApiResponse<List<OrderResponse>> getAllMyOrder(JwtAuthenticationToken jwtToken){
@@ -76,6 +75,7 @@ public class OrderController {
                 .build();
     }
 
+    // [ Xem chi tiet don hang ]
     @GetMapping("/{id}")
     public ApiResponse<OrderResponse> getOrderById(@PathVariable Integer id){
         OrderResponse orderResponse = orderService.getOrderById(id);
@@ -85,6 +85,7 @@ public class OrderController {
                 .build();
     }
 
+    // [ Xem don hang cua tent ]
     @GetMapping("/tenant")
     public ApiResponse<List<OrderResponse>> getAllOrderTenant(JwtAuthenticationToken jwtToken){
         List<OrderResponse> orderResponse = orderService.getAllTenantOrder(jwtToken);
@@ -94,6 +95,7 @@ public class OrderController {
                 .build();
     }
 
+    // [ update Order ]
     @PutMapping("/{orderId}")
     public ApiResponse<OrderResponse> updateOrderAddItems(
             @PathVariable Integer orderId,
@@ -106,7 +108,6 @@ public class OrderController {
                 .message("Update thành cong đơn hàng")
                 .build();
     }
-
 
     /*
     - Staff chấp nhận / từ chối order : [ status = Pending_approval,Approved]
@@ -123,8 +124,8 @@ public class OrderController {
 
 
     // [STAFF]
-    // [1] - Get all đơn hàng đang chờ xử lý
-    @GetMapping("/pending-approval")
+    // [1] - Get all đơn hàng cua Nha Hang đang chờ xử lý
+    @GetMapping("/tenant/pending-approval")
     public ApiResponse<List<OrderResponse>> getAllOrderTenantStatusPendingApproval(JwtAuthenticationToken jwtToken){
         List<OrderResponse> orderResponse = orderService.getAllOrderTenantStatusPendingApproval( jwtToken);
         return ApiResponse.<List<OrderResponse>>builder()
@@ -133,7 +134,28 @@ public class OrderController {
                 .build();
     }
 
-//    @PostMapping("")Q
+    // [2] - Get all đơn hàng đang chờ xử lý của staff đó quản trị
+    @GetMapping("/pending-approval")
+    public ApiResponse<List<OrderResponse>> getAllOrderTenantStatusPendingApprovalByStaff(JwtAuthenticationToken jwtToken){
+        List<OrderResponse> orderResponse = orderService.getAllOrderTenantStatusPendingApprovalByStaff( jwtToken);
+        return ApiResponse.<List<OrderResponse>>builder()
+                .result(orderResponse)
+                .message("Get All thành công Order StatusPendingApproval cua staff nó quản trị")
+                .build();
+    }
+
+
+    // [3] - Get all đơn hàng của staff đó quản trị
+    @GetMapping("")
+    public ApiResponse<List<OrderResponse>> getAllOrderTenantByStaff(JwtAuthenticationToken jwtToken){
+        List<OrderResponse> orderResponse = orderService.getAllTenantOrderByStaff( jwtToken);
+        return ApiResponse.<List<OrderResponse>>builder()
+                .result(orderResponse)
+                .message("Get All thành cong Order cua staff nó quản trị")
+                .build();
+    }
+
+//    @PostMapping("")
 //    public ApiResponse<OrderResponse> createOrder()
     @PostMapping("/{orderId}")
     public ApiResponse<InvoiceResponse>createInvoice(@PathVariable Integer orderId,JwtAuthenticationToken jwtAuthenticationToken){
