@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,6 +55,70 @@ public interface OrderRepository extends JpaRepository<Order , Integer> {
             Integer tableId,
             List<OrderStatus> statuses
     );
+
+
+
+    // =========================================================
+    // 1. DOANH THU THEO NGÀY (từ ngày -> đến ngày) + STATUS
+    // =========================================================
+    @Query("""
+        SELECT DATE(o.createAt), SUM(o.total)
+        FROM Order o
+        WHERE o.createAt BETWEEN :from AND :to
+          AND o.status.statusId = :statusId
+        GROUP BY DATE(o.createAt)
+        ORDER BY DATE(o.createAt)
+    """)
+    List<Object[]> revenueByDateRange(@Param("from") LocalDateTime from,
+                                      @Param("to") LocalDateTime to,
+                                      @Param("statusId") int statusId);
+
+
+    // =========================================================
+    // 2. DOANH THU THEO TUẦN TRONG KHOẢNG THÁNG + STATUS
+    // (MySQL native query)
+    // =========================================================
+    @Query(value = """
+        SELECT 
+          YEAR(o.create_at)   AS y,
+          MONTH(o.create_at)  AS m,
+          WEEK(o.create_at, 1)
+            - WEEK(DATE_SUB(o.create_at, INTERVAL DAY(o.create_at)-1 DAY), 1) + 1 
+            AS weekInMonth,
+          SUM(o.total) AS revenue
+        FROM orders o
+        WHERE 
+          YEAR(o.create_at) = :year
+          AND MONTH(o.create_at) BETWEEN :fromMonth AND :toMonth
+          AND o.status_id = :statusId
+        GROUP BY y, m, weekInMonth
+        ORDER BY y, m, weekInMonth
+    """, nativeQuery = true)
+    List<Object[]> revenueByWeekInMonthRange(@Param("year") int year,
+                                             @Param("fromMonth") int fromMonth,
+                                             @Param("toMonth") int toMonth,
+                                             @Param("statusId") int statusId);
+
+
+    // =========================================================
+    // 3. DOANH THU THEO THÁNG TRONG KHOẢNG NĂM + STATUS
+    // =========================================================
+    @Query("""
+        SELECT YEAR(o.createAt), MONTH(o.createAt), SUM(o.total)
+        FROM Order o
+        WHERE YEAR(o.createAt) BETWEEN :fromYear AND :toYear
+          AND o.status.statusId = :statusId
+        GROUP BY YEAR(o.createAt), MONTH(o.createAt)
+        ORDER BY YEAR(o.createAt), MONTH(o.createAt)
+    """)
+    List<Object[]> revenueByYearRange(@Param("fromYear") int fromYear,
+                                      @Param("toYear") int toYear,
+                                      @Param("statusId") int statusId);
+
+
+
+
+
 
 
 

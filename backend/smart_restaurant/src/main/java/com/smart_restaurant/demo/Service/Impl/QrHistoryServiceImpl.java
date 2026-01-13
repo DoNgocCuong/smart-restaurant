@@ -183,7 +183,6 @@ public class QrHistoryServiceImpl implements QrHistoryService {
 
         String accessToken = authenticationService.generalToken(account);
 
-        // ✅ Gửi token qua URL param
         String redirectUrl = String.format(
                 fe_url+"/guest/menu/%d/tables/%d?accessToken=%s",
                 tenantId,
