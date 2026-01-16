@@ -152,8 +152,8 @@ export default function CartModal({
               placeholder="Ví dụ: ít cay, không hành, lên món sau 10 phút..."
               rows={3}
               className="w-full resize-none rounded-xl border border-gray-300 
-                 px-3 py-2 text-sm focus:outline-none 
-                 focus:ring-2 focus:ring-gray-900/80"
+                px-3 py-2 text-sm focus:outline-none 
+                focus:ring-2 focus:ring-gray-900/80"
             />
           </div>
           <div className="flex justify-between font-semibold text-lg">

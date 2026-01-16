@@ -1,7 +1,7 @@
 import { useState } from "react";
-import authApi from "../../api/authApi";
 import { Eye, EyeOff, X, Mail, Lock } from "lucide-react";
 import Overlay from "../common/Overlay";
+import accountApi from "../../api/accountApi";
 const sanitizePassword = (value) => value.replace(/[^\x21-\x7E]/g, "");
 
 export default function RegisterModal({
@@ -46,7 +46,7 @@ export default function RegisterModal({
     try {
       setLoading(true);
 
-      await authApi.customerSignup(tenantId, {
+      const _res = await accountApi.createCustomerAccount(tenantId, {
         username: formData.username,
         password: formData.password,
       });
@@ -55,6 +55,7 @@ export default function RegisterModal({
       onClose();
     } catch (err) {
       setError("Đăng ký thất bại, vui lòng thử lại");
+      console.error(err);
     } finally {
       setLoading(false);
     }

@@ -32,6 +32,8 @@ export default function LoginModal({
         password,
       });
 
+      console.log(res);
+
       const accessToken = res?.result?.acessToken;
       const userName = email;
 
@@ -54,6 +56,7 @@ export default function LoginModal({
       setError(
         err?.response?.data?.message || "Email hoặc mật khẩu không chính xác"
       );
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -61,8 +64,6 @@ export default function LoginModal({
 
   return (
     <Overlay>
-      {/* OVERLAY */}
-
       {/* MODAL */}
       <div className=" bg-white w-[92%] max-w-md rounded-3xl shadow-xl p-6 sm:p-8 animate-scaleIn">
         {/* HEADER */}
