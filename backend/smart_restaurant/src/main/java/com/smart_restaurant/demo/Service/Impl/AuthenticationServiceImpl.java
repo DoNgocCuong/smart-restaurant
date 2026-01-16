@@ -76,7 +76,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public AuthenticationResponse authenticate(AuthenticateRequest authenticateRequest, HttpServletResponse response) {
          Account account=accountRepository.findByUsername(authenticateRequest.getUserName())
                 .orElseThrow(() ->new AppException(ErrorCode.ACCOUNT_NOT_EXITS));
-         if(account.getIsFirstActivity())
+         if(!account.getIsFirstActivity())
              throw new AppException(ErrorCode.EMAIL_NOT_VERIFY);
 
 
@@ -342,3 +342,4 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return  accountRepository.save(account);
     }
 }
+
