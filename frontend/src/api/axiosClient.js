@@ -46,21 +46,13 @@ axiosClient.interceptors.response.use(
     const originalRequest = error.config;
     const status = error.response?.status;
 
-    console.log("status: " + status);
-    console.log("đây");
-    console.log("Không biết: " + originalRequest._retry);
-
     if (!error.response) return Promise.reject(error);
 
     // ===== Chỉ refresh khi accessToken hết hạn =====
     if (status === 401 && !originalRequest._retry) {
       // Nếu chính login fail → logout
-      console.log("đây");
 
       if (originalRequest.url.includes("/auth/log-in")) {
-        console.log("Không refresh được");
-        console.log("đây");
-
         localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");
         window.location.href = "/login";
@@ -73,8 +65,6 @@ axiosClient.interceptors.response.use(
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           queue.push((token) => {
-            console.log("đây");
-
             if (!token) reject(error);
             originalRequest.headers.Authorization = `Bearer ${token}`;
             resolve(axiosClient(originalRequest));
@@ -83,11 +73,9 @@ axiosClient.interceptors.response.use(
       }
 
       isRefreshing = true;
-      console.log("đây");
 
       try {
         const res = await rawAxios.post("/auth/refresh-token");
-        console.log("đây");
 
         const newAccessToken = res.data?.accessToken;
 
@@ -105,7 +93,6 @@ axiosClient.interceptors.response.use(
       } catch (err) {
         queue.forEach((cb) => cb(null));
         queue = [];
-        console.log("đây");
 
         localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");
