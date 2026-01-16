@@ -2,7 +2,6 @@ package com.smart_restaurant.demo.Service.Impl;
 
 
 import com.lowagie.text.*;
-import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
@@ -13,22 +12,16 @@ import com.smart_restaurant.demo.Repository.*;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.OrderService;
 import com.smart_restaurant.demo.dto.Request.*;
-import com.smart_restaurant.demo.dto.Response.InvoiceResponse;
+import com.smart_restaurant.demo.dto.Response.*;
 import com.smart_restaurant.demo.entity.Discount;
-import com.smart_restaurant.demo.entity.Image;
 import com.smart_restaurant.demo.entity.Order;
 import com.smart_restaurant.demo.entity.Status;
 import com.smart_restaurant.demo.enums.*;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.smart_restaurant.demo.mapper.OrderMapper;
-import com.smart_restaurant.demo.dto.Response.DetailOrderResponse;
-import com.smart_restaurant.demo.dto.Response.ModifierOptionResponse;
-import com.smart_restaurant.demo.dto.Response.OrderResponse;
 import com.smart_restaurant.demo.entity.*;
 import com.smart_restaurant.demo.enums.OrderStatus;
-import com.smart_restaurant.demo.exception.AppException;
-import com.smart_restaurant.demo.exception.ErrorCode;
 
 import com.smart_restaurant.demo.mapper.DetailOrderMapper;
 
@@ -40,14 +33,9 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
 
-import java.awt.*;
-import java.awt.Font;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -490,6 +478,63 @@ public class OrderServiceImpl implements OrderService {
 
         // Save
         Order updatedOrder = orderRepository.save(order);
+        String newStatus=statusEntity.getOrderStatus().toString();
+        OrderNotification orderNotification=OrderNotification.builder()
+                .orderId(id)
+                .tableId(order.getTable().getTableId())
+                .build();
+        switch (newStatus) {
+
+            case "Approved" -> {
+                // Thông báo cho customer: đơn đã được duyệt
+                orderNotification.setMessage("Đơn hàng của bạn đã được phê duyệt.");
+                notificationService.notifyAcceptOrderCustomer(orderNotification);
+
+                // Thông báo cho kitchen: có đơn mới
+                orderNotification.setMessage("Có đơn hàng mới.");
+                notificationService.notifyAcceptOrderKitchen(orderNotification);
+            }
+
+            case "Rejected" -> {
+                // Thông báo cho customer: đơn không được chấp nhận
+                orderNotification.setMessage("Đơn hàng của bạn không được phê duyệt.Nhân viên của chúng tôi sẽ đến giải đáp trong giây lát.");
+                notificationService.notifyAcceptOrderCustomer(orderNotification);
+            }
+
+            case "Cooking" -> {
+                // Thông báo cho customer: đơn đang được nấu
+                orderNotification.setMessage("Đơn hàng của bạn đang được nấu.");
+                notificationService.notifyAcceptOrderCustomer(orderNotification);
+            }
+
+            case "Cooked" -> {
+                // Thông báo cho employee: đơn sẵn sàng phục vụ
+                orderNotification.setMessage("Đơn hàng đã được nấu xong.Nhanh chóng phục vụ khách hàng.");
+                notificationService.notifyNewOrder(orderNotification);
+
+                // Thông báo cho customer: món đã nấu xong
+                orderNotification.setMessage("Đơn hàng của bạn đã được nấu xong, nhân viên của chúng tôi sẽ phục vụ bạn trong giây lát.");
+                notificationService.notifyAcceptOrderCustomer(orderNotification);
+            }
+
+            case "Pending_approval" -> {
+                orderNotification.setMessage("khách hàng yêu cầu thanh toán.");
+                notificationService.notifyNewOrder(orderNotification);
+            }
+
+            case "Pending_payment" -> {
+                orderNotification.setMessage("Bạn đã thanh toán thành công.");
+                notificationService.notifyAcceptOrderCustomer(orderNotification);
+                orderNotification.setMessage("Khách hàng đã thanh toán thành công.");
+                notificationService.notifyNewOrder(orderNotification);
+            }
+            case "Serving"->{
+                orderNotification.setMessage("Đơn hàng đã được phục vụ");
+                notificationService.notifyAcceptOrderCustomer(orderNotification);
+            }
+            default -> {
+            }
+        }
         return toFullOrderResponse(updatedOrder);
     }
 

@@ -66,6 +66,7 @@ public class SecurityConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.addAllowedOrigin("http://localhost:5173");
+        corsConfiguration.addAllowedOrigin("http://127.0.0.1:5500");
         corsConfiguration.addAllowedOrigin("https://smart-restaurant-seven.vercel.app");
         corsConfiguration.addAllowedMethod("*"); // cho phép tất cả các method (GET, POST, PUT, DELETE, ...)
         corsConfiguration.addAllowedHeader("*"); // cho phép tất cả các header
