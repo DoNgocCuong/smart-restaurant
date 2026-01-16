@@ -133,10 +133,10 @@ function Login() {
   };
 
   return (
-    <div className="w-full bg-gradient-to-br from-blue-50 via-white to-blue-50 min-h-screen flex items-center justify-center p-4">
+    <div className="w-full bg-linear-to-br from-blue-50 via-white to-blue-50 min-h-screen flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-8 flex flex-col gap-6 border border-blue-100">
         <div className="flex flex-col gap-2">
-          <h1 className="font-extrabold text-3xl text-center bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="font-extrabold text-3xl text-center bg-linear-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">
             Hệ thống quản lý nhà hàng
           </h1>
           <h2 className="font-bold text-lg text-center text-gray-700">
@@ -191,7 +191,7 @@ function Login() {
                       className="flex items-center justify-between px-3 py-2 hover:bg-blue-50 rounded-lg cursor-pointer transition-all group"
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center shrink-0">
                           <User
                             size={16}
                             className="text-white"
@@ -285,7 +285,7 @@ function Login() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 py-3 px-4 rounded-lg font-bold text-white cursor-pointer hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-300 transition-all duration-300 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            className="w-full bg-linear-to-r from-blue-500 to-blue-600 py-3 px-4 rounded-lg font-bold text-white cursor-pointer hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-300 transition-all duration-300 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
             {isLoading ? "Đang xử lý..." : "Đăng nhập"}
           </button>
