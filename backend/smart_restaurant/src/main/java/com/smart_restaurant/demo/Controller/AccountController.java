@@ -144,7 +144,4 @@ public class AccountController {
                 .result(accountService.createAccountCustomer(signupRequest,tenantId))
                 .build();
     }
-
-
-
 }
