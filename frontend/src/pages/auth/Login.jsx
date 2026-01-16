@@ -26,10 +26,11 @@ function Login() {
     const accounts = localStorage.getItem("savedAccounts");
     if (accounts) {
       try {
-        setSavedAccounts(JSON.parse(accounts));
-      } catch (err) {
-        console.error("Error parsing saved accounts:", err);
+        const parsed = JSON.parse(accounts);
+        setSavedAccounts(Array.isArray(parsed) ? parsed : []);
+      } catch {
         setSavedAccounts([]);
+        localStorage.removeItem("savedAccounts");
       }
     }
   }, []);
@@ -40,6 +41,7 @@ function Login() {
       if (
         suggestionsRef.current &&
         !suggestionsRef.current.contains(event.target) &&
+        inputRef.current &&
         !inputRef.current.contains(event.target)
       ) {
         setShowSuggestions(false);
@@ -52,28 +54,45 @@ function Login() {
 
   // Lọc danh sách tài khoản theo input của người dùng
   const filteredAccounts = savedAccounts.filter((account) =>
-    account.toLowerCase().includes(email.toLowerCase())
+    account.email.toLowerCase().includes(email.toLowerCase())
   );
 
   const addSavedAccount = (newEmail, newPassword) => {
-    const updated = savedAccounts.filter((acc) => acc !== newEmail);
-    updated.unshift(newEmail);
-    if (updated.length > 5) updated.pop();
+    // Loại bỏ tài khoản cũ nếu đã tồn tại
+    const updated = savedAccounts.filter((acc) => acc.email !== newEmail);
+
+    // Thêm tài khoản mới vào đầu danh sách
+    updated.unshift({
+      email: newEmail,
+      password: newPassword,
+    });
+
+    // Giới hạn tối đa 5 tài khoản
+    if (updated.length > 5) {
+      updated.pop();
+    }
+
     setSavedAccounts(updated);
     localStorage.setItem("savedAccounts", JSON.stringify(updated));
   };
 
-  const removeSavedAccount = (accountToRemove) => {
-    const updated = savedAccounts.filter((acc) => acc !== accountToRemove);
+  const removeSavedAccount = (emailToRemove) => {
+    const updated = savedAccounts.filter((acc) => acc.email !== emailToRemove);
     setSavedAccounts(updated);
     localStorage.setItem("savedAccounts", JSON.stringify(updated));
+
+    // Nếu xóa tài khoản đang được chọn, bỏ tick checkbox
+    if (email === emailToRemove) {
+      setSaveAccount(false);
+    }
   };
 
-  const selectSavedAccount = (selectedEmail) => {
-    setEmail(selectedEmail);
-    setPassword("");
+  const selectSavedAccount = (account) => {
+    setEmail(account.email);
+    setPassword(account.password);
     setSaveAccount(true);
     setShowSuggestions(false);
+    setErrorMessage("");
   };
 
   const handleSubmit = async (e) => {
@@ -110,6 +129,12 @@ function Login() {
       // Lưu tài khoản nếu tick "Lưu tài khoản"
       if (saveAccount) {
         addSavedAccount(email, password);
+      } else {
+        // Nếu không tick, xóa tài khoản này khỏi danh sách nếu đã tồn tại
+        const accountExists = savedAccounts.some((acc) => acc.email === email);
+        if (accountExists) {
+          removeSavedAccount(email);
+        }
       }
 
       if (role === "SUPER_ADMIN") {
@@ -132,11 +157,21 @@ function Login() {
     }
   };
 
+  // Kiểm tra xem email hiện tại có trong danh sách đã lưu không
+  useEffect(() => {
+    if (email) {
+      const accountExists = savedAccounts.some((acc) => acc.email === email);
+      if (accountExists && !saveAccount) {
+        setSaveAccount(true);
+      }
+    }
+  }, [email, savedAccounts]);
+
   return (
-    <div className="w-full bg-gradient-to-br from-blue-50 via-white to-blue-50 min-h-screen flex items-center justify-center p-4">
+    <div className="w-full bg-linear-to-br from-blue-50 via-white to-blue-50 min-h-screen flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-8 flex flex-col gap-6 border border-blue-100">
         <div className="flex flex-col gap-2">
-          <h1 className="font-extrabold text-3xl text-center bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="font-extrabold text-3xl text-center bg-linear-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">
             Hệ thống quản lý nhà hàng
           </h1>
           <h2 className="font-bold text-lg text-center text-gray-700">
@@ -158,7 +193,7 @@ function Login() {
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
-                  setErrorMessage(false);
+                  setErrorMessage("");
                   if (savedAccounts.length > 0) {
                     setShowSuggestions(true);
                   }
@@ -169,7 +204,8 @@ function Login() {
                   }
                 }}
                 required
-                className="w-full pl-10 pr-4 border-2 border-blue-200 h-11 rounded-lg text-gray-700 focus:outline-none focus:border-blue-500 focus:shadow-lg focus:shadow-blue-200 transition-all duration-200 placeholder-gray-400"
+                className="w-full pl-10 pr-4 border-2 border-blue-200 h-11 rounded-lg text-gray-700 focus:outline-none 
+                focus:border-blue-500 focus:shadow-lg focus:shadow-blue-200 transition-all duration-200 placeholder-gray-400"
                 placeholder="Nhập email của bạn"
               />
             </div>
@@ -191,7 +227,7 @@ function Login() {
                       className="flex items-center justify-between px-3 py-2 hover:bg-blue-50 rounded-lg cursor-pointer transition-all group"
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center shrink-0">
                           <User
                             size={16}
                             className="text-white"
@@ -200,7 +236,7 @@ function Login() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-gray-900 truncate text-sm">
-                            {account}
+                            {account.email}
                           </div>
                         </div>
                       </div>
@@ -208,7 +244,7 @@ function Login() {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          removeSavedAccount(account);
+                          removeSavedAccount(account.email);
                         }}
                         className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-50 rounded transition-all"
                       >
@@ -239,7 +275,7 @@ function Login() {
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  setErrorMessage(false);
+                  setErrorMessage("");
                 }}
                 required
                 className="w-full pl-10 pr-12 border-2 border-blue-200 h-11 rounded-lg text-gray-700 focus:outline-none focus:border-blue-500 focus:shadow-lg focus:shadow-blue-200 transition-all duration-200 placeholder-gray-400"
@@ -285,7 +321,9 @@ function Login() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 py-3 px-4 rounded-lg font-bold text-white cursor-pointer hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-300 transition-all duration-300 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            className="w-full bg-linear-to-r from-blue-500 to-blue-600 py-3 px-4 rounded-lg font-bold text-white cursor-pointer 
+            hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-300 transition-all duration-300 active:translate-y-0 disabled:opacity-50 
+            disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
             {isLoading ? "Đang xử lý..." : "Đăng nhập"}
           </button>

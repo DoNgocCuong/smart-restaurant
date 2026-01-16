@@ -16,7 +16,6 @@ function StaffManagement() {
     try {
       setLoading(true);
       const res = await accountApi.getAllStaff();
-      console.log(res.result);
       setStaffs(res.result || []);
     } catch (error) {
       console.error(error);
@@ -38,12 +37,12 @@ function StaffManagement() {
   };
 
   return (
-    <div className="col-start-2 col-end-12 space-y-6 py-6">
+    <div className="col-start-2 col-end-12 py-6 space-y-6">
       {/* HEADER */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-md flex justify-between items-center">
+      <div className="flex justify-between items-center p-6 bg-white rounded-xl border-gray-200 shadow-md border">
         <h2 className="text-2xl font-bold text-gray-800">Quản lý nhân viên</h2>
         <button
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition"
           onClick={() => setShowAddModal(true)}
         >
           Thêm tài khoản
@@ -51,20 +50,20 @@ function StaffManagement() {
       </div>
 
       {/* CONTENT */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-md">
+      <div className="p-6 bg-white rounded-xl border-gray-200 shadow-md border">
         {loading ? (
-          <div className="text-center py-12 text-gray-500 italic">
+          <div className="py-12 text-center text-gray-500 italic">
             Đang tải dữ liệu...
           </div>
         ) : staffs.length === 0 ? (
-          <div className="text-center py-12 text-gray-500 italic">
+          <div className="py-12 text-center text-gray-500 italic">
             Chưa có nhân viên
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[700px] border-collapse">
               <thead>
-                <tr className="bg-gray-50 text-left text-sm text-gray-600 uppercase tracking-wide">
+                <tr className="text-left text-sm text-gray-600 tracking-wide bg-gray-50 uppercase">
                   <th className="px-5 py-3 border-b border-gray-200">#</th>
                   <th className="px-5 py-3 border-b border-gray-200">Email</th>
                   <th className="px-5 py-3 border-b border-gray-200">
@@ -83,18 +82,18 @@ function StaffManagement() {
                 {staffs.map((staff, index) => (
                   <tr
                     key={staff.username}
-                    className="transition-colors duration-200 hover:bg-gray-50 text-sm text-gray-700"
+                    className="text-sm text-gray-700 transition-colors duration-200 hover:bg-gray-50"
                   >
                     <td className="px-5 py-3 border-b border-gray-200">
                       {index + 1}
                     </td>
 
-                    <td className="px-5 py-3 border-b border-gray-200 font-medium">
+                    <td className="px-5 py-3 font-medium border-b border-gray-200">
                       {staff.username}
                     </td>
 
                     <td className="px-5 py-3 border-b border-gray-200">
-                      <span className="inline-block px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">
+                      <span className="inline-block px-2 py-1 text-blue-800 text-xs font-semibold bg-blue-100 rounded-full">
                         {renderRole(staff.roles)}
                       </span>
                     </td>

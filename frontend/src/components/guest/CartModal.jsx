@@ -2,6 +2,8 @@ import Overlay from "../common/Overlay";
 import { X, Minus, Plus, ShoppingCart } from "lucide-react";
 import orderApi from "../../api/orderApi";
 import { useState } from "react";
+import toast from "react-hot-toast";
+import { getUsernameFromToken } from "../../utils/jwt";
 
 export default function CartModal({
   cart,
@@ -12,6 +14,13 @@ export default function CartModal({
 }) {
   const safeCart = Array.isArray(cart) ? cart : [];
   const [special, setSpecial] = useState("");
+
+  const [customerName, setCustomerName] = useState("");
+  const [phone, setPhone] = useState("");
+
+  const username = getUsernameFromToken();
+  const isGuestTenant = username?.includes("guest_tenant");
+
   /* ================== TÍNH GIÁ ================== */
   const calcItemTotal = (item) => {
     const modifiers = Array.isArray(item.modifiers) ? item.modifiers : [];
@@ -45,44 +54,61 @@ export default function CartModal({
   const handleMakeOrder = async () => {
     if (safeCart.length === 0) return;
 
+    if (isGuestTenant) {
+      if (!customerName.trim() || !phone.trim()) {
+        toast.error("Vui lòng nhập tên và số điện thoại");
+        return;
+      }
+    }
+
     const payload = {
-      customerName: "Khách tại quán",
+      customerName: isGuestTenant ? customerName.trim() : "Khách tại quán",
+      phone: isGuestTenant ? phone.trim() : "0000000000",
       tableId: Number(tableId),
       special: special.trim(),
       detailOrders: mapCartToDetailOrders(safeCart),
     };
-    console.log(JSON.stringify(payload));
 
     try {
-      await orderApi.makeOrder(payload);
+      const res = await orderApi.makeOrder(payload);
+
+      console.log(res);
+
       onOrderSuccess?.();
-      onClose(); // đóng modal sau khi tạo order
+      toast.success("Đơn hàng được gửi đi, vui lòng chờ nhân viên xử lý!");
+      onClose();
     } catch (err) {
       console.error("Make order failed:", err);
+      if (err?.response?.data?.message === "TABLE_ALREADY_HAS_ORDER") {
+        toast.error("Bàn đang có đơn hàng chưa xử lý");
+      } else {
+        toast.error("Lỗi không thể tạo đơn hàng");
+        console.error(err?.response?.data?.message);
+      }
     }
   };
 
   /* ================== UI ================== */
   return (
     <Overlay onClose={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-[560px] max-w-[95%] overflow-hidden relative">
+      <div className="overflow-hidden relative w-[560px] max-w-[95%] bg-white rounded-2xl shadow-2xl">
         {/* ===== HEADER ===== */}
         <div className="flex items-center justify-between px-6 py-4 shadow-md">
-          <h3 className="font-semibold text-lg flex items-center gap-2">
+          <h3 className="flex items-center gap-2 font-semibold text-lg">
             <ShoppingCart /> Giỏ hàng
           </h3>
           <button
             onClick={onClose}
-            className="p-2 rounded-md hover:bg-red-100 transition cursor-pointer"
+            className="p-2 rounded-md cursor-pointer hover:bg-red-100 transition"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* ===== BODY ===== */}
-        <div className="max-h-[420px] overflow-y-auto px-6 py-4 space-y-4">
+        <div className="overflow-y-auto px-6 py-4 max-h-[420px] space-y-4">
           {safeCart.length === 0 && (
-            <p className="text-center text-gray-400 py-10">
+            <p className="py-10 text-center text-gray-400">
               Giỏ hàng đang trống
             </p>
           )}
@@ -90,7 +116,7 @@ export default function CartModal({
           {safeCart.map((c) => (
             <div
               key={c.cartItemId}
-              className="border rounded-xl p-4 hover:shadow-sm transition"
+              className="p-4 rounded-xl border hover:shadow-sm transition"
             >
               <p className="font-medium">{c.itemName}</p>
 
@@ -98,7 +124,7 @@ export default function CartModal({
                 (g.options || []).map((o) => (
                   <p
                     key={o.modifierOptionId}
-                    className="text-sm text-gray-500 ml-2"
+                    className="ml-2 text-sm text-gray-500"
                   >
                     + {o.name}{" "}
                     <span className="text-gray-400">
@@ -113,7 +139,7 @@ export default function CartModal({
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => onUpdateQty(c.cartItemId, -1)}
-                    className="w-8 h-8 flex items-center justify-center rounded-full border hover:bg-gray-100 transition"
+                    className="flex items-center justify-center w-8 h-8 rounded-full border hover:bg-gray-100 transition"
                   >
                     <Minus size={14} />
                   </button>
@@ -124,7 +150,7 @@ export default function CartModal({
 
                   <button
                     onClick={() => onUpdateQty(c.cartItemId, 1)}
-                    className="w-8 h-8 flex items-center justify-center rounded-full border hover:bg-gray-100 transition"
+                    className="flex items-center justify-center w-8 h-8 rounded-full border hover:bg-gray-100 transition"
                   >
                     <Plus size={14} />
                   </button>
@@ -140,10 +166,38 @@ export default function CartModal({
         </div>
 
         {/* ===== FOOTER ===== */}
-        <div className="shadow-top px-6 py-4 space-y-3">
+        <div className="px-6 py-4 shadow-top space-y-3">
+          {isGuestTenant && (
+            <div className="space-y-3">
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-700">
+                  Tên khách hàng *
+                </label>
+                <input
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="Nhập tên khách hàng"
+                  className="px-3 py-2 w-full text-sm rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/80"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-700">
+                  Số điện thoại *
+                </label>
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Nhập số điện thoại"
+                  className="px-3 py-2 w-full text-sm rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/80"
+                />
+              </div>
+            </div>
+          )}
+
           {/* ===== SPECIAL NOTE ===== */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block mb-1 text-sm font-medium text-gray-700">
               Ghi chú cho nhà bếp
             </label>
             <textarea
@@ -151,9 +205,7 @@ export default function CartModal({
               onChange={(e) => setSpecial(e.target.value)}
               placeholder="Ví dụ: ít cay, không hành, lên món sau 10 phút..."
               rows={3}
-              className="w-full resize-none rounded-xl border border-gray-300 
-                px-3 py-2 text-sm focus:outline-none 
-                focus:ring-2 focus:ring-gray-900/80"
+              className="px-3 py-2 w-full text-sm rounded-xl border-gray-300 resize-none border focus:outline-none focus:ring-2 focus:ring-gray-900/80"
             />
           </div>
           <div className="flex justify-between font-semibold text-lg">
@@ -164,7 +216,7 @@ export default function CartModal({
           <button
             onClick={handleMakeOrder}
             disabled={safeCart.length === 0}
-            className="w-full bg-gray-900 text-white py-3 rounded-xl hover:bg-gray-800 transition font-medium disabled:opacity-50"
+            className="py-3 w-full text-white font-medium bg-gray-900 rounded-xl hover:bg-gray-800 transition disabled:opacity-50"
           >
             Đặt món
           </button>

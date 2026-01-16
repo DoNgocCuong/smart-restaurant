@@ -32,8 +32,6 @@ export default function LoginModal({
         password,
       });
 
-      console.log(res);
-
       const accessToken = res?.result?.acessToken;
       const userName = email;
 
@@ -65,10 +63,10 @@ export default function LoginModal({
   return (
     <Overlay>
       {/* MODAL */}
-      <div className=" bg-white w-[92%] max-w-md rounded-3xl shadow-xl p-6 sm:p-8 animate-scaleIn">
+      <div className="p-6 w-[92%] max-w-md bg-white rounded-3xl shadow-xl animate-scaleIn sm:p-8">
         {/* HEADER */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+          <h2 className="text-lg font-semibold text-gray-800 sm:text-xl">
             Đăng nhập
           </h2>
           <button
@@ -81,7 +79,7 @@ export default function LoginModal({
 
         {/* ERROR */}
         {error && (
-          <div className="mb-4 px-4 py-3 rounded-xl bg-red-50 text-red-600 text-sm">
+          <div className="mb-4 px-4 py-3 text-red-600 text-sm bg-red-50 rounded-xl">
             {error}
           </div>
         )}
@@ -92,15 +90,14 @@ export default function LoginModal({
           <div className="relative">
             <Mail
               size={18}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+              className="absolute left-4 top-1/2 text-gray-400 -translate-y-1/2"
             />
             <input
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-2xl 
-                         focus:outline-none focus:ring-2 focus:ring-black/80"
+              className="pl-11 pr-4 py-3 w-full border-gray-200 rounded-2xl border focus:outline-none focus:ring-2 focus:ring-black/80"
             />
           </div>
 
@@ -108,15 +105,14 @@ export default function LoginModal({
           <div className="relative">
             <Lock
               size={18}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+              className="absolute left-4 top-1/2 text-gray-400 -translate-y-1/2"
             />
             <input
               type="password"
               placeholder="Mật khẩu"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-2xl 
-                         focus:outline-none focus:ring-2 focus:ring-black/80"
+              className="pl-11 pr-4 py-3 w-full border-gray-200 rounded-2xl border focus:outline-none focus:ring-2 focus:ring-black/80"
             />
           </div>
 
@@ -124,8 +120,7 @@ export default function LoginModal({
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 
-                       text-white font-semibold transition disabled:opacity-60"
+            className="py-3 w-full text-white font-semibold bg-blue-600 rounded-2xl hover:bg-blue-700 transition disabled:opacity-60"
           >
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
@@ -138,7 +133,7 @@ export default function LoginModal({
             onClick={() => {
               onRegisterModal();
             }}
-            className="text-green-600 hover:underline font-medium"
+            className="text-green-600 font-medium hover:underline"
           >
             Đăng ký ngay
           </button>

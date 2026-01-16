@@ -1,153 +1,222 @@
-import { X, Check, XCircle, Clock3, User, Utensils } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  X,
+  Check,
+  XCircle,
+  Clock3,
+  User,
+  Utensils,
+  AlertCircle,
+} from "lucide-react";
 import { STATUS_META } from "../../utils/statusMeta";
+import { getTableNameById } from "../../utils/tableUtils";
 import Overlay from "../common/Overlay";
 
 const calcItemTotal = (item) => {
-  const modifierTotal = item.modifiers.reduce((sum, m) => sum + m.price, 0);
+  const modifierTotal =
+    item.modifiers?.reduce((sum, m) => sum + m.price, 0) || 0;
   return (item.price + modifierTotal) * item.quantity;
 };
 
 function StaffDetailOrder({ order, onClose, onApprove, onReject, processing }) {
+  const [tableName, setTableName] = useState("");
+
   if (!order) return null;
 
-  const statusMeta = STATUS_META[order.oderStatus];
+  useEffect(() => {
+    if (!order?.tableId) return;
+
+    const fetchTableName = async () => {
+      try {
+        const name = await getTableNameById(order.tableId);
+        setTableName(name);
+      } catch (err) {
+        console.error(err);
+        setTableName(`#${order.tableId}`);
+      }
+    };
+
+    fetchTableName();
+  }, [order?.tableId]);
+
+  // Xử lý trường hợp status không tồn tại trong STATUS_META
+  const statusMeta = STATUS_META[order.oderStatus] || {
+    label: order.oderStatus || "Không rõ",
+    color: "bg-gray-50 text-gray-600 border-gray-200",
+    icon: AlertCircle,
+  };
+
   const StatusIcon = statusMeta.icon;
+
+  // Xử lý trường hợp detailOrders không tồn tại
+  const detailOrders = order.detailOrders || [];
 
   const subtotal =
     order.subtotal && order.subtotal > 0
       ? order.subtotal
-      : order.detailOrders.reduce((sum, item) => sum + calcItemTotal(item), 0);
+      : detailOrders.reduce((sum, item) => sum + calcItemTotal(item), 0);
 
   return (
-    <Overlay>
+    <Overlay onClose={onClose}>
       <div
-        className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden"
+        className="overflow-hidden max-w-2xl w-full max-h-[90vh] bg-white rounded-2xl shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* ===== HEADER ===== */}
-        <div className="bg-linear-to-r from-indigo-500 to-indigo-600 p-6 text-white">
+        <div className="p-6 bg-linear-to-r from-white to-white">
           <div className="flex justify-between items-start">
             <div>
-              <h2 className="text-2xl font-bold">Order #{order.orderId}</h2>
-              <p className="text-indigo-100 mt-1 flex items-center gap-3">
-                <User size={16} /> {order.customerName || "Guest"} •{" "}
-                <Utensils size={16} /> Bàn {order.tableId}
-              </p>
-              <p className="text-indigo-100 text-sm mt-1 flex items-center gap-3">
-                <Clock3 size={16} />{" "}
-                {new Date(order.createAt).toLocaleString("vi-VN")}
-              </p>
+              <h2 className="text-3xl font-extrabold">
+                Order #{order.orderId}
+              </h2>
+              <div className="mt-3 space-y-2">
+                <p className="flex items-center gap-2 text-gray-500 text-sm">
+                  <User size={16} strokeWidth={2} />
+                  <span className="font-medium">
+                    {order.customerName || "Guest"}
+                  </span>
+                </p>
+                <p className="flex items-center gap-2 text-gray-500 text-sm">
+                  <Utensils size={16} strokeWidth={2} />
+                  <span className="font-medium">Bàn {tableName}</span>
+                </p>
+                <p className="flex items-center gap-2 text-gray-500 text-sm">
+                  <Clock3 size={16} strokeWidth={2} />
+                  <span className="font-medium">
+                    {order.createAt
+                      ? new Date(order.createAt).toLocaleString("vi-VN")
+                      : "Chưa có thời gian"}
+                  </span>
+                </p>
+              </div>
             </div>
 
             <button
               onClick={() => !processing && onClose()}
               disabled={processing}
-              className="p-2 hover:bg-white/20 rounded-xl disabled:opacity-50"
+              className="p-2 rounded-lg transition-all duration-200 cursor-pointer hover:bg-red-100"
             >
-              <X size={24} />
+              <X size={24} strokeWidth={2.5} />
             </button>
           </div>
         </div>
 
         {/* ===== BODY ===== */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-260px)]">
+        <div className="overflow-y-auto p-6 max-h-[calc(90vh-280px)] space-y-6">
           {/* Status */}
-          <div className="mb-6">
+          <div>
             <span
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border ${statusMeta.color}`}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border-2 ${statusMeta.color}`}
             >
-              <StatusIcon size={16} />
+              <StatusIcon size={18} strokeWidth={2.5} />
               {statusMeta.label}
             </span>
           </div>
 
           {/* Items */}
-          <div className="mb-6">
-            <p className="text-sm text-slate-500 mb-3">Chi tiết món ăn</p>
+          <div>
+            <h3 className="mb-4 text-sm font-bold text-gray-600 tracking-wide uppercase">
+              Chi tiết món ăn
+            </h3>
 
-            <div className="space-y-4">
-              {order.detailOrders.map((item) => {
-                const itemTotal = calcItemTotal(item);
+            {detailOrders.length > 0 ? (
+              <div className="space-y-3">
+                {detailOrders.map((item, index) => {
+                  const itemTotal = calcItemTotal(item);
 
-                return (
-                  <div
-                    key={item.detailOrderId}
-                    className="p-4 bg-slate-50 rounded-xl border border-slate-200"
-                  >
-                    <div className="flex justify-between">
-                      <div>
-                        <p className="font-semibold text-slate-800">
-                          {item.itemName}
-                        </p>
-                        <p className="text-sm text-slate-500">
-                          {item.quantity} × {item.price.toLocaleString()}đ
+                  return (
+                    <div
+                      key={item.detailOrderId || index}
+                      className="p-4 bg-linear-to-r from-blue-50 to-white rounded-lg border-blue-100 transition-all duration-200 border hover:border-blue-300 hover:shadow-md"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <p className="font-semibold text-gray-900">
+                            {item.itemName || "Món ăn"}
+                          </p>
+                          <p className="mt-1 text-sm text-gray-500">
+                            {item.quantity || 0} ×{" "}
+                            {(item.price || 0).toLocaleString()}đ
+                          </p>
+                        </div>
+
+                        <p className="font-bold text-blue-600 text-lg">
+                          {itemTotal.toLocaleString()}đ
                         </p>
                       </div>
 
-                      <p className="font-semibold">
-                        {itemTotal.toLocaleString()}đ
-                      </p>
+                      {/* Modifiers */}
+                      {item.modifiers && item.modifiers.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-blue-100 space-y-2">
+                          {item.modifiers.map((m, mIndex) => (
+                            <div
+                              key={m.modifierOptionId || mIndex}
+                              className="flex justify-between text-sm text-gray-600"
+                            >
+                              <span className="flex items-center gap-2">
+                                <span className="text-blue-500">+</span>
+                                <span>
+                                  {m.modifierGroupName}:{" "}
+                                  <span className="font-medium">{m.name}</span>
+                                </span>
+                              </span>
+                              <span className="font-semibold text-blue-600">
+                                +{(m.price || 0).toLocaleString()}đ
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-
-                    {/* Modifiers */}
-                    {item.modifiers.length > 0 && (
-                      <div className="mt-2 space-y-1 text-sm text-slate-600">
-                        {item.modifiers.map((m) => (
-                          <div
-                            key={m.modifierOptionId}
-                            className="flex justify-between"
-                          >
-                            <span>
-                              ➕ {m.modifierGroupName}: {m.name}
-                            </span>
-                            <span>+{m.price.toLocaleString()}đ</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="py-8 text-center bg-slate-50 rounded-lg border-slate-200 border">
+                <p className="text-gray-400 font-medium">Chưa có món ăn nào</p>
+              </div>
+            )}
           </div>
 
           {/* Special note */}
           {order.special && (
-            <div className="mb-6 p-4 bg-amber-50 border-2 border-amber-200 rounded-xl">
-              <p className="text-sm font-semibold text-amber-900 mb-1">
+            <div className="p-4 bg-amber-50 border-2 border-amber-200 rounded-lg">
+              <p className="flex items-center gap-2 mb-2 text-sm font-bold text-amber-900">
                 📝 Ghi chú đặc biệt
               </p>
-              <p className="text-amber-700">{order.special}</p>
+              <p className="text-amber-700 text-sm">{order.special}</p>
             </div>
           )}
 
           {/* ===== TOTAL ===== */}
-          <div className="border-t pt-4 space-y-2">
-            <div className="flex justify-between text-lg font-bold">
-              <span>Tổng cộng</span>
-              <span>{subtotal.toLocaleString()}đ</span>
+          <div className="pt-4 bg-linear-to-r from-blue-50 to-white border-t border-blue-100">
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-bold text-gray-700">Tổng cộng</span>
+              <span className="text-2xl font-extrabold text-blue-600">
+                {subtotal.toLocaleString()}đ
+              </span>
             </div>
           </div>
         </div>
 
         {/* ===== FOOTER ===== */}
         {order.oderStatus === "Pending_approval" && (
-          <div className="p-6 bg-slate-50 border-t-2 border-slate-100 flex gap-3">
+          <div className="flex flex-col md:flex-row gap-3 p-6 bg-white border-t border-blue-100">
             <button
               onClick={() => onReject(order.orderId)}
               disabled={processing}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-red-300 text-red-700 rounded-xl font-semibold hover:bg-red-50 disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-red-600 font-semibold bg-white border-2 border-red-300 rounded-lg transition-all duration-200 hover:bg-red-50 hover:border-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <XCircle size={20} />
+              <XCircle size={20} strokeWidth={2} />
               {processing ? "Đang xử lý..." : "Từ chối"}
             </button>
 
             <button
               onClick={() => onApprove(order.orderId)}
               disabled={processing}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-linear-to-r from-emerald-500 to-emerald-600 text-white rounded-xl font-semibold hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-white font-semibold bg-linear-to-r from-blue-600 to-blue-700 rounded-lg transition-all duration-200 hover:from-blue-700 hover:to-blue-800 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             >
-              <Check size={20} />
+              <Check size={20} strokeWidth={2.5} />
               {processing ? "Đang xử lý..." : "Chấp nhận"}
             </button>
           </div>

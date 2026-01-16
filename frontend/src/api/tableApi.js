@@ -12,6 +12,20 @@ const tableApi = {
     });
   },
 
+  // 🔥 custom get table by id
+  getTableById: async (tableId) => {
+    const res = await axiosClient.get("/admin/tables", {
+      params: {
+        pageNumber: 1,
+        pageSize: 1000, // đủ lớn để đảm bảo có table cần tìm
+      },
+    });
+
+    const tables = res?.result?.content || [];
+
+    return tables.find((table) => table.tableId === tableId) || null;
+  },
+
   createTable: (data) => axiosClient.post("/admin/tables", data),
 
   updateTable: (id, data) => axiosClient.put(`/admin/tables/${id}`, data),

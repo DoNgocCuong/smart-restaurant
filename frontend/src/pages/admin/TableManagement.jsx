@@ -60,7 +60,6 @@ export default function TableManagement() {
     setDownloading(true);
 
     const activeTables = tables.filter((t) => t.is_active);
-    console.log(1);
     try {
       if (downloadFormat === "png") {
         const zip = new JSZip();
@@ -150,9 +149,9 @@ export default function TableManagement() {
   };
 
   return (
-    <div className="col-start-2 col-end-12 space-y-6 py-6">
+    <div className="col-start-2 col-end-12 py-6 space-y-6">
       {/* HEADER */}
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col gap-2 md:flex-row justify-between">
+      <div className="flex flex-col justify-between gap-2 p-6 bg-white rounded-lg border-gray-200 shadow-sm border md:flex-row">
         <div>
           <h1 className="text-2xl font-semibold">Quản lý bàn & QR</h1>
           <p className="text-sm text-gray-500">
@@ -163,20 +162,16 @@ export default function TableManagement() {
 
       {/* SEARCH */}
       <div
-        className="
-          bg-white p-4 rounded-lg border border-gray-200 shadow-sm
-          flex flex-col gap-3
-          sm:flex-row sm:items-center sm:justify-between
-        "
+        className="flex flex-col gap-3 p-4 bg-white rounded-lg border-gray-200 shadow-sm border sm:flex-row items-center justify-between"
       >
         {/* Ô tìm kiếm */}
         <div className="relative flex-1">
           <Search
             size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            className="absolute left-3 top-1/2 text-gray-400 -translate-y-1/2"
           />
           <input
-            className="w-full pl-9 pr-3 py-2 border border-gray-400 rounded-md text-sm"
+            className="pl-9 pr-3 py-2 w-full text-sm border-gray-400 rounded-md border"
             placeholder="Tìm bàn..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -186,12 +181,7 @@ export default function TableManagement() {
         {/* Nút thêm bàn */}
         <button
           onClick={() => setIsCreateDialogOpen(true)}
-          className="
-            flex items-center justify-center gap-2
-            px-4 py-2 bg-gray-900 text-white rounded-md cursor-pointer
-            hover:opacity-90
-            w-full sm:w-auto
-          "
+          className="flex items-center justify-center gap-2 px-4 py-2 w-full text-white bg-gray-900 rounded-md cursor-pointer hover:opacity-90 sm:w-auto"
         >
           <Plus size={18} />
           Thêm bàn
@@ -199,8 +189,8 @@ export default function TableManagement() {
       </div>
 
       {/* TABLE CARDS */}
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm space-y-10">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center sm:justify-between ">
+      <div className="p-6 bg-white rounded-lg border-gray-200 shadow-sm border space-y-10">
+        <div className="flex flex-col gap-3 sm:justify-between md:flex-row items-center">
           <div className="">
             <p className="text-left font-bold text-xl">Danh sách bàn</p>
             <p className="text-sm text-gray-500">
@@ -210,14 +200,14 @@ export default function TableManagement() {
           <div className="flex flex-col gap-2 sm:flex-row">
             <button
               onClick={() => setIsDownloadDialogOpen(true)}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md cursor-pointer hover:opacity-90"
+              className="flex items-center justify-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-md cursor-pointer hover:opacity-90"
             >
               <Download size={18} />
               Tải tất cả QR
             </button>
             <button
               onClick={handleRegenerateAllQR}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-md cursor-pointer hover:opacity-90 disabled:opacity-50"
+              className="flex items-center justify-center gap-2 px-4 py-2 text-white bg-orange-600 rounded-md cursor-pointer hover:opacity-90 disabled:opacity-50"
               disabled={downloading}
             >
               <RefreshCcw size={18} /> Tạo lại tất cả QR
@@ -262,14 +252,14 @@ export default function TableManagement() {
 
       {/* DOWNLOAD MODAL */}
       {isDownloadDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="z-50 fixed inset-0 flex items-center justify-center">
           <div
             className="absolute inset-0 bg-black/40"
             onClick={() => !downloading && setIsDownloadDialogOpen(false)}
           ></div>
 
-          <div className="relative bg-white rounded-lg p-6 w-[90%] max-w-md shadow-lg z-10">
-            <h2 className="text-lg font-semibold mb-4">
+          <div className="z-10 relative p-6 w-[90%] max-w-md bg-white rounded-lg shadow-lg">
+            <h2 className="mb-4 text-lg font-semibold">
               Chọn định dạng tải QR
             </h2>
 
@@ -297,17 +287,17 @@ export default function TableManagement() {
               </label>
             </div>
 
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => setIsDownloadDialogOpen(false)}
-                className="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100"
+                className="px-4 py-2 rounded-md border-gray-300 border hover:bg-gray-100"
                 disabled={downloading}
               >
                 Hủy
               </button>
               <button
                 onClick={handleDownloadAllQR}
-                className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
                 disabled={downloading}
               >
                 {downloading ? "Đang tải..." : "Tải xuống"}
