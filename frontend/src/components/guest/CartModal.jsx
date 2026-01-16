@@ -70,7 +70,10 @@ export default function CartModal({
     };
 
     try {
-      await orderApi.makeOrder(payload);
+      const res = await orderApi.makeOrder(payload);
+
+      console.log(res);
+
       onOrderSuccess?.();
       toast.success("Đơn hàng được gửi đi, vui lòng chờ nhân viên xử lý!");
       onClose();

@@ -30,7 +30,10 @@ function Navigation() {
     } finally {
       // clear auth state
       logout();
-      localStorage.clear();
+      // chỉ xóa auth data
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("userName");
 
       // về trang login
       navigate("/login", { replace: true });

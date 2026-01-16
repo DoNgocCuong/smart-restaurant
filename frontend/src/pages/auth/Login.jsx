@@ -26,10 +26,11 @@ function Login() {
     const accounts = localStorage.getItem("savedAccounts");
     if (accounts) {
       try {
-        setSavedAccounts(JSON.parse(accounts));
-      } catch (err) {
-        console.error("Error parsing saved accounts:", err);
+        const parsed = JSON.parse(accounts);
+        setSavedAccounts(Array.isArray(parsed) ? parsed : []);
+      } catch {
         setSavedAccounts([]);
+        localStorage.removeItem("savedAccounts");
       }
     }
   }, []);
@@ -40,6 +41,7 @@ function Login() {
       if (
         suggestionsRef.current &&
         !suggestionsRef.current.contains(event.target) &&
+        inputRef.current &&
         !inputRef.current.contains(event.target)
       ) {
         setShowSuggestions(false);
@@ -52,28 +54,45 @@ function Login() {
 
   // Lọc danh sách tài khoản theo input của người dùng
   const filteredAccounts = savedAccounts.filter((account) =>
-    account.toLowerCase().includes(email.toLowerCase())
+    account.email.toLowerCase().includes(email.toLowerCase())
   );
 
   const addSavedAccount = (newEmail, newPassword) => {
-    const updated = savedAccounts.filter((acc) => acc !== newEmail);
-    updated.unshift(newEmail);
-    if (updated.length > 5) updated.pop();
+    // Loại bỏ tài khoản cũ nếu đã tồn tại
+    const updated = savedAccounts.filter((acc) => acc.email !== newEmail);
+
+    // Thêm tài khoản mới vào đầu danh sách
+    updated.unshift({
+      email: newEmail,
+      password: newPassword,
+    });
+
+    // Giới hạn tối đa 5 tài khoản
+    if (updated.length > 5) {
+      updated.pop();
+    }
+
     setSavedAccounts(updated);
     localStorage.setItem("savedAccounts", JSON.stringify(updated));
   };
 
-  const removeSavedAccount = (accountToRemove) => {
-    const updated = savedAccounts.filter((acc) => acc !== accountToRemove);
+  const removeSavedAccount = (emailToRemove) => {
+    const updated = savedAccounts.filter((acc) => acc.email !== emailToRemove);
     setSavedAccounts(updated);
     localStorage.setItem("savedAccounts", JSON.stringify(updated));
+
+    // Nếu xóa tài khoản đang được chọn, bỏ tick checkbox
+    if (email === emailToRemove) {
+      setSaveAccount(false);
+    }
   };
 
-  const selectSavedAccount = (selectedEmail) => {
-    setEmail(selectedEmail);
-    setPassword("");
+  const selectSavedAccount = (account) => {
+    setEmail(account.email);
+    setPassword(account.password);
     setSaveAccount(true);
     setShowSuggestions(false);
+    setErrorMessage("");
   };
 
   const handleSubmit = async (e) => {
@@ -110,6 +129,12 @@ function Login() {
       // Lưu tài khoản nếu tick "Lưu tài khoản"
       if (saveAccount) {
         addSavedAccount(email, password);
+      } else {
+        // Nếu không tick, xóa tài khoản này khỏi danh sách nếu đã tồn tại
+        const accountExists = savedAccounts.some((acc) => acc.email === email);
+        if (accountExists) {
+          removeSavedAccount(email);
+        }
       }
 
       if (role === "SUPER_ADMIN") {
@@ -131,6 +156,16 @@ function Login() {
       setIsLoading(false);
     }
   };
+
+  // Kiểm tra xem email hiện tại có trong danh sách đã lưu không
+  useEffect(() => {
+    if (email) {
+      const accountExists = savedAccounts.some((acc) => acc.email === email);
+      if (accountExists && !saveAccount) {
+        setSaveAccount(true);
+      }
+    }
+  }, [email, savedAccounts]);
 
   return (
     <div className="w-full bg-linear-to-br from-blue-50 via-white to-blue-50 min-h-screen flex items-center justify-center p-4">
@@ -158,7 +193,7 @@ function Login() {
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
-                  setErrorMessage(false);
+                  setErrorMessage("");
                   if (savedAccounts.length > 0) {
                     setShowSuggestions(true);
                   }
@@ -201,7 +236,7 @@ function Login() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-gray-900 truncate text-sm">
-                            {account}
+                            {account.email}
                           </div>
                         </div>
                       </div>
@@ -209,7 +244,7 @@ function Login() {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          removeSavedAccount(account);
+                          removeSavedAccount(account.email);
                         }}
                         className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-50 rounded transition-all"
                       >
@@ -240,7 +275,7 @@ function Login() {
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  setErrorMessage(false);
+                  setErrorMessage("");
                 }}
                 required
                 className="w-full pl-10 pr-12 border-2 border-blue-200 h-11 rounded-lg text-gray-700 focus:outline-none focus:border-blue-500 focus:shadow-lg focus:shadow-blue-200 transition-all duration-200 placeholder-gray-400"
