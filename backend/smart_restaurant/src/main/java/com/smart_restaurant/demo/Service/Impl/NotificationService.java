@@ -16,4 +16,5 @@ public class NotificationService {
     public void notifyNewOrder(OrderNotification noti) {
         messagingTemplate.convertAndSend("/topic/orders", noti);
     }
+
 }
