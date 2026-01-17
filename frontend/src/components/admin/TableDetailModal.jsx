@@ -1,4 +1,14 @@
-import { QrCode, Pencil, Download, X, FileImage, FileText } from "lucide-react";
+import {
+  QrCode,
+  Pencil,
+  Download,
+  X,
+  FileImage,
+  FileText,
+  MapPin,
+  Users,
+  Calendar,
+} from "lucide-react";
 import Overlay from "../common/Overlay";
 import qrApi from "../../api/qrApi";
 import { useState, useEffect } from "react";
@@ -9,6 +19,8 @@ export default function TableDetailModal({ table, onClose, onEdit }) {
   const [qrUrl, setQrUrl] = useState("");
   const [showDownloadOptions, setShowDownloadOptions] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  console.log(table);
 
   // 🧩 Hàm tải QR dưới dạng PNG
   const handleDownloadPNG = async (table) => {
@@ -71,7 +83,7 @@ export default function TableDetailModal({ table, onClose, onEdit }) {
               : "Inactive"
           }`,
           20,
-          75
+          75,
         );
 
         pdf.addImage(reader.result, "PNG", 120, 45, 60, 60);
@@ -123,113 +135,261 @@ export default function TableDetailModal({ table, onClose, onEdit }) {
     }
   };
 
+  // Helper function for status
+  const getStatusInfo = () => {
+    if (!table.is_active) {
+      return {
+        label: "Không hoạt động",
+        color: "text-gray-600",
+        bg: "bg-gray-100",
+      };
+    } else if (table.is_active || table.statusTable === "unoccupied") {
+      return {
+        label: "Có sẵn",
+        color: "text-emerald-700",
+        bg: "bg-emerald-100",
+      };
+    } else if (table.is_active || table.statusTable === "occupied") {
+      return { label: "Đang sử dụng", color: "text-red-700", bg: "bg-red-100" };
+    }
+  };
+
+  const statusInfo = getStatusInfo();
+
+  // Helper function for date formatting
+  const formatDate = (dateString) => {
+    if (!dateString) return "—";
+    return (
+      dateString.substring(8, 10) +
+      "/" +
+      dateString.substring(5, 7) +
+      "/" +
+      dateString.substring(0, 4)
+    );
+  };
+
   return (
     <Overlay onClose={onClose}>
-      <div className="h-fit w-full md:w-1/2 lg:w-1/3 bg-white rounded-xl p-4 shadow-lg relative animate-fadeIn">
+      <div className="h-fit w-full max-w-lg mx-3 sm:mx-0 bg-white rounded-3xl p-4 sm:p-6 lg:p-7 shadow-2xl border border-blue-100">
         {/* Header */}
-        <div className="flex justify-between mb-4">
-          <h2 className="font-semibold text-base sm:text-lg">
+        <div className="flex justify-between items-center mb-6 pb-4 border-b-2 border-blue-100">
+          <h2 className="text-xl sm:text-2xl font-bold bg-linear-to-r from-blue-700 to-blue-600 bg-clip-text text-transparent">
             {table.tableName}
           </h2>
           <button
             onClick={onClose}
-            className="cursor-pointer hover:bg-red-200 w-8 h-8 flex justify-center items-center rounded-md"
+            className="
+              w-8 h-8
+              flex justify-center items-center
+              rounded-lg
+              text-gray-400
+              hover:bg-red-100 hover:text-red-600
+              transition-all duration-300
+              cursor-pointer
+            "
           >
-            <X size={18} />
+            <X size={18} strokeWidth={2.5} />
           </button>
         </div>
 
         {/* Thông tin bàn */}
-        <div className="text-sm space-y-2 mb-4">
-          <div>Khu vực: {table.section}</div>
-          <div>Sức chứa: {table.capacity}</div>
-          <div>
-            Trạng thái:{" "}
-            {table.is_active
-              ? table.orders.length > 0
-                ? "Đang sử dụng"
-                : "Có sẵn"
-              : "Không hoạt động"}
+        <div className="space-y-3 mb-6 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+          {/* Khu vực */}
+          <div className="flex items-center gap-3">
+            <MapPin size={18} className="text-blue-600" strokeWidth={2} />
+            <div className="flex-1">
+              <p className="text-xs text-gray-500 font-medium">Khu vực</p>
+              <p className="text-sm font-semibold text-gray-800">
+                {table.section}
+              </p>
+            </div>
           </div>
-          <div>
-            Ngày tạo:{" "}
-            {table.createAt
-              ? table.createAt.substring(8, 10) +
-                "/" +
-                table.createAt.substring(5, 7) +
-                "/" +
-                table.createAt.substring(0, 4)
-              : "—"}
+
+          {/* Sức chứa */}
+          <div className="flex items-center gap-3">
+            <Users size={18} className="text-blue-600" strokeWidth={2} />
+            <div className="flex-1">
+              <p className="text-xs text-gray-500 font-medium">Sức chứa</p>
+              <p className="text-sm font-semibold text-gray-800">
+                {table.capacity} người
+              </p>
+            </div>
+          </div>
+
+          {/* Trạng thái */}
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 flex items-center justify-center">
+              <div className={`w-3 h-3 rounded-full ${statusInfo.bg}`}></div>
+            </div>
+            <div className="flex-1">
+              <p className="text-xs text-gray-500 font-medium">Trạng thái</p>
+              <p className={`text-sm font-semibold ${statusInfo.color}`}>
+                {statusInfo.label}
+              </p>
+            </div>
+          </div>
+
+          {/* Ngày tạo */}
+          <div className="flex items-center gap-3">
+            <Calendar size={18} className="text-blue-600" strokeWidth={2} />
+            <div className="flex-1">
+              <p className="text-xs text-gray-500 font-medium">Ngày tạo</p>
+              <p className="text-sm font-semibold text-gray-800">
+                {formatDate(table.createAt)}
+              </p>
+            </div>
           </div>
         </div>
 
         {/* QR Preview */}
-        <div className="relative border border-gray-300 rounded-lg p-3 sm:p-4 mb-4 text-center">
+        <div className="relative border-2 border-blue-200 rounded-2xl p-4 sm:p-6 mb-6 text-center bg-linear-to-br from-blue-50 to-white">
           {qrUrl ? (
             <div className="relative inline-block">
               <img
                 src={qrUrl}
                 alt="QR Code"
-                className={`mx-auto w-32 h-32 sm:w-36 sm:h-36 object-contain transition-opacity duration-300 ${
+                className={`mx-auto w-40 h-40 sm:w-48 sm:h-48 object-contain transition-opacity duration-300 ${
                   loading ? "opacity-50" : "opacity-100"
                 }`}
               />
               {loading && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
                 </div>
               )}
             </div>
           ) : (
-            <p>{loading ? "Đang tạo mã QR..." : "Chưa có mã QR"}</p>
+            <div className="py-8">
+              <p className="text-sm text-gray-500 font-medium">
+                {loading ? "⏳ Đang tạo mã QR..." : "📱 Chưa có mã QR"}
+              </p>
+            </div>
           )}
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
           <button
             onClick={onEdit}
-            className="border border-gray-300 rounded py-2 flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-100 text-sm sm:text-base"
+            className="
+              flex items-center justify-center gap-2
+              px-4 py-2.5
+              border-2 border-blue-200
+              rounded-xl
+              text-sm
+              font-medium
+              text-blue-700
+              hover:border-blue-300
+              hover:bg-blue-50
+              transition-all duration-300
+              cursor-pointer
+            "
           >
-            <Pencil size={14} /> Chỉnh sửa
+            <Pencil size={16} strokeWidth={2.5} />
+            <span>Chỉnh sửa</span>
           </button>
           <button
             onClick={() => handleGenerateQr(table)}
-            className="border border-gray-300 rounded py-2 flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-100 text-sm sm:text-base"
+            disabled={loading}
+            className="
+              flex items-center justify-center gap-2
+              px-4 py-2.5
+              border-2 border-blue-200
+              rounded-xl
+              text-sm
+              font-medium
+              text-blue-700
+              hover:border-blue-300
+              hover:bg-blue-50
+              disabled:opacity-50
+              disabled:cursor-not-allowed
+              transition-all duration-300
+              cursor-pointer
+            "
           >
-            <QrCode size={14} /> {qrUrl ? "Tạo lại QR" : "Tạo QR"}
+            <QrCode size={16} strokeWidth={2.5} />
+            <span>{qrUrl ? "Tạo lại QR" : "Tạo QR"}</span>
           </button>
-          <button
-            onClick={() => setShowDownloadOptions((prev) => !prev)}
-            className="border border-gray-300 rounded py-2 flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-100 relative text-sm sm:text-base"
-          >
-            <Download size={14} /> Tải QR
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setShowDownloadOptions((prev) => !prev)}
+              className="
+                w-full
+                flex items-center justify-center gap-2
+                px-4 py-2.5
+                bg-linear-to-r from-emerald-600 to-emerald-700
+                rounded-xl
+                text-sm
+                font-medium
+                text-white
+                border-2 border-emerald-600
+                hover:from-emerald-700 hover:to-emerald-800
+                transition-all duration-300
+                cursor-pointer
+                shadow-sm
+              "
+            >
+              <Download size={16} strokeWidth={2.5} />
+              <span>Tải QR</span>
+            </button>
+
+            {/* Dropdown chọn định dạng */}
+            {showDownloadOptions && (
+              <div className="absolute right-0 bottom-full mb-2 bg-white border-2 border-blue-200 rounded-xl shadow-lg w-44 overflow-hidden z-10">
+                <button
+                  onClick={() => {
+                    handleDownloadPNG(table);
+                    setShowDownloadOptions(false);
+                  }}
+                  className="
+                    w-full
+                    text-left
+                    px-4 py-3
+                    hover:bg-blue-50
+                    flex items-center gap-3
+                    cursor-pointer
+                    border-b border-blue-100
+                    transition-colors duration-200
+                  "
+                >
+                  <FileImage
+                    size={16}
+                    className="text-blue-600"
+                    strokeWidth={2}
+                  />
+                  <span className="font-medium text-gray-800">Tải PNG</span>
+                </button>
+                <button
+                  onClick={() => {
+                    handleDownloadPDF(table);
+                    setShowDownloadOptions(false);
+                  }}
+                  className="
+                    w-full
+                    text-left
+                    px-4 py-3
+                    hover:bg-blue-50
+                    flex items-center gap-3
+                    cursor-pointer
+                    transition-colors duration-200
+                  "
+                >
+                  <FileText
+                    size={16}
+                    className="text-blue-600"
+                    strokeWidth={2}
+                  />
+                  <span className="font-medium text-gray-800">Tải PDF</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Dropdown chọn định dạng */}
-        {showDownloadOptions && (
-          <div className="absolute right-4 sm:right-6 bottom-20 bg-white border border-gray-300 rounded-lg shadow-md w-40 animate-fadeIn z-10">
-            <button
-              onClick={() => {
-                handleDownloadPNG(table);
-                setShowDownloadOptions(false);
-              }}
-              className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
-            >
-              <FileImage size={16} /> Tải PNG
-            </button>
-            <button
-              onClick={() => {
-                handleDownloadPDF(table);
-                setShowDownloadOptions(false);
-              }}
-              className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
-            >
-              <FileText size={16} /> Tải PDF
-            </button>
-          </div>
-        )}
+        {/* Hint */}
+        <p className="text-xs text-gray-500 text-center italic pt-2">
+          💡 Quét mã QR để truy cập menu
+        </p>
       </div>
     </Overlay>
   );

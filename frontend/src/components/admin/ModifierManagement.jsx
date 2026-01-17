@@ -117,62 +117,105 @@ function ModifierManagement() {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-5 md:p-6 w-full space-y-6">
+    <div className="bg-white rounded-3xl border border-blue-100 shadow-sm p-4 sm:p-5 md:p-7 w-full space-y-6">
       {/* HEADER */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-800">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h3 className="text-xl sm:text-2xl font-bold bg-linear-to-r from-blue-700 to-blue-600 bg-clip-text text-transparent">
           Quản lý tùy chọn sản phẩm
         </h3>
 
         <button
           onClick={() => setShowGroupForm(!showGroupForm)}
-          className={` px-3 py-2
-            text-sm
-            rounded-md transition flex items-center gap-1 cursor-pointer
-          ${
-            showGroupForm
-              ? "bg-blue-100 text-blue-700"
-              : "bg-blue-600 text-white hover:bg-blue-700"
-          }`}
+          className={`
+            px-4 py-2.5
+            text-sm font-medium
+            rounded-xl
+            transition-all duration-300
+            flex items-center gap-2
+            cursor-pointer
+            ${
+              showGroupForm
+                ? "bg-blue-50 text-blue-700 border-2 border-blue-200 hover:bg-blue-100"
+                : "bg-linear-to-r from-blue-600 to-blue-700 text-white border-2 border-blue-600 hover:from-blue-700 hover:to-blue-800 shadow-sm"
+            }
+          `}
         >
-          {showGroupForm ? <X size={16} /> : <Plus size={18} />}
+          {showGroupForm ? (
+            <X size={18} strokeWidth={2.5} />
+          ) : (
+            <Plus size={18} strokeWidth={2.5} />
+          )}
           {showGroupForm ? "Hủy" : "Thêm loại tùy chọn"}
         </button>
       </div>
 
       {/* CREATE GROUP FORM */}
       {showGroupForm && (
-        <div className="border border-blue-200 rounded-xl p-5 bg-blue-50 space-y-4">
-          <h4 className="font-semibold text-blue-800">Tạo loại tùy chọn</h4>
+        <div className="border-2 border-blue-100 rounded-2xl p-5 bg-linear-to-br from-blue-50 to-white space-y-4 shadow-sm">
+          <h4 className="font-bold text-lg text-blue-700">Tạo loại tùy chọn</h4>
 
           <input
-            className="w-full border border-blue-500 rounded-lg px-3 py-2"
-            placeholder="Tên loại"
+            className="
+              w-full
+              border-2 border-blue-200
+              rounded-xl
+              px-4 py-2.5
+              text-sm
+              focus:outline-none
+              focus:ring-2
+              focus:ring-blue-500
+              focus:border-transparent
+              transition-all duration-300
+            "
+            placeholder="Nhập tên loại..."
             value={groupName}
             onChange={(e) => setGroupName(e.target.value)}
           />
 
           <select
-            className="w-full border border-blue-500 rounded-lg px-3 py-2"
+            className="
+              w-full
+              border-2 border-blue-200
+              rounded-xl
+              px-4 py-2.5
+              text-sm
+              focus:outline-none
+              focus:ring-2
+              focus:ring-blue-500
+              focus:border-transparent
+              bg-white
+              transition-all duration-300
+            "
             value={selectionType}
             onChange={(e) => setSelectionType(e.target.value)}
           >
-            <option value="SINGLE">SINGLE</option>
-            <option value="MULTIPLE">MULTIPLE</option>
+            <option value="SINGLE">SINGLE (Chọn một)</option>
+            <option value="MULTIPLE">MULTIPLE (Chọn nhiều)</option>
           </select>
 
-          <label className="flex items-center gap-2 text-sm">
+          <label className="flex items-center gap-3 text-sm font-medium text-gray-700 cursor-pointer">
             <input
               type="checkbox"
               checked={isRequired}
               onChange={(e) => setIsRequired(e.target.checked)}
+              className="w-4 h-4 text-blue-600 rounded cursor-pointer"
             />
             Bắt buộc chọn
           </label>
 
           <button
             onClick={handleCreateGroup}
-            className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 text-sm"
+            className="
+              w-full
+              bg-linear-to-r from-emerald-600 to-emerald-700
+              text-white
+              px-4 py-2.5
+              rounded-xl
+              hover:from-emerald-700 hover:to-emerald-800
+              text-sm font-medium
+              transition-all duration-300
+              shadow-sm
+            "
           >
             Lưu
           </button>
@@ -181,49 +224,64 @@ function ModifierManagement() {
 
       {/* LIST GROUPS */}
       <div className="space-y-4">
-        <h4 className="font-semibold text-sm text-gray-700">
+        <h4 className="font-bold text-base text-blue-700">
           Danh sách loại tùy chọn
         </h4>
 
         {loading ? (
-          <p>Đang tải...</p>
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-16 bg-linear-to-r from-blue-100 to-blue-50 rounded-2xl animate-pulse"
+              />
+            ))}
+          </div>
+        ) : groups.length === 0 ? (
+          <p className="text-center text-blue-400 py-8 font-medium">
+            📭 Chưa có loại tùy chọn nào
+          </p>
         ) : (
           groups.map((group) => (
             <div
               key={group.modifierGroupId}
-              className="border border-gray-300 rounded-xl p-4 space-y-3"
+              className="border-2 border-blue-100 rounded-2xl p-5 space-y-4 hover:border-blue-200 hover:shadow-md transition-all duration-300"
             >
               {/* GROUP HEADER (CLICK TO EXPAND) */}
               <div
-                className="flex justify-between items-center cursor-pointer"
+                className="flex justify-between items-center cursor-pointer group/header"
                 onClick={() =>
                   setExpandedGroupId(
                     expandedGroupId === group.modifierGroupId
                       ? null
-                      : group.modifierGroupId
+                      : group.modifierGroupId,
                   )
                 }
               >
-                <div>
-                  <p className="font-semibold">{group.name}</p>
-                  <p className="text-sm text-gray-500">
-                    {group.selectionType} •{" "}
-                    {group.isRequired ? "Bắt buộc" : "Không bắt buộc"}
+                <div className="flex-1">
+                  <p className="font-bold text-gray-800 text-base">
+                    {group.name}
+                  </p>
+                  <p className="text-sm text-blue-500 font-medium">
+                    {group.selectionType === "SINGLE"
+                      ? "Chọn một"
+                      : "Chọn nhiều"}{" "}
+                    • {group.isRequired ? "✓ Bắt buộc" : "○ Không bắt buộc"}
                   </p>
                 </div>
 
-                <span className="text-gray-500 text-sm">
+                <div className="text-blue-600 group-hover/header:text-blue-700 transition-colors">
                   {expandedGroupId === group.modifierGroupId ? (
-                    <ChevronUp />
+                    <ChevronUp size={24} strokeWidth={2} />
                   ) : (
-                    <ChevronDown />
+                    <ChevronDown size={24} strokeWidth={2} />
                   )}
-                </span>
+                </div>
               </div>
 
               {/* EXPANDED CONTENT */}
               {expandedGroupId === group.modifierGroupId && (
-                <>
+                <div className="space-y-4 pt-2 border-t-2 border-blue-100">
                   {/* ADD OPTION BUTTON */}
                   <div className="flex justify-end">
                     <button
@@ -231,40 +289,71 @@ function ModifierManagement() {
                         setActiveGroupId(
                           activeGroupId === group.modifierGroupId
                             ? null
-                            : group.modifierGroupId
+                            : group.modifierGroupId,
                         )
                       }
-                      className={`text-sm px-3 py-2 rounded flex items-center gap-1 cursor-pointer
-                      ${
-                        activeGroupId === group.modifierGroupId
-                          ? "bg-green-600/20 text-green-700"
-                          : "bg-green-600 text-white hover:bg-green-700"
-                      }`}
+                      className={`
+                        text-sm
+                        px-4 py-2
+                        rounded-xl
+                        flex items-center gap-2
+                        font-medium
+                        transition-all duration-300
+                        cursor-pointer
+                        ${
+                          activeGroupId === group.modifierGroupId
+                            ? "bg-emerald-50 text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-100"
+                            : "bg-linear-to-r from-emerald-600 to-emerald-700 text-white border-2 border-emerald-600 hover:from-emerald-700 hover:to-emerald-800 shadow-sm"
+                        }
+                      `}
                     >
                       {activeGroupId === group.modifierGroupId ? (
-                        <X size={14} />
+                        <X size={16} strokeWidth={2.5} />
                       ) : (
-                        <Plus size={14} />
+                        <Plus size={16} strokeWidth={2.5} />
                       )}
                       {activeGroupId === group.modifierGroupId
                         ? "Hủy"
                         : "Thêm tùy chọn"}
                     </button>
                   </div>
+
                   {/* FORM CREATE OPTION */}
                   {activeGroupId === group.modifierGroupId && (
-                    <div className="bg-green-50 border border-green-400 rounded-lg p-4 space-y-3">
+                    <div className="bg-linear-to-br from-emerald-50 to-white border-2 border-emerald-100 rounded-2xl p-4 space-y-3 shadow-sm">
                       <input
-                        className="w-full border border-green-400 rounded-lg px-3 py-2"
-                        placeholder="Tên tùy chọn"
+                        className="
+                          w-full
+                          border-2 border-emerald-200
+                          rounded-xl
+                          px-4 py-2.5
+                          text-sm
+                          focus:outline-none
+                          focus:ring-2
+                          focus:ring-emerald-500
+                          focus:border-transparent
+                          transition-all duration-300
+                        "
+                        placeholder="Tên tùy chọn..."
                         value={optionName}
                         onChange={(e) => setOptionName(e.target.value)}
                       />
 
                       <input
                         type="text"
-                        className="w-full border border-green-400 rounded-lg px-3 py-2"
-                        placeholder="Giá"
+                        className="
+                          w-full
+                          border-2 border-emerald-200
+                          rounded-xl
+                          px-4 py-2.5
+                          text-sm
+                          focus:outline-none
+                          focus:ring-2
+                          focus:ring-emerald-500
+                          focus:border-transparent
+                          transition-all duration-300
+                        "
+                        placeholder="Giá (VNĐ)..."
                         value={optionPrice}
                         onChange={(e) => setOptionPrice(e.target.value)}
                       />
@@ -273,7 +362,17 @@ function ModifierManagement() {
                         onClick={() =>
                           handleCreateOption(group.modifierGroupId)
                         }
-                        className="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 text-sm"
+                        className="
+                          w-full
+                          bg-linear-to-r from-emerald-600 to-emerald-700
+                          text-white
+                          px-4 py-2.5
+                          rounded-xl
+                          hover:from-emerald-700 hover:to-emerald-800
+                          text-sm font-medium
+                          transition-all duration-300
+                          shadow-sm
+                        "
                       >
                         Lưu
                       </button>
@@ -281,53 +380,79 @@ function ModifierManagement() {
                   )}
 
                   {/* LIST OPTIONS */}
-                  <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+                  <div className="overflow-x-auto rounded-2xl border-2 border-blue-100 bg-white shadow-sm">
                     <table className="w-full text-sm text-gray-700">
-                      <thead className="bg-gray-50">
+                      <thead className="bg-linear-to-r from-blue-50 to-blue-50 border-b-2 border-blue-100">
                         <tr>
-                          <th className="text-left px-4 py-3 font-medium">
+                          <th className="text-left px-4 py-3 font-bold text-blue-700">
                             Tùy chọn
                           </th>
-                          <th className="text-right px-4 py-3 font-medium">
+                          <th className="text-right px-4 py-3 font-bold text-blue-700">
                             Giá
                           </th>
-                          <th className="text-right px-4 py-3 font-medium w-32">
+                          <th className="text-right px-4 py-3 font-bold text-blue-700 w-32">
                             Thao tác
                           </th>
                         </tr>
                       </thead>
 
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-blue-100">
                         {group.options?.map((opt) => (
                           <tr
                             key={opt.modifierOptionId}
-                            className="hover:bg-gray-50 transition"
+                            className="hover:bg-blue-50 transition-colors duration-200"
                           >
                             <td className="px-4 py-3">
                               {editingOptionId === opt.modifierOptionId ? (
                                 <input
-                                  className="w-20 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                                  className="
+                                    w-32
+                                    rounded-lg
+                                    border-2 border-blue-200
+                                    px-3 py-2
+                                    text-sm
+                                    focus:outline-none
+                                    focus:ring-2
+                                    focus:ring-blue-500
+                                    focus:border-transparent
+                                  "
                                   value={editOptionName}
                                   onChange={(e) =>
                                     setEditOptionName(e.target.value)
                                   }
                                 />
                               ) : (
-                                <span className="font-medium">{opt.name}</span>
+                                <span className="font-semibold text-gray-800">
+                                  {opt.name}
+                                </span>
                               )}
                             </td>
 
                             <td className="px-4 py-3 text-right">
                               {editingOptionId === opt.modifierOptionId ? (
                                 <input
-                                  className="w-12 ml-auto rounded-lg border border-gray-300 px-3 py-2 text-sm text-right"
+                                  className="
+                                    w-20
+                                    ml-auto
+                                    rounded-lg
+                                    border-2 border-blue-200
+                                    px-3 py-2
+                                    text-sm
+                                    text-right
+                                    focus:outline-none
+                                    focus:ring-2
+                                    focus:ring-blue-500
+                                    focus:border-transparent
+                                  "
                                   value={editOptionPrice}
                                   onChange={(e) =>
                                     setEditOptionPrice(e.target.value)
                                   }
                                 />
                               ) : (
-                                opt.price
+                                <span className="font-semibold text-gray-800">
+                                  {opt.price}
+                                </span>
                               )}
                             </td>
 
@@ -338,13 +463,31 @@ function ModifierManagement() {
                                     onClick={() =>
                                       handleUpdateOption(opt.modifierOptionId)
                                     }
-                                    className="bg-green-500 text-white px-3 py-1.5 rounded text-xs"
+                                    className="
+                                      bg-linear-to-r from-emerald-600 to-emerald-700
+                                      text-white
+                                      px-3 py-1.5
+                                      rounded-lg
+                                      text-xs
+                                      font-medium
+                                      hover:from-emerald-700 hover:to-emerald-800
+                                      transition-all duration-300
+                                    "
                                   >
                                     Lưu
                                   </button>
                                   <button
                                     onClick={() => setEditingOptionId(null)}
-                                    className="bg-gray-100 px-3 py-1.5 rounded text-xs"
+                                    className="
+                                      bg-gray-200
+                                      text-gray-700
+                                      px-3 py-1.5
+                                      rounded-lg
+                                      text-xs
+                                      font-medium
+                                      hover:bg-gray-300
+                                      transition-all duration-300
+                                    "
                                   >
                                     Hủy
                                   </button>
@@ -356,7 +499,16 @@ function ModifierManagement() {
                                     setEditOptionName(opt.name);
                                     setEditOptionPrice(opt.price);
                                   }}
-                                  className="text-blue-600 text-xs"
+                                  className="
+                                    text-blue-600
+                                    hover:text-blue-700
+                                    text-xs
+                                    font-medium
+                                    hover:bg-blue-50
+                                    px-2 py-1
+                                    rounded-lg
+                                    transition-all duration-300
+                                  "
                                 >
                                   Sửa
                                 </button>
@@ -369,7 +521,7 @@ function ModifierManagement() {
                           <tr>
                             <td
                               colSpan={3}
-                              className="px-4 py-6 text-center text-gray-400 italic"
+                              className="px-4 py-6 text-center text-blue-400 italic font-medium"
                             >
                               Chưa có tùy chọn
                             </td>
@@ -378,7 +530,7 @@ function ModifierManagement() {
                       </tbody>
                     </table>
                   </div>
-                </>
+                </div>
               )}
             </div>
           ))

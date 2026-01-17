@@ -525,7 +525,7 @@ public class OrderServiceImpl implements OrderService {
             case "Pending_payment" -> {
                 orderNotification.setMessage("Bạn đã thanh toán thành công.");
                 notificationService.notifyAcceptOrderCustomer(orderNotification);
-                orderNotification.setMessage("Khách hàng đã thanh toán thành công.");
+                orderNotification.setMessage("Khách hàng yêu cầu thanh toán.");
                 notificationService.notifyNewOrder(orderNotification);
             }
             case "Serving"->{

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import itemApi from "../../api/itemApi";
-import { Plus } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import AddItemModal from "./AddItemModal";
 import DetailItemOverlay from "./DetailItemOverlay";
 
@@ -33,7 +33,7 @@ function ItemManagementCard() {
         null,
         parsedStatus,
         sortBy,
-        direction
+        direction,
       );
 
       const pageData = res.result;
@@ -58,22 +58,38 @@ function ItemManagementCard() {
   };
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-md">
-      <h2 className="text-xl font-semibold mb-6">Quản lý món ăn</h2>
+    <div className="bg-white rounded-3xl border border-blue-100 shadow-sm p-6 md:p-8">
+      <h2 className="text-2xl md:text-3xl font-bold bg-linear-to-r from-blue-700 to-blue-600 bg-clip-text text-transparent mb-7">
+        Quản lý món ăn
+      </h2>
 
       {/* ===== FILTER + SORT ===== */}
-      <div className=" flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
-        <div className="flex flex-col md:flex-row gap-2 md:gap-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-7">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-6 flex-1">
           {/* STATUS */}
-          <div className=" w-full flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-500">
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-bold text-blue-600">
               Trạng thái
             </label>
             <select
               value={status}
               onChange={handleChange(setStatus)}
-              className="min-w-[140px] border border-gray-300 rounded-lg px-3 py-2 text-sm
-              focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="
+                min-w-40
+                border-2 border-blue-200
+                rounded-xl
+                px-4 py-2.5
+                text-sm
+                font-medium
+                bg-white
+                focus:outline-none
+                focus:ring-2
+                focus:ring-blue-500
+                focus:border-transparent
+                transition-all duration-300
+                hover:border-blue-300
+                cursor-pointer
+              "
             >
               <option value="">Tất cả</option>
               <option value="true">Đang bán</option>
@@ -82,14 +98,27 @@ function ItemManagementCard() {
           </div>
 
           {/* SORT */}
-          <div className=" w-full flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-500">Sắp xếp</label>
-            <div className="flex flex-col md:flex-row gap-2">
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-bold text-blue-600">Sắp xếp</label>
+            <div className="flex gap-3">
               <select
                 value={sortBy}
                 onChange={handleChange(setSortBy)}
-                className="min-w-[150px] border border-gray-300 rounded-lg px-3 py-2 text-sm
-                focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="
+                  border-2 border-blue-200
+                  rounded-xl
+                  px-4 py-2.5
+                  text-sm
+                  font-medium
+                  bg-white
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-blue-500
+                  focus:border-transparent
+                  transition-all duration-300
+                  hover:border-blue-300
+                  cursor-pointer
+                "
               >
                 <option value="CREATED_DATE">Ngày tạo</option>
                 <option value="PRICE">Giá</option>
@@ -99,8 +128,21 @@ function ItemManagementCard() {
               <select
                 value={direction}
                 onChange={handleChange(setDirection)}
-                className="min-w-[120px] border border-gray-300 rounded-lg px-3 py-2 text-sm
-                focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="
+                  border-2 border-blue-200
+                  rounded-xl
+                  px-4 py-2.5
+                  text-sm
+                  font-medium
+                  bg-white
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-blue-500
+                  focus:border-transparent
+                  transition-all duration-300
+                  hover:border-blue-300
+                  cursor-pointer
+                "
               >
                 <option value="DESC">Giảm dần</option>
                 <option value="ASC">Tăng dần</option>
@@ -111,60 +153,99 @@ function ItemManagementCard() {
 
         {/* ADD ITEM */}
         <button
-          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white
-          px-4 py-2 rounded-lg shadow-sm transition whitespace-nowrap cursor-pointer"
+          className="
+            flex items-center justify-center gap-2
+            bg-linear-to-r from-blue-600 to-blue-700
+            hover:from-blue-700 hover:to-blue-800
+            text-white
+            px-5 py-2.5
+            rounded-xl
+            shadow-sm
+            transition-all duration-300
+            whitespace-nowrap
+            cursor-pointer
+            font-medium
+            border-2 border-blue-600
+          "
           onClick={() => setOpenAdd(true)}
         >
-          <Plus size={18} />
+          <Plus size={20} strokeWidth={2.5} />
           Thêm sản phẩm
         </button>
       </div>
 
       {/* ===== LOADING ===== */}
       {loading ? (
-        <div className="flex justify-center py-16">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-600"></div>
+        <div className="flex justify-center py-20">
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 bg-linear-to-r from-blue-400 to-blue-600 rounded-full opacity-20 animate-pulse"></div>
+            <div className="absolute inset-1 border-3 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          </div>
         </div>
       ) : (
         <>
           {items.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              Không có món ăn
+            <div className="text-center py-16 text-blue-400 font-medium">
+              📦 Chưa có món ăn nào
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {items.map((item) => (
                 <div
                   key={item.itemId}
                   onClick={() => setSelectedItem(item)}
-                  className="border border-gray-100 shadow-lg rounded-xl overflow-hidden hover:shadow-xl transition cursor-pointer"
+                  className="
+                    border-2 border-blue-100
+                    shadow-sm
+                    rounded-2xl
+                    overflow-hidden
+                    hover:shadow-lg
+                    hover:border-blue-200
+                    transition-all duration-300
+                    cursor-pointer
+                    group
+                  "
                 >
-                  <div className="relative">
+                  <div className="relative overflow-hidden bg-gray-100 h-44">
                     <img
                       src={
                         item.avatarUrl ||
                         "https://res.cloudinary.com/dznocieoi/image/upload/v1766487761/istockphoto-1396814518-612x612_upvria.jpg"
                       }
                       alt={item.itemName}
-                      className="w-full h-40 object-cover"
+                      className="
+                        w-full
+                        h-full
+                        object-cover
+                        group-hover:scale-105
+                        transition-transform duration-300
+                      "
                     />
                     <span
-                      className={`absolute top-2 right-2 px-3 py-1 text-xs rounded-full text-white
-                        ${item.status ? "bg-green-500" : "bg-red-500"}`}
+                      className={`
+                        absolute top-3 right-3
+                        px-3 py-1.5
+                        text-xs
+                        font-bold
+                        rounded-full
+                        text-white
+                        shadow-md
+                        ${item.status ? "bg-linear-to-r from-emerald-500 to-emerald-600" : "bg-linear-to-r from-red-500 to-red-600"}
+                      `}
                     >
-                      {item.status ? "Đang bán" : "Ngừng bán"}
+                      {item.status ? "✓ Đang bán" : "✕ Ngừng bán"}
                     </span>
                   </div>
 
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-800 truncate">
+                  <div className="p-5 space-y-3">
+                    <h3 className="font-bold text-gray-800 truncate text-base">
                       {item.itemName}
                     </h3>
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                    <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">
                       {item.description}
                     </p>
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="font-bold text-orange-600">
+                    <div className="flex items-center justify-between pt-2 border-t border-blue-100">
+                      <span className="font-bold text-lg bg-linear-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
                         {item.price.toLocaleString()} ₫
                       </span>
                     </div>
@@ -175,27 +256,72 @@ function ItemManagementCard() {
           )}
 
           {/* PAGINATION */}
-          <div className="flex justify-center items-center gap-3 mt-8">
-            <button
-              disabled={page === 0}
-              onClick={() => setPage(page - 1)}
-              className="px-4 py-2 border rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            >
-              ← Trước
-            </button>
+          {totalPages > 0 && (
+            <div className="flex justify-center items-center gap-4 mt-8">
+              <button
+                disabled={page === 0}
+                onClick={() => setPage(page - 1)}
+                className="
+                  flex items-center justify-center
+                  gap-1
+                  px-4 py-2.5
+                  border-2 border-blue-200
+                  rounded-xl
+                  hover:border-blue-300
+                  hover:bg-blue-50
+                  disabled:opacity-40
+                  disabled:cursor-not-allowed
+                  disabled:hover:border-blue-200
+                  disabled:hover:bg-white
+                  cursor-pointer
+                  transition-all duration-300
+                  font-medium
+                  text-gray-700
+                "
+              >
+                <ChevronLeft size={18} strokeWidth={2.5} />
+                Trước
+              </button>
 
-            <span className="text-sm text-gray-600">
-              Trang <b>{totalPages === 0 ? 0 : page + 1}</b> / {totalPages}
-            </span>
+              <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-xl border-2 border-blue-100">
+                <span className="text-sm text-gray-700">
+                  Trang{" "}
+                  <b className="text-blue-700">
+                    {totalPages === 0 ? 0 : page + 1}
+                  </b>
+                </span>
+                <span className="text-gray-400">/</span>
+                <span className="text-sm text-gray-700">
+                  <b className="text-blue-700">{totalPages}</b>
+                </span>
+              </div>
 
-            <button
-              disabled={page + 1 >= totalPages}
-              onClick={() => setPage(page + 1)}
-              className="px-4 py-2 border rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            >
-              Sau →
-            </button>
-          </div>
+              <button
+                disabled={page + 1 >= totalPages}
+                onClick={() => setPage(page + 1)}
+                className="
+                  flex items-center justify-center
+                  gap-1
+                  px-4 py-2.5
+                  border-2 border-blue-200
+                  rounded-xl
+                  hover:border-blue-300
+                  hover:bg-blue-50
+                  disabled:opacity-40
+                  disabled:cursor-not-allowed
+                  disabled:hover:border-blue-200
+                  disabled:hover:bg-white
+                  cursor-pointer
+                  transition-all duration-300
+                  font-medium
+                  text-gray-700
+                "
+              >
+                Sau
+                <ChevronRight size={18} strokeWidth={2.5} />
+              </button>
+            </div>
+          )}
         </>
       )}
       {openAdd && (
