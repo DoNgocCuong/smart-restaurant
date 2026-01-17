@@ -142,6 +142,7 @@ public class AccountServiceImpl implements AccountService {
         newAccount.setRoles(roleRepository.findAllByName(Roles.STAFF.toString()));
         newAccount.setIsEmailVerify(true);
         newAccount.setIsActive(true);
+        newAccount.setIsFirstActivity(true);
         newAccount.setTenant(tenant);
 
         Employee employee = employeeMapper.toEmployee(signupStaffRequest);
@@ -195,6 +196,7 @@ public class AccountServiceImpl implements AccountService {
         newAccount.setRoles(roleRepository.findAllByName(Roles.KITCHEN_STAFF.toString()));
         newAccount.setIsEmailVerify(true);
         newAccount.setIsActive(true);
+        newAccount.setIsFirstActivity(true);
         newAccount.setTenant(tenant);
 
         Employee employee = employeeMapper.toEmployeeKitchen(signupKitchenRequest);

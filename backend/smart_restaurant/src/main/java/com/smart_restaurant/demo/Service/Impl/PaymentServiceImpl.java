@@ -9,6 +9,7 @@ import com.smart_restaurant.demo.dto.Response.PaymentHistoryResponse;
 import com.smart_restaurant.demo.dto.Response.PaymentResponse;
 import com.smart_restaurant.demo.entity.*;
 import com.smart_restaurant.demo.enums.OrderStatus;
+import com.smart_restaurant.demo.enums.StatusTable;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.smart_restaurant.demo.mapper.PaymentMapper;
@@ -37,6 +38,7 @@ public class PaymentServiceImpl implements PaymentService {
     AccountRepository accountRepository;
     PaymentMapper paymentMapper;
     CustomerRepository customerRepository;
+    TableRepository tableRepository;
 
     @Override
     @Transactional
@@ -60,6 +62,8 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
 
         return paymentRepository.save(payment);
+
+
     }
 
     @Override
@@ -69,27 +73,36 @@ public class PaymentServiceImpl implements PaymentService {
         Integer resultCode = Integer.valueOf(momoResponse.get(MomoParameter.RESULT_CODE));
 
         Payment payment = paymentRepository.findByMomoRequestId(requestId)
-                .orElseThrow(() -> new RuntimeException("Payment not found with requestId: " + requestId));
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND_WITH_REQUEST_ID));
 
         // Update MoMo transaction ID
         payment.setMomoTransId(transId);
 
         // Update status based on result code
         OrderStatus paymentStatus =
-                (resultCode == 0) ? OrderStatus.Paid : OrderStatus.Deleted;
+                (resultCode == 0) ? OrderStatus.Paid : OrderStatus.Rejected;
 
         Status status = statusRepository.findByOrderStatus(paymentStatus)
-                .orElseThrow(() -> new RuntimeException("Status not found: " + paymentStatus));
+                .orElseThrow(() -> new AppException(ErrorCode.STATUS_NOT_FOUND));
 
         payment.setStatus(status);
 
         // Update order status if payment success
         if (resultCode == 0) {
             Order order = payment.getOrder();
-            Status orderPaidStatus = statusRepository.findByOrderStatus(OrderStatus.Pending_payment)
-                    .orElseThrow(() -> new RuntimeException("Status PAID not found"));
+
+            // ✅ SỬA: PAID thay vì PENDING_PAYMENT
+            Status orderPaidStatus = statusRepository.findByOrderStatus(OrderStatus.Paid)
+                    .orElseThrow(() -> new AppException(ErrorCode.STATUS_PAID_NOT_FOUND));
             order.setStatus(orderPaidStatus);
             orderRepository.save(order);
+
+            // ✅ THÊM: Set bàn thành trống
+            RestaurantTable table = order.getTable();
+            if (table != null) {
+                table.setStatusTable(StatusTable.unoccupied);
+                tableRepository.save(table);
+            }
         }
 
         return paymentRepository.save(payment);
@@ -99,7 +112,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public Payment findByOrderId(Integer orderId) {
         return paymentRepository.findByOrder_OrderId(orderId)
-                .orElseThrow(() -> new RuntimeException("Payment not found for order: " + orderId));
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND_FOR_ORDER));
     }
 
     @Override

@@ -44,6 +44,8 @@ import java.util.*;
 
 import java.util.stream.Collectors;
 
+import static com.smart_restaurant.demo.enums.StatusTable.occupied;
+
 
 @Slf4j
 @Service
@@ -263,6 +265,7 @@ public class OrderServiceImpl implements OrderService {
                 + ", customerId: " + (customer != null ? customer.getCustomerId() : "null"));
 
         Order savedOrder = orderRepository.save(order);
+        restaurantTable.setStatusTable(StatusTable.occupied);
         // ================== SEND SOCKET NOTIFICATION ==================
         OrderNotification noti = new OrderNotification(
                 savedOrder.getOrderId(),
@@ -351,7 +354,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order không tồn tại"));
 
-        if ("Deleted".equals(order.getStatus().getOrderStatus())) {
+        if ("Rejected".equals(order.getStatus().getOrderStatus())) {
             throw new RuntimeException("Order đã bị xóa");
         }
 
@@ -382,7 +385,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order không tồn tại"));
 
-        if ("Deleted".equals(order.getStatus().getOrderStatus())) {
+        if ("Rejected".equals(order.getStatus().getOrderStatus())) {
             throw new RuntimeException("Order đã bị xóa");
         }
         return order;
