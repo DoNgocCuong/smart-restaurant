@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import orderApi from "../../api/orderApi";
 import { STATUS_META } from "../../utils/statusMeta";
 import { isGuest } from "../../utils/jwt";
+import toast from "react-hot-toast";
 
 export default function OrderHistoryModal({ onClose }) {
   const [orders, setOrders] = useState([]);
@@ -14,7 +15,7 @@ export default function OrderHistoryModal({ onClose }) {
       const res = await orderApi.getMyOrder();
 
       let sortedOrders = (res.result || []).sort(
-        (a, b) => new Date(b.createAt) - new Date(a.createAt)
+        (a, b) => new Date(b.createAt) - new Date(a.createAt),
       );
 
       // 👉 Nếu là guest
@@ -24,12 +25,14 @@ export default function OrderHistoryModal({ onClose }) {
 
         // Lọc các order trong vòng 2 giờ
         const recentOrders = sortedOrders.filter(
-          (order) => now - new Date(order.createAt).getTime() <= TWO_HOURS
+          (order) => now - new Date(order.createAt).getTime() <= TWO_HOURS,
         );
 
         // Chỉ giữ order gần nhất
         sortedOrders = recentOrders.slice(0, 1);
       }
+
+      console.log(sortedOrders);
 
       setOrders(sortedOrders);
     } catch (error) {
@@ -42,6 +45,19 @@ export default function OrderHistoryModal({ onClose }) {
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  const handleRequestPayment = async (orderId) => {
+    try {
+      await orderApi.updateStatus(orderId, { status: "Pending_payment" });
+      toast.success(
+        "Yêu cầu thanh toán thành công, vui lòng đợi trong giây lát",
+      );
+      fetchOrders();
+    } catch (err) {
+      console.error("Lỗi cập nhật trạng thái:", err);
+      setError("Không thể yêu cầu thanh toán");
+    }
+  };
 
   return (
     <Overlay onClose={onClose}>
@@ -88,9 +104,9 @@ export default function OrderHistoryModal({ onClose }) {
                       (item.price +
                         (item.modifiers?.reduce(
                           (mSum, m) => mSum + m.price,
-                          0
+                          0,
                         ) || 0)),
-                  0
+                  0,
                 );
 
                 const statusMeta =
@@ -167,6 +183,17 @@ export default function OrderHistoryModal({ onClose }) {
                         {total.toLocaleString()} đ
                       </span>
                     </div>
+                    {/* 👉 Button yêu cầu thanh toán */}
+                    {order.oderStatus === "Serving" && (
+                      <div className="mt-4 flex justify-end">
+                        <button
+                          onClick={() => handleRequestPayment(order.orderId)}
+                          className="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
+                        >
+                          Yêu cầu thanh toán
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })}

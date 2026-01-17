@@ -1,21 +1,16 @@
 import { useState, useEffect, useContext } from "react";
 import {
-  ChefHat,
   RefreshCw,
   Clock,
   AlertCircle,
   Flame,
-  User,
-  Utensils,
   Check,
   Sparkles,
 } from "lucide-react";
-import { STATUS_META } from "../../utils/statusMeta";
 import useKitchenWebSocket from "../../hooks/useKitchenWebSocket";
 import orderApi from "../../api/orderApi";
 import itemApi from "../../api/itemApi";
 import { getTableNameById } from "../../utils/tableUtils";
-import ItemsScrollContainer from "../../components/kitchen-staff/ItemsScrollContainer";
 import KDSHeader from "../../components/kitchen-staff/KDSHeader";
 import toast from "react-hot-toast";
 
@@ -27,7 +22,6 @@ function DisplayKDS() {
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [tableNames, setTableNames] = useState({});
   const [itemMap, setItemMap] = useState({});
-  const [activeTab, setActiveTab] = useState("all");
 
   const { notifications } = useKitchenWebSocket({
     serverPort: import.meta.env.VITE_SERVER_PORT,
@@ -58,7 +52,7 @@ function DisplayKDS() {
           (order) =>
             order.oderStatus === "Approved" ||
             order.oderStatus === "Cooking" ||
-            order.oderStatus === "Cooked"
+            order.oderStatus === "Cooked",
         )
         .sort((a, b) => new Date(b.createAt) - new Date(a.createAt));
 
@@ -394,7 +388,7 @@ function DisplayKDS() {
                             {/* Total */}
                             <div className="mb-3 p-2.5 rounded-lg bg-gray-100 text-gray-800 text-center font-bold text-sm">
                               {calculateTotal(
-                                order.detailOrders
+                                order.detailOrders,
                               ).toLocaleString("vi-VN")}{" "}
                               đ
                             </div>

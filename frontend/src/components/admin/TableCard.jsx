@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Users, MapPin } from "lucide-react";
 import TableDetailModal from "./TableDetailModal";
 
 // 🧩 Hàm xác định trạng thái bàn
@@ -27,21 +28,33 @@ export default function TableCard({ table, onEdit, onQR, onDownload }) {
   const statusConfig = {
     available: {
       label: "Có sẵn",
-      border: "border-green-500/50",
-      bg: "bg-green-50",
-      text: "text-green-700",
+      badge: "🟢",
+      border: "border-emerald-200 hover:border-emerald-300",
+      bg: "bg-gradient-to-br from-emerald-50 to-white",
+      text: "text-emerald-700",
+      badgeBg: "bg-emerald-100",
+      badgeText: "text-emerald-700",
+      icon: "text-emerald-600",
     },
     occupied: {
       label: "Đã sử dụng",
-      border: "border-red-500/50",
-      bg: "bg-red-50",
+      badge: "🔴",
+      border: "border-red-200 hover:border-red-300",
+      bg: "bg-gradient-to-br from-red-50 to-white",
       text: "text-red-700",
+      badgeBg: "bg-red-100",
+      badgeText: "text-red-700",
+      icon: "text-red-600",
     },
     inactive: {
       label: "Không hoạt động",
-      border: "border-gray-300",
-      bg: "bg-gray-50",
-      text: "text-gray-400",
+      badge: "⚪",
+      border: "border-gray-200 hover:border-gray-300",
+      bg: "bg-gradient-to-br from-gray-50 to-white",
+      text: "text-gray-500",
+      badgeBg: "bg-gray-100",
+      badgeText: "text-gray-600",
+      icon: "text-gray-400",
     },
   };
 
@@ -49,20 +62,64 @@ export default function TableCard({ table, onEdit, onQR, onDownload }) {
     <>
       <div
         onClick={() => setOpen(true)}
-        className={`w-[260px] rounded-xl border-2 p-4 cursor-pointer transition hover:shadow-md
+        className={`
+          w-full max-w-xs rounded-2xl border-2 p-5
+          cursor-pointer
+          transition-all duration-300
+          hover:shadow-lg hover:scale-105
+          group
           ${statusConfig[status].border}
-          ${statusConfig[status].bg}`}
+          ${statusConfig[status].bg}
+        `}
       >
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="font-semibold">{table.tableName}</h3>
-          <span className={`text-xs ${statusConfig[status].text}`}>
-            {statusConfig[status].label}
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-800 group-hover:text-blue-700 transition-colors">
+            {table.tableName}
+          </h3>
+          <span
+            className={`text-xs font-bold px-3 py-1.5 rounded-full ${statusConfig[status].badgeBg} ${statusConfig[status].badgeText}`}
+          >
+            {statusConfig[status].badge} {statusConfig[status].label}
           </span>
         </div>
 
-        <div className="text-sm text-gray-600 space-y-1">
-          <div>Khu vực: {table.section}</div>
-          <div>Sức chứa: {table.capacity}</div>
+        {/* Info */}
+        <div className="space-y-2.5">
+          {/* Khu vực */}
+          <div className="flex items-center gap-2">
+            <MapPin
+              size={16}
+              className={statusConfig[status].icon}
+              strokeWidth={2.5}
+            />
+            <span className="text-sm text-gray-600 font-medium">
+              Khu vực:{" "}
+              <strong className="text-gray-800">{table.section}</strong>
+            </span>
+          </div>
+
+          {/* Sức chứa */}
+          <div className="flex items-center gap-2">
+            <Users
+              size={16}
+              className={statusConfig[status].icon}
+              strokeWidth={2.5}
+            />
+            <span className="text-sm text-gray-600 font-medium">
+              Sức chứa:{" "}
+              <strong className="text-gray-800">{table.capacity} người</strong>
+            </span>
+          </div>
+        </div>
+
+        {/* Status indicator */}
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <div className={`text-xs font-semibold ${statusConfig[status].text}`}>
+            {status === "available" && "✓ Sẵn sàng cho khách"}
+            {status === "occupied" && "⏱ Khách đang sử dụng"}
+            {status === "inactive" && "✕ Tạm không hoạt động"}
+          </div>
         </div>
       </div>
 

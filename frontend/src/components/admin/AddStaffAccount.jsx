@@ -2,7 +2,8 @@ import { useState } from "react";
 import Overlay from "../common/Overlay";
 import toast from "react-hot-toast";
 import accountApi from "../../api/accountApi";
-import { X } from "lucide-react";
+import { X, Mail, Lock, UserCheck } from "lucide-react";
+
 function AddStaffAccount({ onClose, onSuccess }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -11,7 +12,7 @@ function AddStaffAccount({ onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e?.preventDefault?.();
 
     if (!email || !password || !confirmPassword) {
       toast.error("Vui lòng điền đầy đủ thông tin");
@@ -35,7 +36,7 @@ function AddStaffAccount({ onClose, onSuccess }) {
 
     try {
       setLoading(true);
-      await accountApi.addStaff(role, { username: email, password }); // ✅ role là tham số đầu
+      await accountApi.addStaff(role, { username: email, password });
       toast.success("Thêm nhân viên thành công");
       onSuccess();
     } catch (error) {
@@ -48,99 +49,232 @@ function AddStaffAccount({ onClose, onSuccess }) {
 
   return (
     <Overlay onClose={onClose}>
-      <div className="bg-white rounded-2xl p-6 w-[420px] mx-auto shadow-xl animate-slide-down">
-        {/* Header */}
-        <div className="border-b border-gray-300 pb-3 mb-6 flex justify-between items-center">
-          <h3 className="text-2xl font-semibold text-gray-800 ">
-            Thêm tài khoản
-          </h3>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-md hover:bg-red-100 cursor-pointer"
-          >
-            <X />
-          </button>
-        </div>
-        {/* Form */}
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          {/* Email */}
-          <div>
-            <label className="block text-gray-700 mb-2 font-medium">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Nhập email"
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-            />
-          </div>
-
-          {/* Password */}
-          <div>
-            <label className="block text-gray-700 mb-2 font-medium">
-              Mật khẩu
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Nhập mật khẩu"
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-            />
-          </div>
-
-          {/* Confirm Password */}
-          <div>
-            <label className="block text-gray-700 mb-2 font-medium">
-              Xác nhận mật khẩu
-            </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Xác nhận mật khẩu"
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-            />
-          </div>
-
-          {/* Role */}
-          <div>
-            <label className="block text-gray-700 mb-2 font-medium">
-              Vai trò
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+      <div className="fixed inset-0 flex items-center justify-center p-3 sm:p-4 z-50">
+        <div className="bg-white rounded-3xl p-4 sm:p-6 lg:p-7 w-full max-w-md shadow-2xl border border-blue-100">
+          {/* Header */}
+          <div className="border-b-2 border-blue-100 pb-4 sm:pb-5 mb-6 flex justify-between items-center">
+            <h3 className="text-xl sm:text-2xl font-bold">
+              Thêm tài khoản nhân viên
+            </h3>
+            <button
+              onClick={onClose}
+              disabled={loading}
+              className="
+                w-8 h-8
+                flex items-center justify-center
+                rounded-lg
+                text-gray-400
+                hover:bg-red-100 hover:text-red-600
+                transition-all duration-300
+                cursor-pointer
+                disabled:opacity-50
+                disabled:cursor-not-allowed
+              "
             >
-              <option value="STAFF">Phục vụ</option>
-              <option value="KITCHEN_STAFF">Đầu bếp</option>
-            </select>
+              <X size={18} strokeWidth={2.5} />
+            </button>
+          </div>
+
+          {/* Form Fields */}
+          <div className="space-y-5">
+            {/* Email */}
+            <div className="space-y-2">
+              <label className="block text-sm font-bold">
+                Email <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Mail
+                  size={16}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500"
+                  strokeWidth={2}
+                />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="user@example.com"
+                  required
+                  disabled={loading}
+                  className="
+                    w-full
+                    pl-10 pr-4 py-2.5
+                    border-2 border-blue-200
+                    rounded-xl
+                    text-sm
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-blue-500
+                    focus:border-transparent
+                    transition-all duration-300
+                    placeholder-gray-400
+                    disabled:opacity-50
+                    disabled:cursor-not-allowed
+                  "
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div className="space-y-2">
+              <label className="block text-sm font-bold">
+                Mật khẩu <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Lock
+                  size={16}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500"
+                  strokeWidth={2}
+                />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Ít nhất 6 ký tự"
+                  required
+                  disabled={loading}
+                  className="
+                    w-full
+                    pl-10 pr-4 py-2.5
+                    border-2 border-blue-200
+                    rounded-xl
+                    text-sm
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-blue-500
+                    focus:border-transparent
+                    transition-all duration-300
+                    placeholder-gray-400
+                    disabled:opacity-50
+                    disabled:cursor-not-allowed
+                  "
+                />
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div className="space-y-2">
+              <label className="block text-sm font-bold">
+                Xác nhận mật khẩu <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Lock
+                  size={16}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500"
+                  strokeWidth={2}
+                />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Nhập lại mật khẩu"
+                  required
+                  disabled={loading}
+                  className="
+                    w-full
+                    pl-10 pr-4 py-2.5
+                    border-2 border-blue-200
+                    rounded-xl
+                    text-sm
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-blue-500
+                    focus:border-transparent
+                    transition-all duration-300
+                    placeholder-gray-400
+                    disabled:opacity-50
+                    disabled:cursor-not-allowed
+                  "
+                />
+              </div>
+            </div>
+
+            {/* Role */}
+            <div className="space-y-2">
+              <label className="block text-sm font-bold">
+                Vai trò <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <UserCheck
+                  size={16}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500 pointer-events-none"
+                  strokeWidth={2}
+                />
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  disabled={loading}
+                  className="
+                    w-full
+                    pl-10 pr-4 py-2.5
+                    border-2 border-blue-200
+                    rounded-xl
+                    text-sm
+                    bg-white
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-blue-500
+                    focus:border-transparent
+                    transition-all duration-300
+                    cursor-pointer
+                    disabled:opacity-50
+                    disabled:cursor-not-allowed
+                  "
+                >
+                  <option value="STAFF">Phục vụ</option>
+                  <option value="KITCHEN_STAFF">Đầu bếp</option>
+                </select>
+              </div>
+            </div>
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-end gap-4 mt-6">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 mt-7 pt-5 border-t-2 border-blue-100">
             <button
-              type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition cursor-pointer"
+              disabled={loading}
+              className="
+                flex-1 sm:flex-none
+                px-5 py-2.5
+                rounded-xl
+                border-2 border-gray-300
+                text-gray-700
+                font-medium
+                text-sm
+                hover:border-gray-400
+                hover:bg-gray-100
+                disabled:opacity-50
+                disabled:cursor-not-allowed
+                transition-all duration-300
+                cursor-pointer
+              "
             >
               Hủy
             </button>
             <button
-              type="submit"
+              onClick={handleSubmit}
               disabled={loading}
-              className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition cursor-pointer"
+              className="
+                flex-1 sm:flex-none
+                px-6 py-2.5
+                rounded-xl
+                bg-linear-to-r from-blue-600 to-blue-700
+                text-white
+                font-medium
+                text-sm
+                border-2 border-blue-600
+                hover:from-blue-700
+                hover:to-blue-800
+                disabled:opacity-50
+                disabled:cursor-not-allowed
+                transition-all duration-300
+                shadow-sm
+                cursor-pointer
+              "
             >
-              {loading ? "Đang thêm..." : "Thêm"}
+              {loading ? "Đang thêm..." : "Thêm nhân viên"}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </Overlay>
   );

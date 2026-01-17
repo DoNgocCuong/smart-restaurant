@@ -18,7 +18,7 @@ import StaffDetailOrder from "../../components/waiter/StaffDetailOrder";
 import tenantApi from "../../api/tenantApi";
 import orderApi from "../../api/orderApi";
 import useOrderWebSocket from "../../hooks/useOrderWebSocket";
-
+import toast from "react-hot-toast";
 /* ===== STATUS CONFIG ===== */
 const STATUS_META = {
   Paid: {
@@ -111,7 +111,7 @@ function Dashboard() {
       const res = await orderApi.tenantGetAllOrder();
 
       const sorted = (res.result || []).sort(
-        (a, b) => new Date(b.createAt) - new Date(a.createAt)
+        (a, b) => new Date(b.createAt) - new Date(a.createAt),
       );
 
       setOrders(sorted);
@@ -157,7 +157,7 @@ function Dashboard() {
     try {
       await orderApi.updateStatus(orderId, { status: "Serving" });
       toast.success("Đang tiến hành phục vụ đơn hàng");
-      onServing();
+      setSelectedOrder(null);
     } catch (err) {
       console.error("Lỗi cập nhật trạng thái:", err);
       setError("Không thể cập nhật trạng thái đơn hàng");

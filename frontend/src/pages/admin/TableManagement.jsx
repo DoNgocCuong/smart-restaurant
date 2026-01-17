@@ -1,4 +1,4 @@
-import { Plus, Search, Download, RefreshCcw } from "lucide-react";
+import { Plus, Search, Download, RefreshCcw, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import jsPDF from "jspdf";
@@ -39,7 +39,7 @@ export default function TableManagement() {
 
   /* ================= FILTER ================= */
   const filteredTables = tables.filter((t) =>
-    t.tableName.toLowerCase().includes(searchQuery.toLowerCase())
+    t.tableName.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   /* ================= GROUP STATUS (THEO TableCard LOGIC) ================= */
@@ -47,10 +47,10 @@ export default function TableManagement() {
     available: filteredTables.filter(
       (t) =>
         t.is_active &&
-        (t.statusTable === "unoccupied" || t.statusTable === null)
+        (t.statusTable === "unoccupied" || t.statusTable === null),
     ),
     occupied: filteredTables.filter(
-      (t) => t.is_active && t.statusTable === "occupied"
+      (t) => t.is_active && t.statusTable === "occupied",
     ),
     inactive: filteredTables.filter((t) => !t.is_active),
   };
@@ -151,27 +151,37 @@ export default function TableManagement() {
   return (
     <div className="col-start-2 col-end-12 py-6 space-y-6">
       {/* HEADER */}
-      <div className="flex flex-col justify-between gap-2 p-6 bg-white rounded-lg border-gray-200 shadow-sm border md:flex-row">
+      <div className="flex flex-col justify-between gap-3 p-4 sm:p-6 lg:p-7 bg-white rounded-3xl border-2 border-blue-100 shadow-sm md:flex-row">
         <div>
-          <h1 className="text-2xl font-semibold">Quản lý bàn & QR</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl sm:text-3xl font-bold ">Quản lý bàn & QR</h1>
+          <p className="text-sm text-gray-500 font-medium mt-1">
             Hiển thị theo card & trạng thái
           </p>
         </div>
       </div>
 
-      {/* SEARCH */}
-      <div
-        className="flex flex-col gap-3 p-4 bg-white rounded-lg border-gray-200 shadow-sm border sm:flex-row items-center justify-between"
-      >
+      {/* SEARCH + ADD BUTTON */}
+      <div className="flex flex-col gap-3 p-4 sm:p-6 lg:p-7 bg-white rounded-3xl border-2 border-blue-100 shadow-sm sm:flex-row items-stretch sm:items-center justify-between">
         {/* Ô tìm kiếm */}
         <div className="relative flex-1">
           <Search
             size={18}
-            className="absolute left-3 top-1/2 text-gray-400 -translate-y-1/2"
+            className="absolute left-4 top-1/2 text-blue-500 -translate-y-1/2"
           />
           <input
-            className="pl-9 pr-3 py-2 w-full text-sm border-gray-400 rounded-md border"
+            className="
+              pl-10 pr-4 py-2.5
+              w-full
+              text-sm
+              border-2 border-blue-200
+              rounded-xl
+              focus:outline-none
+              focus:ring-2
+              focus:ring-blue-500
+              focus:border-transparent
+              transition-all duration-300
+              placeholder-gray-400
+            "
             placeholder="Tìm bàn..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -181,58 +191,129 @@ export default function TableManagement() {
         {/* Nút thêm bàn */}
         <button
           onClick={() => setIsCreateDialogOpen(true)}
-          className="flex items-center justify-center gap-2 px-4 py-2 w-full text-white bg-gray-900 rounded-md cursor-pointer hover:opacity-90 sm:w-auto"
+          className="
+            flex items-center justify-center gap-2
+            px-5 py-2.5
+            w-full
+            text-white
+            bg-linear-to-r from-blue-600 to-blue-700
+            rounded-xl
+            cursor-pointer
+            hover:from-blue-700 hover:to-blue-800
+            border-2 border-blue-600
+            shadow-sm
+            transition-all duration-300
+            sm:w-auto
+            font-medium
+            text-sm
+          "
         >
-          <Plus size={18} />
+          <Plus size={18} strokeWidth={2.5} />
           Thêm bàn
         </button>
       </div>
 
-      {/* TABLE CARDS */}
-      <div className="p-6 bg-white rounded-lg border-gray-200 shadow-sm border space-y-10">
-        <div className="flex flex-col gap-3 sm:justify-between md:flex-row items-center">
-          <div className="">
-            <p className="text-left font-bold text-xl">Danh sách bàn</p>
-            <p className="text-sm text-gray-500">
+      {/* TABLE CARDS SECTION */}
+      <div className="p-4 sm:p-6 lg:p-7 bg-white rounded-3xl border-2 border-blue-100 shadow-sm space-y-8">
+        {/* Section Header */}
+        <div className="flex flex-col gap-4 sm:justify-between md:flex-row items-start md:items-center">
+          <div>
+            <p className="text-left font-bold text-xl sm:text-2xl bg-linear-to-r from-blue-700 to-blue-600 bg-clip-text text-transparent">
+              Danh sách bàn
+            </p>
+            <p className="text-sm text-gray-500 font-medium mt-1">
               Tất cả bàn hiện có của nhà hàng và trạng thái hoạt động
             </p>
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex flex-col gap-2 sm:flex-row w-full md:w-auto">
             <button
               onClick={() => setIsDownloadDialogOpen(true)}
-              className="flex items-center justify-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-md cursor-pointer hover:opacity-90"
+              className="
+                flex items-center justify-center gap-2
+                px-5 py-2.5
+                text-white
+                bg-linear-to-r from-emerald-600 to-emerald-700
+                rounded-xl
+                cursor-pointer
+                hover:from-emerald-700 hover:to-emerald-800
+                border-2 border-emerald-600
+                shadow-sm
+                transition-all duration-300
+                text-sm
+                font-medium
+              "
             >
-              <Download size={18} />
-              Tải tất cả QR
+              <Download size={18} strokeWidth={2.5} />
+              <span>Tải tất cả QR</span>
             </button>
             <button
               onClick={handleRegenerateAllQR}
-              className="flex items-center justify-center gap-2 px-4 py-2 text-white bg-orange-600 rounded-md cursor-pointer hover:opacity-90 disabled:opacity-50"
               disabled={downloading}
+              className="
+                flex items-center justify-center gap-2
+                px-5 py-2.5
+                text-white
+                bg-linear-to-r from-orange-600 to-orange-700
+                rounded-xl
+                cursor-pointer
+                hover:from-orange-700 hover:to-orange-800
+                border-2 border-orange-600
+                shadow-sm
+                transition-all duration-300
+                disabled:opacity-50
+                disabled:cursor-not-allowed
+                text-sm
+                font-medium
+              "
             >
-              <RefreshCcw size={18} /> Tạo lại tất cả QR
+              <RefreshCcw size={18} strokeWidth={2.5} />
+              <span>Tạo lại tất cả QR</span>
             </button>
           </div>
         </div>
 
+        {/* Groups */}
         {[
-          { key: "available", title: "🟢 Có sẵn" },
-          { key: "occupied", title: "🔴 Đã sử dụng" },
-          { key: "inactive", title: "⚪ Không hoạt động" },
+          {
+            key: "available",
+            title: "🟢 Có sẵn",
+            count: groupedTables.available.length,
+          },
+          {
+            key: "occupied",
+            title: "🔴 Đã sử dụng",
+            count: groupedTables.occupied.length,
+          },
+          {
+            key: "inactive",
+            title: "⚪ Không hoạt động",
+            count: groupedTables.inactive.length,
+          },
         ].map((group) => (
           <div key={group.key}>
-            <h2 className="mb-4 font-semibold text-lg">{group.title}</h2>
+            <h2 className="mb-4 font-bold text-lg text-gray-800 flex items-center gap-2">
+              {group.title}
+              <span className="text-sm font-medium text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
+                {group.count}
+              </span>
+            </h2>
             <div className="flex flex-wrap gap-5">
-              {groupedTables[group.key].map((table) => (
-                <TableCard
-                  key={table.tableId}
-                  table={table}
-                  onEdit={() => {
-                    setSelectedTable(table);
-                    setIsEditDialogOpen(true);
-                  }}
-                />
-              ))}
+              {groupedTables[group.key].length === 0 ? (
+                <p className="text-gray-400 italic text-sm w-full">
+                  Không có bàn nào
+                </p>
+              ) : (
+                groupedTables[group.key].map((table) => (
+                  <TableCard
+                    key={table.tableId}
+                    table={table}
+                    onEdit={() => {
+                      setSelectedTable(table);
+                      setIsEditDialogOpen(true);
+                    }}
+                  />
+                ))
+              )}
             </div>
           </div>
         ))}
@@ -258,47 +339,123 @@ export default function TableManagement() {
             onClick={() => !downloading && setIsDownloadDialogOpen(false)}
           ></div>
 
-          <div className="z-10 relative p-6 w-[90%] max-w-md bg-white rounded-lg shadow-lg">
-            <h2 className="mb-4 text-lg font-semibold">
-              Chọn định dạng tải QR
-            </h2>
+          <div className="z-10 relative p-4 sm:p-6 lg:p-7 w-[95%] max-w-md bg-white rounded-3xl shadow-2xl border border-blue-100">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-blue-100">
+              <h2 className="text-lg sm:text-xl font-bold bg-linear-to-r from-blue-700 to-blue-600 bg-clip-text text-transparent">
+                Chọn định dạng tải QR
+              </h2>
+              <button
+                onClick={() => !downloading && setIsDownloadDialogOpen(false)}
+                className="
+                  w-8 h-8
+                  flex items-center justify-center
+                  rounded-lg
+                  text-gray-400
+                  hover:bg-red-100 hover:text-red-600
+                  transition-all duration-300
+                  cursor-pointer
+                "
+              >
+                <X size={18} strokeWidth={2.5} />
+              </button>
+            </div>
 
-            <div className="space-y-3">
-              <label className="flex items-center gap-2">
+            {/* Content */}
+            <div className="space-y-3 mb-6">
+              <label
+                className="
+                flex items-center gap-3
+                p-3 rounded-xl
+                border-2 border-blue-200
+                cursor-pointer
+                hover:bg-blue-50
+                transition-all duration-300
+              "
+              >
                 <input
                   type="radio"
                   name="format"
                   value="png"
                   checked={downloadFormat === "png"}
                   onChange={() => setDownloadFormat("png")}
+                  className="w-4 h-4 text-blue-600 cursor-pointer"
                 />
-                <span>Ảnh PNG (ZIP nhiều file)</span>
+                <div className="flex-1">
+                  <p className="font-medium text-gray-800">Ảnh PNG (ZIP)</p>
+                  <p className="text-xs text-gray-500">
+                    Tải tất cả QR dưới dạng ZIP nhiều file
+                  </p>
+                </div>
               </label>
 
-              <label className="flex items-center gap-2">
+              <label
+                className="
+                flex items-center gap-3
+                p-3 rounded-xl
+                border-2 border-blue-200
+                cursor-pointer
+                hover:bg-blue-50
+                transition-all duration-300
+              "
+              >
                 <input
                   type="radio"
                   name="format"
                   value="pdf"
                   checked={downloadFormat === "pdf"}
                   onChange={() => setDownloadFormat("pdf")}
+                  className="w-4 h-4 text-blue-600 cursor-pointer"
                 />
-                <span>File PDF (tất cả bàn trong 1 file)</span>
+                <div className="flex-1">
+                  <p className="font-medium text-gray-800">File PDF</p>
+                  <p className="text-xs text-gray-500">
+                    Tất cả bàn được in trong 1 file PDF
+                  </p>
+                </div>
               </label>
             </div>
 
-            <div className="flex justify-end gap-3 mt-6">
+            {/* Actions */}
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t-2 border-blue-100">
               <button
                 onClick={() => setIsDownloadDialogOpen(false)}
-                className="px-4 py-2 rounded-md border-gray-300 border hover:bg-gray-100"
                 disabled={downloading}
+                className="
+                  px-5 py-2.5
+                  rounded-xl
+                  border-2 border-gray-300
+                  text-gray-700
+                  hover:border-gray-400
+                  hover:bg-gray-100
+                  text-sm
+                  font-medium
+                  transition-all duration-300
+                  disabled:opacity-50
+                  disabled:cursor-not-allowed
+                  cursor-pointer
+                "
               >
                 Hủy
               </button>
               <button
                 onClick={handleDownloadAllQR}
-                className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
                 disabled={downloading}
+                className="
+                  px-6 py-2.5
+                  text-white
+                  bg-linear-to-r from-blue-600 to-blue-700
+                  rounded-xl
+                  hover:from-blue-700 hover:to-blue-800
+                  border-2 border-blue-600
+                  text-sm
+                  font-medium
+                  transition-all duration-300
+                  disabled:opacity-50
+                  disabled:cursor-not-allowed
+                  shadow-sm
+                  cursor-pointer
+                "
               >
                 {downloading ? "Đang tải..." : "Tải xuống"}
               </button>

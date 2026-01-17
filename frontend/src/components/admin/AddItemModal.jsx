@@ -4,6 +4,7 @@ import categoryApi from "../../api/categoryApi";
 import Overlay from "../common/Overlay";
 import toast from "react-hot-toast";
 import modifierGroupApi from "../../api/modifierGroupApi";
+import { X, Upload } from "lucide-react";
 
 /* ================= CLOUDINARY CONFIG ================= */
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
@@ -97,7 +98,7 @@ function AddItemModal({ onClose, onSuccess }) {
       {
         method: "POST",
         body: data,
-      }
+      },
     );
 
     const json = await res.json();
@@ -172,78 +173,80 @@ function AddItemModal({ onClose, onSuccess }) {
   return (
     <Overlay onClose={onClose}>
       {/* container chính chia làm header cố định + nội dung cuộn */}
-      <div className="bg-white w-full max-w-lg rounded-2xl shadow-lg flex flex-col h-[90vh]">
+      <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col h-[90vh] md:h-auto md:max-h-[95vh] border border-blue-100">
         {/* Header cố định */}
-        <div className="flex items-center justify-between p-6 sm:p-7 shadow-md shrink-0">
-          <h2 className="text-lg font-semibold text-gray-800">Thêm sản phẩm</h2>
+        <div className="flex items-center justify-between p-4 sm:p-6 lg:p-7 border-b-2 border-blue-100 shrink-0 bg-linear-to-r from-blue-50 to-white rounded-t-3xl">
+          <h2 className="text-lg sm:text-xl font-bold ">Thêm sản phẩm</h2>
           <button
             onClick={onClose}
             className="
-              w-8 h-8
+              w-9 h-9
               flex items-center justify-center
-              rounded-md
+              rounded-xl
               text-gray-400
-              hover:bg-red-100
-              transition
+              hover:bg-red-100 hover:text-red-600
+              transition-all duration-300
               cursor-pointer
             "
           >
-            ✕
+            <X size={20} strokeWidth={2.5} />
           </button>
         </div>
 
         {/* Nội dung scroll */}
-        <div className="flex-1 overflow-y-auto p-6 sm:p-7">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-7">
+          <div className="space-y-5">
             {/* Item name */}
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">
-                Tên sản phẩm
-              </label>
+            <div className="space-y-2">
+              <label className="text-sm font-bold">Tên sản phẩm</label>
               <input
                 name="itemName"
                 value={form.itemName}
                 onChange={handleChange}
-                placeholder="Nhập tên sản phẩm"
+                placeholder="Nhập tên sản phẩm..."
                 className="
-                w-full
-                border border-gray-300
-                rounded-md
-                px-3 py-2
-                text-sm
-                focus:outline-none
-                focus:ring-2 focus:ring-blue-500
-              "
+                  w-full
+                  border-2 border-blue-200
+                  rounded-xl
+                  px-4 py-2.5
+                  text-sm
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-blue-500
+                  focus:border-transparent
+                  transition-all duration-300
+                "
               />
             </div>
 
             {/* Description */}
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Mô tả</label>
+            <div className="space-y-2">
+              <label className="text-sm font-bold">Mô tả</label>
               <textarea
                 name="description"
                 value={form.description}
                 onChange={handleChange}
-                placeholder="Mô tả sản phẩm"
+                placeholder="Mô tả sản phẩm..."
                 rows={3}
                 className="
-                w-full
-                border border-gray-300
-                rounded-md
-                px-3 py-2
-                text-sm
-                resize-none
-                focus:outline-none
-                focus:ring-2 focus:ring-blue-500
-              "
+                  w-full
+                  border-2 border-blue-200
+                  rounded-xl
+                  px-4 py-2.5
+                  text-sm
+                  resize-none
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-blue-500
+                  focus:border-transparent
+                  transition-all duration-300
+                "
               />
             </div>
 
             {/* Price */}
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">
-                Giá bán
-              </label>
+            <div className="space-y-2">
+              <label className="text-sm font-bold">Giá bán</label>
               <input
                 type="text"
                 step="0.1"
@@ -253,34 +256,39 @@ function AddItemModal({ onClose, onSuccess }) {
                 placeholder="Ví dụ: 25000"
                 className="
                   w-full
-                  border border-gray-300
-                  rounded-md
-                  px-3 py-2
+                  border-2 border-blue-200
+                  rounded-xl
+                  px-4 py-2.5
                   text-sm
                   focus:outline-none
-                  focus:ring-2 focus:ring-blue-500
+                  focus:ring-2
+                  focus:ring-blue-500
+                  focus:border-transparent
+                  transition-all duration-300
                 "
               />
             </div>
 
             {/* Category */}
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">
-                Danh mục
-              </label>
+            <div className="space-y-2">
+              <label className="text-sm font-bold">Danh mục</label>
               <select
                 value={form.categoryIds[0] || ""}
                 onChange={handleCategorySelect}
                 className="
-                w-full
-                border border-gray-300
-                rounded-md
-                px-3 py-2
-                text-sm
-                bg-white
-                focus:outline-none
-                focus:ring-2 focus:ring-blue-500
-              "
+                  w-full
+                  border-2 border-blue-200
+                  rounded-xl
+                  px-4 py-2.5
+                  text-sm
+                  bg-white
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-blue-500
+                  focus:border-transparent
+                  transition-all duration-300
+                  cursor-pointer
+                "
               >
                 <option value="">-- Chọn danh mục --</option>
                 {!loadingCategory &&
@@ -293,10 +301,8 @@ function AddItemModal({ onClose, onSuccess }) {
             </div>
 
             {/* Modifier Groups */}
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">
-                Nhóm tùy chọn
-              </label>
+            <div className="space-y-2">
+              <label className="text-sm font-bold">Nhóm tùy chọn</label>
               {loadingModifiers ? (
                 <p className="text-sm text-gray-500">Đang tải...</p>
               ) : modifierGroups.length === 0 ? (
@@ -304,20 +310,31 @@ function AddItemModal({ onClose, onSuccess }) {
                   Chưa có nhóm tùy chọn
                 </p>
               ) : (
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
                   {modifierGroups.map((group) => (
                     <label
                       key={group.modifierGroupId}
-                      className="flex items-center gap-2 text-sm text-gray-700"
+                      className="
+                        flex items-center gap-2.5
+                        text-sm
+                        text-gray-700
+                        font-medium
+                        cursor-pointer
+                        p-2
+                        rounded-lg
+                        hover:bg-white
+                        transition-colors duration-200
+                      "
                     >
                       <input
                         type="checkbox"
                         checked={form.modifierGroupIds.includes(
-                          group.modifierGroupId
+                          group.modifierGroupId,
                         )}
                         onChange={() =>
                           handleModifierToggle(group.modifierGroupId)
                         }
+                        className="w-4 h-4 text-blue-600 rounded cursor-pointer"
                       />
                       {group.name}
                     </label>
@@ -328,22 +345,20 @@ function AddItemModal({ onClose, onSuccess }) {
 
             {/* Image upload */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                Ảnh sản phẩm
-              </label>
+              <label className="text-sm font-bold">Ảnh sản phẩm</label>
 
               {!form.avatarUrl && (
                 <label
                   htmlFor="image-upload"
                   className="
-                    border-2 border-dashed border-gray-300
-                    rounded-lg
+                    border-2 border-dashed border-blue-300
+                    rounded-2xl
                     flex flex-col items-center justify-center
                     text-center
-                    hover:border-blue-400
-                    transition
+                    hover:border-blue-500 hover:bg-blue-50
+                    transition-all duration-300
                     cursor-pointer
-                    p-4
+                    p-6
                   "
                 >
                   <input
@@ -353,66 +368,106 @@ function AddItemModal({ onClose, onSuccess }) {
                     onChange={handleImageChange}
                     className="hidden"
                   />
-                  <p className="text-sm text-gray-600">Click để chọn ảnh</p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    JPG, PNG — dung lượng nhỏ hơn 5MB
-                  </p>
+                  <div className="flex flex-col items-center gap-2">
+                    <Upload
+                      size={28}
+                      className="text-blue-500"
+                      strokeWidth={1.5}
+                    />
+                    <p className="text-sm font-medium text-gray-700">
+                      Click để chọn ảnh
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      JPG, PNG — dung lượng nhỏ hơn 5MB
+                    </p>
+                  </div>
                 </label>
               )}
               {uploadingImg && (
-                <p className="text-xs text-blue-500">Đang upload ảnh...</p>
+                <div className="flex items-center justify-center gap-2 p-3 bg-blue-50 rounded-xl border border-blue-200">
+                  <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-xs text-blue-600 font-medium">
+                    Đang upload ảnh...
+                  </p>
+                </div>
               )}
               {form.avatarUrl && (
-                <img
-                  src={form.avatarUrl}
-                  alt="preview"
-                  className="
-                    mt-2
-                    w-full
-                    object-cover
-                    rounded-md
-                    border
-                    border-gray-300
-                  "
-                />
+                <div className="space-y-2">
+                  <img
+                    src={form.avatarUrl}
+                    alt="preview"
+                    className="
+                      w-full
+                      h-40
+                      object-cover
+                      rounded-2xl
+                      border-2 border-blue-200
+                    "
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm((prev) => ({ ...prev, avatarUrl: "" }))
+                    }
+                    className="
+                      w-full
+                      text-sm
+                      text-red-600
+                      hover:text-red-700
+                      hover:bg-red-50
+                      py-2
+                      rounded-lg
+                      transition-colors duration-300
+                      font-medium
+                    "
+                  >
+                    Thay đổi ảnh
+                  </button>
+                </div>
               )}
             </div>
+          </div>
+        </div>
 
-            {/* Actions */}
-            <div className="flex justify-end gap-3 pt-5">
-              <button
-                type="button"
-                onClick={onClose}
-                className="
-                  px-4 py-2
-                  text-sm
-                  rounded-md
-                  border
-                  text-gray-700
-                  hover:bg-gray-100
-                  transition
-                "
-              >
-                Hủy
-              </button>
-              <button
-                type="submit"
-                disabled={saving || uploadingImg}
-                className="
-                  px-5 py-2
-                  text-sm
-                  rounded-md
-                  bg-blue-600
-                  text-white
-                  hover:bg-blue-700
-                  disabled:opacity-50
-                  transition
-                "
-              >
-                {saving ? "Đang lưu..." : "Lưu"}
-              </button>
-            </div>
-          </form>
+        {/* Footer cố định */}
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 p-4 sm:p-6 lg:p-7 border-t-2 border-blue-100 shrink-0 bg-blue-50 rounded-b-3xl">
+          <button
+            type="button"
+            onClick={onClose}
+            className="
+              px-5 py-2.5
+              text-sm
+              font-medium
+              rounded-xl
+              border-2 border-gray-300
+              text-gray-700
+              hover:border-gray-400
+              hover:bg-gray-100
+              transition-all duration-300
+            "
+          >
+            Hủy
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={saving || uploadingImg}
+            className="
+              px-6 py-2.5
+              text-sm
+              font-medium
+              rounded-xl
+              bg-linear-to-r from-blue-600 to-blue-700
+              text-white
+              border-2 border-blue-600
+              hover:from-blue-700 hover:to-blue-800
+              disabled:opacity-50
+              disabled:cursor-not-allowed
+              transition-all duration-300
+              shadow-sm
+            "
+          >
+            {saving ? "Đang lưu..." : "Lưu"}
+          </button>
         </div>
       </div>
     </Overlay>

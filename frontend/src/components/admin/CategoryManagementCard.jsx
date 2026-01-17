@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import categoryApi from "../../api/categoryApi";
 import toast from "react-hot-toast";
+import { Plus, Edit2, Check, X } from "lucide-react";
 
 function CategoryManagementCard() {
   const [categories, setCategories] = useState([]);
@@ -89,11 +90,11 @@ function CategoryManagementCard() {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-5 md:p-6 w-full">
+    <div className="bg-white rounded-3xl border border-blue-100 shadow-sm p-4 sm:p-5 md:p-7 w-full hover:shadow-md transition-shadow duration-300">
       {/* Header */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
-          <h3 className="text-base sm:text-lg font-semibold text-gray-800">
+          <h3 className="text-xl sm:text-2xl font-bold bg-linear-to-r from-blue-700 to-blue-600 bg-clip-text text-transparent">
             Quản lý danh mục
           </h3>
         </div>
@@ -101,102 +102,112 @@ function CategoryManagementCard() {
         <button
           onClick={() => setShowCreate((prev) => !prev)}
           className={`
-            px-3 py-2
-            text-sm
-            rounded-md
+            px-4 py-2.5
+            text-sm font-medium
+            rounded-xl
+            flex items-center gap-2
+            transition-all duration-300
             ${
               showCreate
-                ? "bg-gray-100 text-black border border-gray-200"
-                : "bg-blue-600 text-white"
+                ? "bg-blue-50 text-blue-700 border-2 border-blue-200 hover:bg-blue-100"
+                : "bg-linear-to-r from-blue-600 to-blue-700 text-white border-2 border-blue-600 hover:from-blue-700 hover:to-blue-800 shadow-sm"
             }
-            
-            hover:bg-blue-700
-            transition
             cursor-pointer
           `}
         >
-          {showCreate ? "Đóng" : "+ Thêm danh mục"}
+          <Plus size={18} strokeWidth={2.5} />
+          {showCreate ? "Đóng" : "Thêm danh mục"}
         </button>
       </div>
 
       {/* Create form */}
       {showCreate && (
-        <form
-          onSubmit={handleCreateCategory}
+        <div
           className="
-            mb-4
-            p-3 sm:p-4
-            rounded-lg
-            border border-gray-100
-            bg-gray-50
-            flex flex-col sm:flex-row gap-2
+            mb-6
+            p-5
+            rounded-2xl
+            border-2 border-blue-100
+            bg-linear-to-br from-blue-50 to-white
+            flex flex-col sm:flex-row gap-3
+            shadow-sm
           "
         >
           <input
             type="text"
-            placeholder="Tên danh mục"
+            placeholder="Nhập tên danh mục..."
             value={categoryName}
             onChange={(e) => setCategoryName(e.target.value)}
             className="
               flex-1
-              px-3 py-2
+              px-4 py-2.5
               text-sm
-              rounded-md
-              border border-gray-300
+              rounded-xl
+              border-2 border-blue-200
+              bg-white
               focus:outline-none
               focus:ring-2
               focus:ring-blue-500
+              focus:border-transparent
+              transition-all duration-300
             "
           />
 
           <button
-            type="submit"
+            onClick={handleCreateCategory}
             disabled={creating}
             className="
-              px-4 py-2
-              text-sm
-              rounded-md
-              bg-green-600
+              px-5 py-2.5
+              text-sm font-medium
+              rounded-xl
+              bg-linear-to-r from-emerald-600 to-emerald-700
               text-white
-              hover:bg-green-700
-              disabled:opacity-50
-              transition
+              hover:from-emerald-700 hover:to-emerald-800
+              disabled:opacity-50 disabled:cursor-not-allowed
+              transition-all duration-300
+              shadow-sm
             "
           >
             {creating ? "Đang lưu..." : "Lưu"}
           </button>
-        </form>
+        </div>
       )}
 
       {/* Content */}
       {loading ? (
-        <p className="text-sm text-gray-500 py-4 text-center sm:text-left">
-          Đang tải danh mục...
-        </p>
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-14 bg-linear-to-r from-blue-100 to-blue-50 rounded-2xl animate-pulse"
+            />
+          ))}
+        </div>
       ) : categories.length === 0 ? (
-        <p className="text-sm text-gray-500 py-4 text-center sm:text-left">
-          Chưa có danh mục nào
+        <p className="text-base text-blue-400 py-8 text-center font-medium">
+          📭 Chưa có danh mục nào
         </p>
       ) : (
-        <ul className="space-y-2 sm:space-y-3">
+        <div className="space-y-3">
           {categories.map((category) => (
-            <li
+            <div
               key={category.categoryId}
               className="
-                flex flex-col gap-2
+                flex flex-col gap-3
                 sm:flex-row sm:items-center sm:justify-between
-                p-3 sm:p-4
-                rounded-lg
-                border border-gray-100
-                hover:bg-gray-50
-                transition
+                p-4
+                rounded-2xl
+                border-2 border-blue-100
+                bg-white
+                hover:border-blue-200 hover:shadow-md
+                transition-all duration-300
               "
             >
               {/* VIEW MODE */}
               {editingId !== category.categoryId ? (
-                <div className="flex justify-between w-full">
+                <div className="flex justify-between w-full items-center">
                   <div className="min-w-0">
-                    <p className="font-medium text-gray-800 truncate">
+                    <p className="font-semibold text-gray-800 text-base">
                       {category.categoryName}
                     </p>
                   </div>
@@ -206,27 +217,40 @@ function CategoryManagementCard() {
                       setEditingId(category.categoryId);
                       setEditingName(category.categoryName);
                     }}
-                    className=" text-sm text-blue-600 hover:underline"
+                    className="
+                      flex items-center gap-1.5
+                      text-sm font-medium
+                      text-blue-600
+                      hover:text-blue-700
+                      hover:bg-blue-50
+                      px-3 py-1.5
+                      rounded-lg
+                      transition-all duration-300
+                    "
                   >
+                    <Edit2 size={16} />
                     Chỉnh sửa
                   </button>
                 </div>
               ) : (
                 /* EDIT MODE */
-                <div className="flex flex-col sm:flex-row gap-2 w-full">
+                <div className="flex flex-col sm:flex-row gap-3 w-full">
                   <input
                     type="text"
                     value={editingName}
                     onChange={(e) => setEditingName(e.target.value)}
                     className="
                       flex-1
-                      px-3 py-2
+                      px-4 py-2.5
                       text-sm
-                      rounded-md
-                      border border-gray-300
+                      rounded-xl
+                      border-2 border-blue-200
+                      bg-white
                       focus:outline-none
                       focus:ring-2
                       focus:ring-blue-500
+                      focus:border-transparent
+                      transition-all duration-300
                     "
                   />
 
@@ -235,15 +259,18 @@ function CategoryManagementCard() {
                       onClick={() => handleUpdateCategory(category.categoryId)}
                       disabled={updating}
                       className="
-                        px-3 py-2
-                        text-sm
-                        rounded-md
-                        bg-green-600
+                        flex items-center gap-1.5
+                        px-4 py-2.5
+                        text-sm font-medium
+                        rounded-xl
+                        bg-linear-to-r from-emerald-600 to-emerald-700
                         text-white
-                        hover:bg-green-700
-                        disabled:opacity-50
+                        hover:from-emerald-700 hover:to-emerald-800
+                        disabled:opacity-50 disabled:cursor-not-allowed
+                        transition-all duration-300
                       "
                     >
+                      <Check size={16} />
                       Lưu
                     </button>
 
@@ -253,21 +280,25 @@ function CategoryManagementCard() {
                         setEditingName("");
                       }}
                       className="
-                        px-3 py-2
-                        text-sm
-                        rounded-md
+                        flex items-center gap-1.5
+                        px-4 py-2.5
+                        text-sm font-medium
+                        rounded-xl
                         bg-gray-200
+                        text-gray-700
                         hover:bg-gray-300
+                        transition-all duration-300
                       "
                     >
+                      <X size={16} />
                       Hủy
                     </button>
                   </div>
                 </div>
               )}
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
