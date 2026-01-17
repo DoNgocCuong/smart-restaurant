@@ -26,7 +26,7 @@ import com.smart_restaurant.demo.enums.OrderStatus;
 import com.smart_restaurant.demo.mapper.DetailOrderMapper;
 
 
-
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -459,7 +459,7 @@ public class OrderServiceImpl implements OrderService {
                 .map(this::toFullOrderResponse)
                 .collect(Collectors.toList());
     }
-
+    @Transactional
     @Override
     public OrderResponse updateOrderStatus(Integer id, UpdateOrderStatusRequest updateOrderStatusRequest) {
 
@@ -472,15 +472,31 @@ public class OrderServiceImpl implements OrderService {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
 
+
+
+
         // Map enum → entity Status
         Status statusEntity = statusRepository
                 .findByOrderStatus(updateOrderStatusRequest.getStatus())
                 .orElseThrow(() -> new AppException(ErrorCode.STATUS_NOT_FOUND));
 
+
+
         order.setStatus(statusEntity);
+        // Nếu status là Approved thì duyệt tất cả detail orders
+        if (OrderStatus.Approved.equals(updateOrderStatusRequest.getStatus())) {
+            if (order.getDetailOrders() != null && !order.getDetailOrders().isEmpty()) {
+                order.getDetailOrders().forEach(detailOrder -> {
+                    detailOrder.setIsApproved(true);
+                    detailOrderRepository.save(detailOrder);
+                });
+            }
+        }
+
 
         // Save
         Order updatedOrder = orderRepository.save(order);
+
         String newStatus=statusEntity.getOrderStatus().toString();
         OrderNotification orderNotification=OrderNotification.builder()
                 .orderId(id)
@@ -540,7 +556,6 @@ public class OrderServiceImpl implements OrderService {
         }
         return toFullOrderResponse(updatedOrder);
     }
-
 
     @Override
     public OrderResponse updateOrderAddItems(Integer orderId, List<UpdateDetailOrderRequest> detailOrderRequests, JwtAuthenticationToken jwtAuthenticationToken) {

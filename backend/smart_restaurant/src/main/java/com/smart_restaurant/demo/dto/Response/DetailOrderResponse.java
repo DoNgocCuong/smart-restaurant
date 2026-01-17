@@ -16,5 +16,6 @@ public class DetailOrderResponse {
     private String itemName;
     private Integer quantity;
     private Double price;
+    private Boolean isApproved;
     private List<ModifierOptionResponse> modifiers;
 }

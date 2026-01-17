@@ -29,6 +29,9 @@ public class DetailOrder {
     private Integer quantity;
     private Double price;
 
+    @Column(name = "is_approved")
+    private Boolean isApproved;
+
     @ManyToMany(fetch = FetchType.EAGER )
     @JoinTable(
             name="Detail_order_modifier_option",
