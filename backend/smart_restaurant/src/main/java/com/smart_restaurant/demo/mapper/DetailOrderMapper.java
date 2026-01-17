@@ -9,9 +9,12 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring",  uses = {ModifierOptionMapper.class})
 public interface DetailOrderMapper {
 
+    @Mapping(source = "item.itemId", target = "itemId")
+    @Mapping(source = "item.itemName", target = "itemName")
+    @Mapping(source = "modifies", target = "modifiers")
     DetailOrderResponse toDetailOrderResponse (DetailOrder detailOrder);
     DetailOrder toDetailOrder (DetailOrderRequest detailOrderRequest);
 

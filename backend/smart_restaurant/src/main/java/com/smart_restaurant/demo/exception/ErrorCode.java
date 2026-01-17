@@ -80,7 +80,9 @@ public enum ErrorCode {
     PHONE_EXISTED("1053", "PHONE_EXISTED", HttpStatus.BAD_REQUEST),
     STATUS_PAID_NOT_FOUND("1054", "Status PAID not found", HttpStatus.BAD_REQUEST),
     PAYMENT_NOT_FOUND_FOR_ORDER("1055", "Payment not found for order", HttpStatus.BAD_REQUEST),
-    PAYMENT_NOT_FOUND_WITH_REQUEST_ID("1056", "Payment not found with requestId", HttpStatus.BAD_REQUEST);
+    PAYMENT_NOT_FOUND_WITH_REQUEST_ID("1056", "Payment not found with requestId", HttpStatus.BAD_REQUEST),
+    DETAIL_ORDER_NOT_FOUND("1057", "DETAIL_ORDER_NOT_FOUND", HttpStatus.BAD_REQUEST),
+    DETAIL_ORDER_ALREADY_APPROVED("1058", "DETAIL_ORDER_ALREADY_APPROVED", HttpStatus.BAD_REQUEST);
 
     ErrorCode(String code, String message, HttpStatus httpStatusCode) {
         this.code = code;

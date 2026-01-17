@@ -556,7 +556,7 @@ public class OrderServiceImpl implements OrderService {
         }
         return toFullOrderResponse(updatedOrder);
     }
-
+    @Transactional
     @Override
     public OrderResponse updateOrderAddItems(Integer orderId, List<UpdateDetailOrderRequest> detailOrderRequests, JwtAuthenticationToken jwtAuthenticationToken) {
         // 1. Lấy Customer từ JWT
@@ -585,47 +585,42 @@ public class OrderServiceImpl implements OrderService {
             throw new AppException(ErrorCode.UNAUTHORIZED_ORDER_ACCESS);
         }
 
-        // 4. Validate: Order phải ở trạng thái Pending_payment
-        OrderStatus requiredStatus = OrderStatus.valueOf("Pending_payment");
-        Status pendingPaymentStatus = statusRepository.findByOrderStatus(requiredStatus)
-                .orElseThrow(() -> new RuntimeException("Status not found"));
-
-        if (!order.getStatus().getStatusId().equals(pendingPaymentStatus.getStatusId())) {
+        // 4. Validate: Order KHÔNG được ở trạng thái Pending_payment, Paid, Pending_approval
+        OrderStatus currentStatus = order.getStatus().getOrderStatus();
+        if (OrderStatus.Pending_payment.equals(currentStatus) ||
+                OrderStatus.Paid.equals(currentStatus) ||
+                OrderStatus.Pending_approval.equals(currentStatus)) {
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
         }
 
         // 5. Validate: Bàn vẫn hoạt động (không bị xóa/khóa)
         RestaurantTable table = order.getTable();
-        if (table.getIs_active() != null && table.getIs_active()) {
+        if (!table.getIs_active()) {
             throw new AppException(ErrorCode.TABLE_NOT_AVAILABLE);
         }
 
-        // 6. Lấy danh sách DetailOrder hiện tại
-        List<DetailOrder> existingDetails = order.getDetailOrders();
-
-        // 7. Xử lý các mặt hàng - CHỈ THÊM, KHÔNG XÓA
+        // 6. Xử lý các mặt hàng - CHỈ THÊM MỚI
         List<DetailOrder> newDetailOrders = new ArrayList<>();
-        List<DetailOrder> updatedDetailOrders = new ArrayList<>();
 
         for (UpdateDetailOrderRequest detailOrderRequest : detailOrderRequests) {
 
-            // 7.1. Validate request
+            // 6.1. Validate request
             if (detailOrderRequest.getItemId() == null || detailOrderRequest.getQuantity() == null) {
                 throw new AppException(ErrorCode.INVALID_REQUEST);
             }
 
-            // 7.2. KHÔNG CHO PHÉP GIẢM QUANTITY (quantity <= 0 hoặc âm)
+            // 6.2. Kiểm tra quantity > 0
             if (detailOrderRequest.getQuantity() <= 0) {
                 throw new AppException(ErrorCode.CANNOT_DECREASE_QUANTITY);
             }
 
-            // 7.3. Kiểm tra item
+            // 6.3. Kiểm tra item tồn tại
             Item item = itemRepository.findById(detailOrderRequest.getItemId())
                     .orElseThrow(() -> new AppException(ErrorCode.ITEM_NOT_FOUND));
 
             double itemPrice = item.getPrice();
 
-            // 7.4. Validate & xử lý modifiers
+            // 6.4. Validate & lấy modifiers
             List<ModifierOption> requestModifiers = new ArrayList<>();
             if (detailOrderRequest.getModifierOptionIds() != null && !detailOrderRequest.getModifierOptionIds().isEmpty()) {
                 requestModifiers = modifierOptionRepository.findAllById(detailOrderRequest.getModifierOptionIds());
@@ -635,116 +630,34 @@ public class OrderServiceImpl implements OrderService {
                     throw new AppException(ErrorCode.MODIFIER_NOT_FOUND);
                 }
 
+                // Validate modifiers hợp lệ với item
                 List<ModifierGroup> itemModifierGroups = item.getModifierGroups();
                 validateModifiersForItem(requestModifiers, itemModifierGroups);
             } else {
+                // Validate item có yêu cầu modifier bắt buộc không
                 validateRequiredModifierGroups(item.getModifierGroups());
             }
 
-            // 7.5. Tìm DetailOrder đã tồn tại theo itemId
-            DetailOrder existingDetailOrder = existingDetails.stream()
-                    .filter(d -> d.getItem().getItemId().equals(detailOrderRequest.getItemId()))
-                    .findFirst()
-                    .orElse(null);
+            // 6.5. Tạo DetailOrder mới
+            DetailOrder detailOrder = new DetailOrder();
+            detailOrder.setItem(item);
+            detailOrder.setPrice(itemPrice);
+            detailOrder.setQuantity(detailOrderRequest.getQuantity());
+            detailOrder.setModifies(requestModifiers);
+            detailOrder.setOrder(order);
 
-            if (existingDetailOrder != null) {
-                // ===== ĐÃ CÓ DETAILORDER → KIỂM TRA XÓA MODIFIERS =====
+            // ✅ Detail mới luôn chờ duyệt
+            detailOrder.setIsApproved(false);
 
-                // 7.6. Lấy danh sách modifier IDs hiện tại
-                Set<Integer> currentModifierIds = existingDetailOrder.getModifies().stream()
-                        .map(ModifierOption::getModifierOptionId)
-                        .collect(Collectors.toSet());
+            newDetailOrders.add(detailOrder);
 
-                // 7.7. KIỂM TRA CÓ Ý ĐỊNH XÓA MODIFIERS KHÔNG
-                Set<Integer> requestModifierIds = requestModifiers.stream()
-                        .map(ModifierOption::getModifierOptionId)
-                        .collect(Collectors.toSet());
-
-                // Tìm modifiers bị thiếu trong request (có nghĩa là muốn xóa)
-                Set<Integer> removedModifierIds = new HashSet<>(currentModifierIds);
-                removedModifierIds.removeAll(requestModifierIds);
-
-                if (!removedModifierIds.isEmpty()) {
-                    // CÓ MODIFIERS BỊ THIẾU → BÁO LỖI
-                    throw new AppException(ErrorCode.CANNOT_REMOVE_MODIFIERS);
-                }
-
-                // 7.8. Lọc ra các modifiers MỚI (chưa có trong DetailOrder)
-                List<ModifierOption> newModifiersToAdd = new ArrayList<>();
-                List<Integer> skippedModifierIds = new ArrayList<>();
-
-                for (ModifierOption requestModifier : requestModifiers) {
-                    if (!currentModifierIds.contains(requestModifier.getModifierOptionId())) {
-                        // ✅ Modifier chưa có → THÊM
-                        newModifiersToAdd.add(requestModifier);
-                        System.out.println("➕ Thêm modifier " + requestModifier.getModifierOptionId() +
-                                " vào DetailOrder " + existingDetailOrder.getDetailOrderId());
-                    } else {
-                        // ℹ️ Modifier đã có → BỎ QUA
-                        skippedModifierIds.add(requestModifier.getModifierOptionId());
-                    }
-                }
-
-                // 7.9. THÊM modifiers mới vào DetailOrder
-                if (!newModifiersToAdd.isEmpty()) {
-                    existingDetailOrder.getModifies().addAll(newModifiersToAdd);
-                    System.out.println("✅ Đã thêm " + newModifiersToAdd.size() + " modifier mới vào DetailOrder " +
-                            existingDetailOrder.getDetailOrderId());
-                }
-
-                if (!skippedModifierIds.isEmpty()) {
-                    System.out.println("ℹ️ Bỏ qua " + skippedModifierIds.size() + " modifier đã tồn tại: " + skippedModifierIds);
-                }
-
-                // 7.10. TĂNG quantity (CHỈ TĂNG, KHÔNG GIẢM)
-                int oldQuantity = existingDetailOrder.getQuantity();
-                int newQuantity = oldQuantity + detailOrderRequest.getQuantity();
-                existingDetailOrder.setQuantity(newQuantity);
-
-                updatedDetailOrders.add(existingDetailOrder);
-
-                System.out.println("📝 Cập nhật DetailOrder " + existingDetailOrder.getDetailOrderId() +
-                        ": Item " + item.getItemId() +
-                        ", qty " + oldQuantity + " → " + newQuantity +
-                        ", modifiers " + currentModifierIds.size() + " → " + existingDetailOrder.getModifies().size());
-
-            } else {
-                // ===== CHƯA CÓ DETAILORDER → THÊM MỚI =====
-
-                DetailOrder detailOrder = new DetailOrder();
-                detailOrder.setItem(item);
-                detailOrder.setPrice(itemPrice);
-                detailOrder.setQuantity(detailOrderRequest.getQuantity());
-                detailOrder.setModifies(requestModifiers);
-                detailOrder.setOrder(order);
-
-                newDetailOrders.add(detailOrder);
-
-                System.out.println("✨ Thêm mới DetailOrder: Item " + item.getItemId() +
-                        ", qty " + detailOrderRequest.getQuantity() +
-                        ", modifiers " + requestModifiers.size());
-            }
+            System.out.println("✨ Thêm mới DetailOrder: Item " + item.getItemId() +
+                    ", qty " + detailOrderRequest.getQuantity() +
+                    ", modifiers " + requestModifiers.size() +
+                    ", isApproved: false (chờ duyệt)");
         }
 
-        // 8. KIỂM TRA CÓ Ý ĐỊNH XÓA DETAILORDER KHÔNG
-        // Lấy tất cả itemIds từ request
-        Set<Integer> requestItemIds = detailOrderRequests.stream()
-                .map(UpdateDetailOrderRequest::getItemId)
-                .collect(Collectors.toSet());
 
-        // Kiểm tra có DetailOrder nào trong order KHÔNG CÓ trong request không
-        List<Integer> missingItemIds = new ArrayList<>();
-        for (DetailOrder existingDetail : existingDetails) {
-            Integer existingItemId = existingDetail.getItem().getItemId();
-            if (!requestItemIds.contains(existingItemId)) {
-                missingItemIds.add(existingItemId);
-            }
-        }
-
-        if (!missingItemIds.isEmpty()) {
-            // ❌ CÓ ITEMS BỊ THIẾU TRONG REQUEST → BÁO LỖI
-            throw new AppException(ErrorCode.CANNOT_REMOVE_ITEMS);
-        }
 
         // 9. Lưu các DetailOrder mới và cập nhật
         if (!newDetailOrders.isEmpty()) {
@@ -752,51 +665,48 @@ public class OrderServiceImpl implements OrderService {
             System.out.println("💾 Đã lưu " + newDetailOrders.size() + " DetailOrder mới");
         }
 
-        if (!updatedDetailOrders.isEmpty()) {
-            detailOrderRepository.saveAll(updatedDetailOrders);
-            System.out.println("💾 Đã cập nhật " + updatedDetailOrders.size() + " DetailOrder hiện có");
-        }
-
-        // 10. Cập nhật quantity_sold của items
-        for (UpdateDetailOrderRequest detailOrderRequest : detailOrderRequests) {
-            Item item = itemRepository.findById(detailOrderRequest.getItemId()).orElse(null);
-            if (item != null) {
-                int currentSold = item.getQuantitySold() != null ? item.getQuantitySold() : 0;
-                item.setQuantitySold(currentSold + detailOrderRequest.getQuantity());
-                itemRepository.save(item);
-            }
-        }
 
         // 11. Cập nhật order
         order.setUpdateAt(LocalDateTime.now());
-        Order updatedOrder = orderRepository.save(order);
 
         // 12. Lấy toàn bộ DetailOrders của order (cả cũ + mới)
         List<DetailOrder> allDetailOrders = detailOrderRepository.findByOrder_OrderId(orderId);
 
-        // 13. TÍNH LẠI subtotal từ tất cả DetailOrders
+        // 12. TÍNH subtotal - CHỈ TÍNH DETAIL ĐÃ DUYỆT (isApproved = true)
         float totalSubtotal = 0;
+        int approvedCount = 0;
+
         for (DetailOrder detail : allDetailOrders) {
+            // ✅ CHỈ TÍNH detail đã duyệt
+            if (detail.getIsApproved() == null || !detail.getIsApproved()) {
+                continue;  // Bỏ qua detail chưa duyệt
+            }
+
+            approvedCount++;
             double itemTotal = detail.getPrice() * detail.getQuantity();
+
             if (detail.getModifies() != null && !detail.getModifies().isEmpty()) {
                 for (ModifierOption modifier : detail.getModifies()) {
                     itemTotal += modifier.getPrice() * detail.getQuantity();
                 }
             }
+
             totalSubtotal += itemTotal;
         }
+
+        order.setSubtotal(totalSubtotal);
+        Order updatedOrder = orderRepository.save(order);
 
         // 14. Tạo response
         OrderResponse response = orderMapper.toOrderResponse(updatedOrder);
         response.setSubtotal(totalSubtotal);
         response.setOderStatus(updatedOrder.getStatus().getOrderStatus());
         response.setCustomerName(updatedOrder.getCustomerName());
-        response.setTableId(updatedOrder.getTable().getTableId());
-        response.setDetailOrders(toDetailOrderResponses(allDetailOrders));
+        response.setDetailOrders(allDetailOrders.stream()
+                .map(detailOrderMapper::toDetailOrderResponse)
+                .collect(Collectors.toList()));
 
-        System.out.println("✅ Cập nhật order " + orderId + " thành công. " +
-                "Thêm " + newDetailOrders.size() + " DetailOrder mới, " +
-                "Cập nhật " + updatedDetailOrders.size() + " DetailOrder hiện có");
+        System.out.println("✅ Thêm " + newDetailOrders.size() + " DetailOrder vào order " + orderId);
 
         return response;
     }
