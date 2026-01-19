@@ -5,6 +5,7 @@ import com.smart_restaurant.demo.Repository.ItemRepository;
 import com.smart_restaurant.demo.Repository.OrderRepository;
 import com.smart_restaurant.demo.Service.DetailOrderService;
 import com.smart_restaurant.demo.dto.Response.DetailOrderResponse;
+import com.smart_restaurant.demo.dto.Response.OrderNotification;
 import com.smart_restaurant.demo.dto.Response.OrderResponse;
 import com.smart_restaurant.demo.entity.DetailOrder;
 import com.smart_restaurant.demo.entity.Item;
@@ -36,6 +37,7 @@ public class DetailOrderServiceImpl implements DetailOrderService {
     ItemRepository itemRepository;
     OrderRepository orderRepository;
     OrderMapper orderMapper;
+    NotificationService notificationService;
 
 
     @Transactional
@@ -100,7 +102,12 @@ public class DetailOrderServiceImpl implements DetailOrderService {
         orderRepository.save(order);
 
         System.out.println("✅ Đã duyệt tất cả DetailOrder của Order ");
-
+        OrderNotification orderNotification=OrderNotification.builder()
+                .orderId(orderId)
+                .tableId(order.getTable().getTableId())
+                .message("Khách yêu cầu thêm món ăn cho đơn hàng.")
+                .build();
+        notificationService.notifyNewOrder(orderNotification);
         return responses;
     }
 }
