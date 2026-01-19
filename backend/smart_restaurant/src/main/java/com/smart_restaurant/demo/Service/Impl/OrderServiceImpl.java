@@ -453,6 +453,9 @@ public class OrderServiceImpl implements OrderService {
                 .map(this::toFullOrderResponse)
                 .collect(Collectors.toList());
     }
+
+
+
     @Transactional
     @Override
     public OrderResponse updateOrderStatus(Integer id, UpdateOrderStatusRequest updateOrderStatusRequest) {
@@ -560,6 +563,7 @@ public class OrderServiceImpl implements OrderService {
         }
         return toFullOrderResponse(updatedOrder);
     }
+
     @Transactional
     @Override
     public OrderResponse updateOrderAddItems(Integer orderId, List<UpdateDetailOrderRequest> detailOrderRequests, JwtAuthenticationToken jwtAuthenticationToken) {
@@ -740,12 +744,10 @@ public class OrderServiceImpl implements OrderService {
     private OrderResponse toFullOrderResponse(Order order) {
         OrderResponse response = orderMapper.toOrderResponse(order);
         response.setCustomerName(order.getCustomerName());
-        // ✅ Set customerId
         if (order.getCustomer() != null) {
             response.setCustomerId(order.getCustomer().getCustomerId());
         }
 
-        // Set tableId (vì mapper cơ bản có thể không map trường này)
         if (order.getTable() != null) {
             response.setTableId(order.getTable().getTableId());
         }

@@ -32,7 +32,7 @@ public class MomoPaymentServiceImpl implements MomoPaymentService {
     @Value("${momo.endpoint}")
     private String ENDPOINT;
 
-    @Value("http://localhost:8080/")
+    @Value("${momo.return-url}")
     private String REDIRECT_URL;
 
     @Value("${momo.ipn-url}")

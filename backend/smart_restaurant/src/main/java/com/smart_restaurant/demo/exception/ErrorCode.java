@@ -86,7 +86,8 @@ public enum ErrorCode {
     MODIFIER_OPTION_NOT_FOUND("1060", "MODIFIER_OPTION_NOT_FOUND", HttpStatus.BAD_REQUEST),
     CUSTOMER_NAME_REQUIRED("1061", "CUSTOMER_NAME_REQUIRED)", HttpStatus.BAD_REQUEST),
     PHONE_REQUIRED("1062", "PHONE_REQUIRED", HttpStatus.BAD_REQUEST),
-    NO_DETAIL_ORDER_FOUND("1063", "NO_DETAIL_ORDER_FOUND", HttpStatus.BAD_REQUEST);
+    NO_DETAIL_ORDER_FOUND("1063", "NO_DETAIL_ORDER_FOUND", HttpStatus.BAD_REQUEST),
+    ORDER_PAIDED("1064", "Order này đã được thanh toán", HttpStatus.BAD_REQUEST);
 
     ErrorCode(String code, String message, HttpStatus httpStatusCode) {
         this.code = code;

@@ -33,23 +33,23 @@ public class MomoPaymentController {
     private final MomoPaymentService momoPaymentService;
     private final OrderService orderService;
     private  final PaymentService paymentService;
-    OrderRepository orderRepository;
 
     @PostMapping("/create")
-    public MomoPaymentResponse createQR(
-            @RequestParam Integer orderId,
-            @RequestParam String orderInfo) {
-
-
+    public MomoPaymentResponse createQR(@RequestParam Integer orderId, @RequestParam String orderInfo) {
         log.info("Creating MoMo QR for orderId: {}, amount: {}", orderId);
 
         try {
             // Get order from database
             Order order = orderService.getOrderEntityById(orderId);
 
-            // Get subtotal from order
-            Long amount = (long) Math.round(order.getSubtotal());
-            log.info("Order subtotal: {}", amount);
+            // Kiểm tra order đó trang thái paid hay chua
+            if(order.getStatus().getOrderStatus() == OrderStatus.Paid){
+                throw new AppException(ErrorCode.ORDER_PAIDED);
+            }
+
+            // Get total from order
+            Long amount = (long) Math.round(order.getTotal());
+            log.info("Order total: {}", amount);
 
 
             // Create MoMo QR
@@ -79,14 +79,12 @@ public class MomoPaymentController {
 
     }
 
-    @GetMapping("/ipn")
-    public String ipnHandler(@RequestParam Map<String, String> momoResponse) {
+    @PostMapping("/ipn")
+    public String ipnHandler(@RequestBody Map<String, String> momoResponse) {
         log.info("Received MoMo IPN callback: {}", momoResponse);
 
         try {
             Integer resultCode = Integer.valueOf(momoResponse.get(MomoParameter.RESULT_CODE));
-
-            // Update payment status in database
             Payment payment = paymentService.updatePaymentStatus(momoResponse);
 
             if (resultCode == 0) {

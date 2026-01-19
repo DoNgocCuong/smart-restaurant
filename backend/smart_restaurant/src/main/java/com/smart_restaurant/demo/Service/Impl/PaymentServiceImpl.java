@@ -47,7 +47,7 @@ public class PaymentServiceImpl implements PaymentService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
 
-        // ✅ CHECK PAYMENT ĐÃ TỒN TẠI CHƯA
+        // CHECK PAYMENT ĐÃ TỒN TẠI CHƯA
         Optional<Payment> existingPayment = paymentRepository.findByOrder_OrderId(orderId);
 
         if (existingPayment.isPresent()) {
@@ -57,7 +57,7 @@ public class PaymentServiceImpl implements PaymentService {
             payment.setMomoRequestId(momoRequestId);
             payment.setMomoOrderId(momoOrderId);
 
-            log.info("✅ Payment updated for orderId: {}", orderId);
+            log.info("Payment updated for orderId: {}", orderId);
             return paymentRepository.save(payment);
         }
 
@@ -77,7 +77,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .typePayment(momoType)
                 .build();
 
-        log.info("✅ Payment created for orderId: {}", orderId);
+        log.info("Payment created for orderId: {}", orderId);
         return paymentRepository.save(payment);
 
 
@@ -90,7 +90,6 @@ public class PaymentServiceImpl implements PaymentService {
         String transId = momoResponse.get(MomoParameter.TRANS_ID);
         Integer resultCode = Integer.valueOf(momoResponse.get(MomoParameter.RESULT_CODE));
 
-        // ⭐ TÌM THEO momoOrderId HOẶC requestId
         Payment payment = paymentRepository.findByMomoOrderId(momoOrderId)
                 .or(() -> paymentRepository.findByMomoRequestId(requestId))
                 .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND_WITH_REQUEST_ID));
@@ -107,17 +106,15 @@ public class PaymentServiceImpl implements PaymentService {
 
         payment.setStatus(status);
 
-        // Update order status if payment success
+
         if (resultCode == 0) {
             Order order = payment.getOrder();
 
-            // ✅ SỬA: PAID thay vì PENDING_PAYMENT
             Status orderPaidStatus = statusRepository.findByOrderStatus(OrderStatus.Paid)
                     .orElseThrow(() -> new AppException(ErrorCode.STATUS_PAID_NOT_FOUND));
             order.setStatus(orderPaidStatus);
             orderRepository.save(order);
 
-            // ✅ THÊM: Set bàn thành trống
             RestaurantTable table = order.getTable();
             if (table != null) {
                 table.setStatusTable(StatusTable.unoccupied);
