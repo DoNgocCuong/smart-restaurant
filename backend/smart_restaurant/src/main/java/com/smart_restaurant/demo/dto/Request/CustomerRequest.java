@@ -19,5 +19,4 @@ public class CustomerRequest {
     String phone;
     String address;
     Genders gender;
-    Integer accountId;
 }

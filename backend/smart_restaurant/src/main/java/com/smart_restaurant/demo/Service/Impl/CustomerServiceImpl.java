@@ -15,6 +15,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -26,10 +27,12 @@ public class CustomerServiceImpl implements CustomerService {
     AccountRepository accountRepository;
     CustomerMapper customerMapper;
     @Override
-    public CustomerResponseDto createCustomer(CustomerRequest customerRequest) {
-        Account account=accountRepository.findById(customerRequest.getAccountId()).orElseThrow(()-> new AppException(ErrorCode.ACCOUNT_NOT_EXITS));
+    public CustomerResponseDto createCustomer(CustomerRequest customerRequest, JwtAuthenticationToken jwtAuthenticationToken) {
+        Account account=accountRepository.findByUsername(jwtAuthenticationToken.getName()).orElseThrow(()-> new AppException(ErrorCode.ACCOUNT_NOT_EXITS));
         Customer customer=customerMapper.toCustomer(customerRequest);
         customer.setAccount(account);
+        account.setIsFirstActivity(false);
+        accountRepository.save(account);
         return customerMapper.toCustomerResponseDto(customerRepository.save(customer));
     }
 }
