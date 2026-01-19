@@ -15,9 +15,8 @@ import java.util.List;
 @Builder
 public class OrderRequest {
 
-    @NotBlank(message = "Customer name is required")
     private String customerName;
-    @NotBlank(message = "Phone is required")
+
     private String phone;
 
     private Integer tableId;

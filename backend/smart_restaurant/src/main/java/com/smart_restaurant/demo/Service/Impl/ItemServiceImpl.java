@@ -5,10 +5,7 @@ import com.smart_restaurant.demo.Repository.*;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.ItemService;
 import com.smart_restaurant.demo.Service.ItemSpecification;
-import com.smart_restaurant.demo.dto.Request.AvatarRequest;
-import com.smart_restaurant.demo.dto.Request.ItemRequest;
-import com.smart_restaurant.demo.dto.Request.MenuAvailabilityToggleListRequest;
-import com.smart_restaurant.demo.dto.Request.UpdateItemRequest;
+import com.smart_restaurant.demo.dto.Request.*;
 import com.smart_restaurant.demo.dto.Response.CategoryResponse;
 import com.smart_restaurant.demo.dto.Response.ItemResponse;
 import com.smart_restaurant.demo.dto.Response.ModifierGroupResponse;
@@ -110,6 +107,7 @@ public class ItemServiceImpl implements ItemService {
                     CategoryResponse cr = new CategoryResponse();
                     cr.setCategoryId(c.getCategoryId());
                     cr.setCategoryName(c.getCategoryName());
+                    cr.setIsActive(c.getIsActive());
                     cr.setTenantId(c.getTenant().getTenantId());
                     return cr;
                 }).toList();
@@ -272,6 +270,7 @@ public Page<ItemResponse> getAllItems(int page, int size,
                 .map(c -> new CategoryResponse(
                         c.getCategoryId(),
                         c.getCategoryName(),
+                        c.getIsActive(),
                         c.getTenant().getTenantId()
                 ))
                 .toList();
@@ -393,6 +392,7 @@ public Page<ItemResponse> getAllItems(int page, int size,
                     .map(c -> new CategoryResponse(
                             c.getCategoryId(),
                             c.getCategoryName(),
+                            c.getIsActive(),
                             c.getTenant().getTenantId()
                     ))
                     .toList();
@@ -439,6 +439,7 @@ public Page<ItemResponse> getAllItems(int page, int size,
                     .map(c -> new CategoryResponse(
                             c.getCategoryId(),
                             c.getCategoryName(),
+                            c.getIsActive(),
                             c.getTenant().getTenantId()
                     ))
                     .toList();
@@ -452,6 +453,36 @@ public Page<ItemResponse> getAllItems(int page, int size,
             return itemResponse;
         });
     }
+
+    @Override
+    public ItemResponse updateStatusItem(Integer itemId, UpdateItemStatusRequest updateItemStatusRequest, JwtAuthenticationToken jwtAuthenticationToken) {
+        // Lay tenant_id boi username
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = accountService.getTenantIdByUsername(username);
+
+        //  Lấy item cần update
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new AppException(ErrorCode.ITEM_NOT_FOUND));
+
+        // [ Kiểm tra tenant (multi-tenant check) ] **
+        boolean invalidTenant = item.getCategory()
+                .stream()
+                .anyMatch(category -> !category.getTenant().getTenantId().equals(tenantId));
+        if (invalidTenant) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Update category
+        item.setStatus(updateItemStatusRequest.getStatus());
+
+        // Lưu DB
+        Item updatedItem = itemRepository.save(item);
+
+        // Build response
+        ItemResponse itemResponse = itemMapper.toItemResponse(updatedItem);
+        return itemResponse;
+    }
+
 
     private Sort buildSort(ItemSortType sortBy, Sort.Direction direction) {
         return switch (sortBy) {

@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,39 +40,53 @@ public class DetailOrderServiceImpl implements DetailOrderService {
 
     @Transactional
     @Override
-    public DetailOrderResponse approveDetailOrder(Integer detailOrderId) {
-        // 1. Kiểm tra DetailOrder tồn tại
-        DetailOrder detailOrder = detailOrderRepository.findById(detailOrderId)
-                .orElseThrow(() -> new AppException(ErrorCode.DETAIL_ORDER_NOT_FOUND));
+    public List<DetailOrderResponse> approveAllDetailOrders(Integer orderId) {
+        // 1. Kiểm tra Order tồn tại
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
-        // 2. Kiểm tra xem đã approved chưa
-        if (detailOrder.getIsApproved() != null && detailOrder.getIsApproved()) {
-            throw new AppException(ErrorCode.DETAIL_ORDER_ALREADY_APPROVED);
+        // 2. Lấy tất cả DetailOrder của order này
+        List<DetailOrder> allDetailOrders = detailOrderRepository.findByOrder_OrderId(orderId);
+
+        if (allDetailOrders.isEmpty()) {
+            throw new AppException(ErrorCode.NO_DETAIL_ORDER_FOUND);
         }
 
-        // 3. Set isApproved = true
-        detailOrder.setIsApproved(true);
+        List<DetailOrderResponse> responses = new ArrayList<>();
 
-        // 4. Lưu lại
-        DetailOrder approvedDetail = detailOrderRepository.save(detailOrder);
+        // 3. Duyệt từng DetailOrder
+        for (DetailOrder detailOrder : allDetailOrders) {
+            // Kiểm tra xem đã approved chưa
+            if (detailOrder.getIsApproved() != null && detailOrder.getIsApproved()) {
+                System.out.println("⚠️ DetailOrder " + detailOrder.getDetailOrderId() + " đã được duyệt trước đó");
+                continue; // Skip nếu đã approved
+            }
 
-        // 5. Cập nhật quantity_sold ( số lượng bán được )
-        Item item = approvedDetail.getItem();
-        if (item != null) {
-            int currentSold = item.getQuantitySold() != null ? item.getQuantitySold() : 0;
-            item.setQuantitySold(currentSold + approvedDetail.getQuantity());
-            itemRepository.save(item);
-            System.out.println("📊 Cập nhật quantity_sold: Item " + item.getItemId() + " +" + approvedDetail.getQuantity());
+            // Set isApproved = true
+            detailOrder.setIsApproved(true);
+            DetailOrder approvedDetail = detailOrderRepository.save(detailOrder);
+
+            // Cập nhật quantity_sold
+            Item item = approvedDetail.getItem();
+            if (item != null) {
+                int currentSold = item.getQuantitySold() != null ? item.getQuantitySold() : 0;
+                item.setQuantitySold(currentSold + approvedDetail.getQuantity());
+                itemRepository.save(item);
+                System.out.println("📊 Cập nhật quantity_sold: Item " + item.getItemId() + " +" + approvedDetail.getQuantity());
+            }
+
+            responses.add(detailOrderMapper.toDetailOrderResponse(approvedDetail));
+            System.out.println("✅ Đã duyệt DetailOrder " + detailOrder.getDetailOrderId());
         }
 
-        // 6. Cập nhật order
-        Order order = approvedDetail.getOrder();
+        // 4. Cập nhật Order
         order.setUpdateAt(LocalDateTime.now());
 
-        // 7. Tính lại subtotal của toàn bộ order
-        List<DetailOrder> allDetailOrders = detailOrderRepository.findByOrder_OrderId(order.getOrderId());
+        // 5. Tính lại subtotal của toàn bộ order
+        List<DetailOrder> updatedDetailOrders = detailOrderRepository.findByOrder_OrderId(orderId);
         float totalSubtotal = 0;
-        for (DetailOrder detail : allDetailOrders) {
+
+        for (DetailOrder detail : updatedDetailOrders) {
             double itemTotal = detail.getPrice() * detail.getQuantity();
             if (detail.getModifies() != null && !detail.getModifies().isEmpty()) {
                 for (ModifierOption modifier : detail.getModifies()) {
@@ -82,9 +97,10 @@ public class DetailOrderServiceImpl implements DetailOrderService {
         }
 
         order.setSubtotal(totalSubtotal);
-        Order updatedOrder = orderRepository.save(order);
-        System.out.println("✅ Đã duyệt DetailOrder " + detailOrderId);
-        // 5. Return response
-        return detailOrderMapper.toDetailOrderResponse(approvedDetail);
+        orderRepository.save(order);
+
+        System.out.println("✅ Đã duyệt tất cả DetailOrder của Order ");
+
+        return responses;
     }
 }

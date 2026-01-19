@@ -1,8 +1,11 @@
 package com.smart_restaurant.demo.Service;
 
 import com.smart_restaurant.demo.dto.Request.ModifierOptionRequest;
+import com.smart_restaurant.demo.dto.Request.UpdateModifierOptionIsActiveRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateModifierOptionRequest;
+import com.smart_restaurant.demo.dto.Response.ModifierGroupResponse;
 import com.smart_restaurant.demo.dto.Response.ModifierOptionResponse;
+import com.smart_restaurant.demo.entity.ModifierOption;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.util.List;
@@ -19,4 +22,6 @@ public interface ModifierOptionService {
     ModifierOptionResponse updateModifierOption(Integer modifierOptionId, UpdateModifierOptionRequest request, JwtAuthenticationToken jwtAuthenticationToken);
 
     void deleteModifierOption(Integer modifierOptionId, JwtAuthenticationToken jwtAuthenticationToken);
+
+    ModifierOptionResponse updateIsActiveModifierOption(Integer modifierOptionId, UpdateModifierOptionIsActiveRequest updateModifierOptionIsActiveRequest, JwtAuthenticationToken jwtAuthenticationToken);
 }

@@ -21,6 +21,7 @@ public interface ModifierGroupMapper {
 
     @Mapping(source = "selectionType", target = "selectionType")
     @Mapping(source = "isRequired", target = "isRequired")
+    @Mapping(source = "isActive", target = "isActive")
     ModifierGroupResponse toModifierGroupResponse(ModifierGroup modifierGroup);
 
     @Mapping(target = "items", ignore = true)

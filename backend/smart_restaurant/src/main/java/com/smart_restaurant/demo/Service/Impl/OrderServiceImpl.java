@@ -771,6 +771,7 @@ public class OrderServiceImpl implements OrderService {
                                     m.getModifierOptionId(),
                                     m.getName(),
                                     m.getPrice(),
+                                    m.getIsActive(),
                                     m.getModifierGroup().getModifierGroupId(),
                                     m.getModifierGroup().getName()
                             ))
