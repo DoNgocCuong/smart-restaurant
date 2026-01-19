@@ -26,10 +26,10 @@ public class MomoPaymentServiceImpl implements MomoPaymentService {
     @Value("${momo.access-key}")
     private String ACCESS_KEY;
 
-    @Value("${momo.secret-key}")
+    @Value("${momo.secret-key-momo}")
     private String SECRET_KEY;
 
-    @Value("${momo.endpoint}")
+    @Value("${momo.end-point}")
     private String ENDPOINT;
 
     @Value("${momo.return-url}")
@@ -51,9 +51,10 @@ public class MomoPaymentServiceImpl implements MomoPaymentService {
             String requestId = UUID.randomUUID().toString();
             String extraData = "";
 
-            String rawSignature = String.format(
-                    "accessKey=%s&amount=%s&extraData=%s&ipnUrl=%s&orderId=%s&orderInfo=%s&partnerCode=%s&redirectUrl=%s&requestId=%s&requestType=%s",
-                    ACCESS_KEY, amount, extraData, IPN_URL, momoOrderId, orderInfo, PARTNER_CODE, REDIRECT_URL, requestId, REQUEST_TYPE);
+
+        String rawSignature = String.format(
+                "accessKey=%s&amount=%d&extraData=%s&ipnUrl=%s&orderId=%s&orderInfo=%s&partnerCode=%s&redirectUrl=%s&requestId=%s&requestType=%s",
+                ACCESS_KEY, amount, extraData, IPN_URL, momoOrderId, orderInfo, PARTNER_CODE, REDIRECT_URL, requestId, REQUEST_TYPE);
 
 
             String prettySignature = "";

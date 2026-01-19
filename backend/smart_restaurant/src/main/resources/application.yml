@@ -66,12 +66,12 @@ qr:
 momo:
   partner-code: MOMO
   access-key: ${ACCESS_KEY}
-  secret-key: ${SECRET_KEY}
+#  secret-key: ${SECRET_KEY}
   request-type: captureWallet
   return-url: ${RETURN_URL}
   end-point: ${END_POINT}
   ipn-url:  ${IPN_URL}
-
+  secret-key-momo: ${SECRET_KEY_MOMO}
 google:
   client-id: 315292685589-c003buqq43ad0a35laoq80kelu45i6bf.apps.googleusercontent.com
 
