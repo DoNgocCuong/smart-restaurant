@@ -1,4 +1,3 @@
-import { data } from "react-router";
 import axiosClient from "./axiosClient";
 
 const tableApi = {
@@ -25,6 +24,8 @@ const tableApi = {
 
     return tables.find((table) => table.tableId === tableId) || null;
   },
+
+  getActiveTable: () => axiosClient.get("/admin/tables/active"),
 
   createTable: (data) => axiosClient.post("/admin/tables", data),
 

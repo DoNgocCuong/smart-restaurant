@@ -150,6 +150,7 @@ public class ReviewServiceImpl implements ReviewService {
         Review review=reviewMapper.toReview(reviewRequest);
         review.setCustomer(customer);
         review.setItem(item);
+        review.setIsActive(true);
         return reviewMapper.toReviewResponse(reviewRepository.save(review));
     }
 }

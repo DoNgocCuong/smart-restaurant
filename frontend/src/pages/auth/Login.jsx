@@ -54,7 +54,7 @@ function Login() {
 
   // Lọc danh sách tài khoản theo input của người dùng
   const filteredAccounts = savedAccounts.filter((account) =>
-    account.email.toLowerCase().includes(email.toLowerCase())
+    account?.email?.toLowerCase().includes(email.toLowerCase()),
   );
 
   const addSavedAccount = (newEmail, newPassword) => {
@@ -136,7 +136,6 @@ function Login() {
           removeSavedAccount(email);
         }
       }
-      console.log(role);
 
       if (role === "SUPER_ADMIN") {
         navigate("/super-admin/accounts", { replace: true });
@@ -146,6 +145,8 @@ function Login() {
         navigate(`/waiter/dashboard`, { replace: true });
       } else if (role === "KITCHEN_STAFF") {
         navigate(`/kitchen/kds`, { replace: true });
+      } else if (role === "CUSTOMER") {
+        navigate(`/customer/dashboard`, { replace: true });
       }
     } catch (error) {
       console.error(error);

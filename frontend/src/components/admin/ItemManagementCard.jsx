@@ -206,7 +206,7 @@ function ItemManagementCard() {
                     group
                   "
                 >
-                  <div className="relative overflow-hidden bg-gray-100 aspect-[4/3]">
+                  <div className="relative overflow-hidden bg-gray-100 aspect-4/3">
                     <img
                       src={
                         item.avatarUrl ||

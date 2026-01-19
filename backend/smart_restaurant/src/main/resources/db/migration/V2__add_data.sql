@@ -29,7 +29,7 @@ INSERT INTO permission VALUES
 -- =========================
 INSERT INTO role (name) VALUES
 ('TENANT_ADMIN'),
-('SUPPER_ADMIN'),
+('SUPER_ADMIN'),
 ('STAFF'),
 ('CUSTOMER'),
 ('KITCHEN_STAFF');
@@ -69,7 +69,7 @@ INSERT INTO type_payment VALUES
 INSERT INTO Account
 (username, password, is_first_activity, is_email_verify, is_customer, is_active, create_at, update_at, tenant_id)
 VALUES
-('superadmin','$2a$10$FXN9AqpGyBLou88FfgRCseKapMCoiF44AVsGf7hu6M0oRYyPb9FJO',0,1,0,1,NOW(),NOW(),1),
+('superadmin','$2a$10$FXN9AqpGyBLou88FfgRCseKapMCoiF44AVsGf7hu6M0oRYyPb9FJO',0,1,0,1,NOW(),NOW(),null),
 ('staff','$2a$10$FXN9AqpGyBLou88FfgRCseKapMCoiF44AVsGf7hu6M0oRYyPb9FJO',0,1,0,1,NOW(),NOW(),1),
 ('kitchen','$2a$10$FXN9AqpGyBLou88FfgRCseKapMCoiF44AVsGf7hu6M0oRYyPb9FJO',1,1,1,1,NOW(),NOW(),1),
 ('customer','$2a$10$FXN9AqpGyBLou88FfgRCseKapMCoiF44AVsGf7hu6M0oRYyPb9FJO',1,1,1,1,NOW(),NOW(),2),
@@ -88,8 +88,10 @@ VALUES
 ('staff3','$2a$10$FXN9AqpGyBLou88FfgRCseKapMCoiF44AVsGf7hu6M0oRYyPb9FJO',0,1,0,1,NOW(),NOW(),3),
 ('delivery1','$2a$10$FXN9AqpGyBLou88FfgRCseKapMCoiF44AVsGf7hu6M0oRYyPb9FJO',0,1,0,1,NOW(),NOW(),1),
 ('inventory1','$2a$10$FXN9AqpGyBLou88FfgRCseKapMCoiF44AVsGf7hu6M0oRYyPb9FJO',0,1,0,1,NOW(),NOW(),2),
-('admin2','$2a$10$FXN9AqpGyBLou88FfgRCseKapMCoiF44AVsGf7hu6M0oRYyPb9FJO',0,1,0,1,NOW(),NOW(),3);
-
+('admin2','$2a$10$FXN9AqpGyBLou88FfgRCseKapMCoiF44AVsGf7hu6M0oRYyPb9FJO',0,1,0,1,NOW(),NOW(),3),
+('guest_tenant_1@gmail.com','$2a$10$FXN9AqpGyBLou88FfgRCseKapMCoiF44AVsGf7hu6M0oRYyPb9FJO',0,1,0,1,NOW(),NOW(),1),
+('guest_tenant_2@gmail.com','$2a$10$FXN9AqpGyBLou88FfgRCseKapMCoiF44AVsGf7hu6M0oRYyPb9FJO',0,1,0,1,NOW(),NOW(),2),
+('guest_tenant_3@gmail.com','$2a$10$FXN9AqpGyBLou88FfgRCseKapMCoiF44AVsGf7hu6M0oRYyPb9FJO',0,1,0,1,NOW(),NOW(),3);
 
 -- ACCOUNT_ROLE
 INSERT INTO account_role VALUES
@@ -149,16 +151,16 @@ INSERT INTO Bank VALUES
 (10,'SHB','012345','TENANT J',10);
 -- CATEGORY (10 records)
 INSERT INTO category VALUES
-(1,'Food',1),
-(2,'Drink',1),
-(3,'Combo',1),
-(4,'Appetizer',1),
-(5,'Dessert',1),
-(6,'Coffee',1),
-(7,'Juice',1),
-(8,'Salad',1),
-(9,'Soup',2),
-(10,'Seafood',3);
+(1,'Food',1,1),
+(2,'Drink',1,1),
+(3,'Combo',1,1),
+(4,'Appetizer',1,1),
+(5,'Dessert',1,1),
+(6,'Coffee',1,1),
+(7,'Juice',1,1),
+(8,'Salad',1,1),
+(9,'Soup',2,1),
+(10,'Seafood',3,1);
 -- DISCOUNT (10 records)
 INSERT INTO Discount VALUES
 (1,10,100,500,1,'Fixed',1),
@@ -248,39 +250,39 @@ INSERT INTO item_category VALUES
 
 -- MODIFIER_GROUP (10 records)
 INSERT INTO modifier_group VALUES
-(1,'Size','SINGLE',1,1),
-(2,'Topping','MULTIPLE',0,1),
-(3,'Spice Level','SINGLE',1,1),
-(4,'Extra Meat','MULTIPLE',0,2),
-(5,'Sauce','MULTIPLE',0,1),
-(6,'Side Dish','MULTIPLE',0,2),
-(7,'Ice Level','SINGLE',1,3),
-(8,'Sugar Level','SINGLE',1,3),
-(9,'Cooking Level','SINGLE',1,1),
-(10,'Add-ons','MULTIPLE',0,1);
+(1,'Size','SINGLE',1,1,1),
+(2,'Topping','MULTIPLE',0,1,1),
+(3,'Spice Level','SINGLE',1,1,1),
+(4,'Extra Meat','MULTIPLE',0,1,2),
+(5,'Sauce','MULTIPLE',0,1,1),
+(6,'Side Dish','MULTIPLE',0,1,2),
+(7,'Ice Level','SINGLE',1,1,3),
+(8,'Sugar Level','SINGLE',1,1,3),
+(9,'Cooking Level','SINGLE',1,1,1),
+(10,'Add-ons','MULTIPLE',0,1,1);
 
 -- MODIFIER_OPTION (20 records)
 INSERT INTO modifier_option VALUES
-(1,'Small',0,1),
-(2,'Large',10000,1),
-(3,'Cheese',5000,2),
-(4,'Egg',7000,2),
-(5,'Medium',0,1),
-(6,'Extra Large',15000,1),
-(7,'Mild',0,3),
-(8,'Medium',0,3),
-(9,'Hot',0,3),
-(10,'Extra Beef',15000,4),
-(11,'Extra Pork',12000,4),
-(12,'Chili Sauce',3000,5),
-(13,'Soy Sauce',2000,5),
-(14,'Fries Side',20000,6),
-(15,'Salad Side',15000,6),
-(16,'Less Ice',0,7),
-(17,'No Ice',0,7),
-(18,'Less Sugar',0,8),
-(19,'Rare',0,9),
-(20,'Well Done',0,9);
+(1,'Small',0,1,1),
+(2,'Large',10000,1,1),
+(3,'Cheese',5000,1,2),
+(4,'Egg',7000,1,2),
+(5,'Medium',0,1,1),
+(6,'Extra Large',15000,1,1),
+(7,'Mild',0,1,3),
+(8,'Medium',0,1,3),
+(9,'Hot',0,1,3),
+(10,'Extra Beef',15000,1,4),
+(11,'Extra Pork',12000,1,4),
+(12,'Chili Sauce',3000,1,5),
+(13,'Soy Sauce',2000,1,5),
+(14,'Fries Side',20000,1,6),
+(15,'Salad Side',15000,1,6),
+(16,'Less Ice',0,1,7),
+(17,'No Ice',0,1,7),
+(18,'Less Sugar',0,1,8),
+(19,'Rare',0,1,9),
+(20,'Well Done',0,1,9);
 
 -- MODIFIER_GROUP_ITEM
 INSERT INTO modifier_group_item VALUES

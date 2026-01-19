@@ -1,25 +1,32 @@
 import Overlay from "../common/Overlay";
 import { X, Minus, Plus, ShoppingCart } from "lucide-react";
 import orderApi from "../../api/orderApi";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { getUsernameFromToken } from "../../utils/jwt";
 
 export default function CartModal({
   cart,
+  orderedItems = [],
+  orderId,
   onUpdateQty,
   onClose,
   onOrderSuccess,
   tableId,
 }) {
   const safeCart = Array.isArray(cart) ? cart : [];
-  const [special, setSpecial] = useState("");
+  const safeOrderedItems = Array.isArray(orderedItems) ? orderedItems : [];
 
+  const [special, setSpecial] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
 
   const username = getUsernameFromToken();
   const isGuestTenant = username?.includes("guest_tenant");
+
+  useEffect(() => {
+    console.log(isGuestTenant);
+  }, []);
 
   /* ================== TÍNH GIÁ ================== */
   const calcItemTotal = (item) => {
@@ -31,7 +38,7 @@ export default function CartModal({
         (Array.isArray(g.options)
           ? g.options.reduce((s, o) => s + o.price, 0)
           : 0),
-      0
+      0,
     );
 
     return (item.price + modifierTotal) * item.quantity;
@@ -40,20 +47,64 @@ export default function CartModal({
   const total = safeCart.reduce((sum, item) => sum + calcItemTotal(item), 0);
 
   /* ================== MAP CART → API ================== */
-  const mapCartToDetailOrders = (cart) => {
-    return cart.map((item) => ({
+  const mapCartToDetailOrders = (cart) =>
+    cart.map((item) => ({
       itemId: item.itemId,
       quantity: item.quantity,
       modifierOptionIds: (item.modifiers || [])
         .flatMap((g) => g.options || [])
         .map((o) => o.modifierOptionId),
     }));
+
+  /* ================== MERGE ITEM CŨ + MỚI ================== */
+  const mergeItems = (oldItems, newItems) => {
+    const map = new Map();
+
+    [...oldItems, ...newItems].forEach((item) => {
+      const key =
+        item.itemId +
+        "-" +
+        (item.modifiers || [])
+          .flatMap((g) => g.options || [])
+          .map((o) => o.modifierOptionId)
+          .sort()
+          .join(",");
+
+      if (map.has(key)) {
+        map.get(key).quantity += item.quantity;
+      } else {
+        map.set(key, { ...item });
+      }
+    });
+
+    return Array.from(map.values());
   };
 
-  /* ================== MAKE ORDER ================== */
-  const handleMakeOrder = async () => {
+  /* ================== MAKE / UPDATE ORDER ================== */
+  const handleSubmit = async () => {
     if (safeCart.length === 0) return;
 
+    // ===== GỌI THÊM MÓN =====
+    if (orderId) {
+      // ✅ Gửi chỉ items mới (safeCart)
+      const detailOrders = mapCartToDetailOrders(safeCart);
+      const mergedItems = mergeItems(safeOrderedItems, safeCart);
+
+      try {
+        await orderApi.customerUpdate(orderId, detailOrders);
+
+        toast.success("Đã gửi thêm món cho nhà bếp");
+        onOrderSuccess?.(mergedItems);
+        onClose();
+      } catch (err) {
+        console.error("Update order failed:", err);
+        toast.error("Không thể cập nhật đơn hàng");
+      }
+
+      return;
+    }
+
+    // ===== TẠO ORDER MỚI =====
     if (isGuestTenant) {
       if (!customerName.trim() || !phone.trim()) {
         toast.error("Vui lòng nhập tên và số điện thoại");
@@ -68,13 +119,12 @@ export default function CartModal({
       special: special.trim(),
       detailOrders: mapCartToDetailOrders(safeCart),
     };
+    console.log(payload);
 
     try {
       const res = await orderApi.makeOrder(payload);
-
       console.log(res);
-
-      onOrderSuccess?.();
+      onOrderSuccess?.(safeCart, res?.result?.orderId);
       toast.success("Đơn hàng được gửi đi, vui lòng chờ nhân viên xử lý!");
       onClose();
     } catch (err) {
@@ -83,7 +133,6 @@ export default function CartModal({
         toast.error("Bàn đang có đơn hàng chưa xử lý");
       } else {
         toast.error("Lỗi không thể tạo đơn hàng");
-        console.error(err?.response?.data?.message);
       }
     }
   };
@@ -131,11 +180,10 @@ export default function CartModal({
                       ({o.price.toLocaleString()}₫)
                     </span>
                   </p>
-                ))
+                )),
               )}
 
               <div className="flex items-center justify-between mt-3">
-                {/* Qty control */}
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => onUpdateQty(c.cartItemId, -1)}
@@ -156,7 +204,6 @@ export default function CartModal({
                   </button>
                 </div>
 
-                {/* Item total */}
                 <span className="font-semibold">
                   {calcItemTotal(c).toLocaleString()}₫
                 </span>
@@ -167,58 +214,42 @@ export default function CartModal({
 
         {/* ===== FOOTER ===== */}
         <div className="px-6 py-4 shadow-top space-y-3">
-          {isGuestTenant && (
+          {isGuestTenant && !orderId && (
             <div className="space-y-3">
-              <div>
-                <label className="block mb-1 text-sm font-medium text-gray-700">
-                  Tên khách hàng *
-                </label>
-                <input
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="Nhập tên khách hàng"
-                  className="px-3 py-2 w-full text-sm rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/80"
-                />
-              </div>
-
-              <div>
-                <label className="block mb-1 text-sm font-medium text-gray-700">
-                  Số điện thoại *
-                </label>
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Nhập số điện thoại"
-                  className="px-3 py-2 w-full text-sm rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/80"
-                />
-              </div>
+              <input
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                placeholder="Tên khách hàng *"
+                className="px-3 py-2 w-full text-sm rounded-xl border"
+              />
+              <input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="Số điện thoại *"
+                className="px-3 py-2 w-full text-sm rounded-xl border"
+              />
             </div>
           )}
 
-          {/* ===== SPECIAL NOTE ===== */}
-          <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
-              Ghi chú cho nhà bếp
-            </label>
-            <textarea
-              value={special}
-              onChange={(e) => setSpecial(e.target.value)}
-              placeholder="Ví dụ: ít cay, không hành, lên món sau 10 phút..."
-              rows={3}
-              className="px-3 py-2 w-full text-sm rounded-xl border-gray-300 resize-none border focus:outline-none focus:ring-2 focus:ring-gray-900/80"
-            />
-          </div>
+          <textarea
+            value={special}
+            onChange={(e) => setSpecial(e.target.value)}
+            placeholder="Ghi chú cho nhà bếp"
+            rows={3}
+            className="px-3 py-2 w-full text-sm rounded-xl border resize-none"
+          />
+
           <div className="flex justify-between font-semibold text-lg">
             <span>Tổng cộng</span>
-            <span className="text-gray-900">{total.toLocaleString()}₫</span>
+            <span>{total.toLocaleString()}₫</span>
           </div>
 
           <button
-            onClick={handleMakeOrder}
+            onClick={handleSubmit}
             disabled={safeCart.length === 0}
             className="py-3 w-full text-white font-medium bg-gray-900 rounded-xl hover:bg-gray-800 transition disabled:opacity-50"
           >
-            Đặt món
+            {orderId ? "Gọi thêm món" : "Đặt món"}
           </button>
         </div>
       </div>

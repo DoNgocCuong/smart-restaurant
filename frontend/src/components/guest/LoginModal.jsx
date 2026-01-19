@@ -1,8 +1,10 @@
 import { X, Mail, Lock } from "lucide-react";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import authApi from "../../api/authApi";
 import Overlay from "../common/Overlay";
+import CustomerInfoModal from "./CustomerInfoModal";
+
 export default function LoginModal({
   onClose,
   tenantId,
@@ -14,30 +16,73 @@ export default function LoginModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { login } = useContext(AuthContext);
+  const [showCustomerInfo, setShowCustomerInfo] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    if (!email || !password) {
-      setError("Vui lòng nhập đầy đủ email và mật khẩu");
+  // Load Google Sign-In script
+  useEffect(() => {
+    // Kiểm tra nếu script đã được load
+    if (document.getElementById("google-signin-script")) {
+      initializeGoogleSignIn();
       return;
     }
 
+    const script = document.createElement("script");
+    script.id = "google-signin-script";
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = initializeGoogleSignIn;
+    document.body.appendChild(script);
+
+    return () => {
+      // Cleanup nếu cần
+    };
+  }, []);
+
+  const initializeGoogleSignIn = () => {
+    if (window.google) {
+      window.google.accounts.id.initialize({
+        client_id:
+          "315292685589-c003buqq43ad0a35laoq80kelu45i6bf.apps.googleusercontent.com",
+        callback: handleGoogleCredentialResponse,
+      });
+
+      window.google.accounts.id.renderButton(
+        document.getElementById("googleSignInButton"),
+        {
+          theme: "outline",
+          size: "large",
+          width: "100%",
+          text: "signin_with",
+          shape: "rectangular",
+          logo_alignment: "left",
+        },
+      );
+    }
+  };
+
+  const handleGoogleCredentialResponse = async (response) => {
     try {
       setLoading(true);
+      setError("");
 
-      const res = await authApi.login({
-        userName: email,
-        password,
+      const googleToken = response.credential;
+
+      // Gửi token lên backend
+      const res = await authApi.loginWithGoogle(tenantId, {
+        token: googleToken,
       });
 
       const accessToken = res?.result?.acessToken;
-      const userName = email;
+      const firstActivity = res?.result?.firstActivity;
 
       if (!accessToken) {
-        throw new Error("Đăng nhập thất bại");
+        throw new Error("Đăng nhập Google thất bại");
       }
+
+      // Decode token để lấy email
+      const payload = JSON.parse(atob(googleToken.split(".")[1]));
+      const userName = payload.email;
 
       // 🔐 LƯU GIỐNG LOGIN PAGE
       localStorage.setItem("token", accessToken);
@@ -46,13 +91,57 @@ export default function LoginModal({
       // 🔄 CẬP NHẬT AUTH CONTEXT
       await login(accessToken);
 
-      const role = localStorage.getItem("role");
+      if (firstActivity) {
+        setShowCustomerInfo(true);
+        return;
+      }
+
+      onClose();
+      onSuccess?.();
+    } catch (err) {
+      setError(err?.response?.data?.message || "Đăng nhập Google thất bại");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (!email || !password) {
+      setError("Vui lòng nhập đầy đủ email và mật khẩu");
+      return;
+    }
+    try {
+      setLoading(true);
+      const res = await authApi.login({
+        userName: email,
+        password,
+      });
+      const accessToken = res?.result?.acessToken;
+      const firstActivity = res?.result?.firstActivity;
+
+      const userName = email;
+      if (!accessToken) {
+        throw new Error("Đăng nhập thất bại");
+      }
+      // 🔐 LƯU GIỐNG LOGIN PAGE
+      localStorage.setItem("token", accessToken);
+      sessionStorage.setItem("userName", userName);
+      // 🔄 CẬP NHẬT AUTH CONTEXT
+      await login(accessToken);
+
+      if (firstActivity) {
+        setShowCustomerInfo(true);
+        return;
+      }
 
       onClose();
       onSuccess?.();
     } catch (err) {
       setError(
-        err?.response?.data?.message || "Email hoặc mật khẩu không chính xác"
+        err?.response?.data?.message || "Email hoặc mật khẩu không chính xác",
       );
       console.error(err);
     } finally {
@@ -83,6 +172,21 @@ export default function LoginModal({
             {error}
           </div>
         )}
+
+        {/* GOOGLE SIGN IN BUTTON */}
+        <div className="mb-4">
+          <div
+            id="googleSignInButton"
+            className="w-full flex justify-center"
+          ></div>
+        </div>
+
+        {/* DIVIDER */}
+        <div className="flex items-center my-6">
+          <div className="flex-1 border-t border-gray-200"></div>
+          <span className="px-4 text-sm text-gray-500">hoặc</span>
+          <div className="flex-1 border-t border-gray-200"></div>
+        </div>
 
         {/* FORM */}
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -139,6 +243,18 @@ export default function LoginModal({
           </button>
         </div>
       </div>
+      {showCustomerInfo && (
+        <CustomerInfoModal
+          onClose={() => {
+            setShowCustomerInfo(false);
+            onClose();
+          }}
+          onSuccess={() => {
+            onSuccess?.();
+            setShowCustomerInfo(false);
+          }}
+        />
+      )}
     </Overlay>
   );
 }

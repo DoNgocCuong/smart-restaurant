@@ -11,6 +11,7 @@ import {
   LogOut,
   User,
   X,
+  AlertCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import authApi from "../../api/authApi";
@@ -19,6 +20,8 @@ import tenantApi from "../../api/tenantApi";
 import orderApi from "../../api/orderApi";
 import useOrderWebSocket from "../../hooks/useOrderWebSocket";
 import toast from "react-hot-toast";
+import detailOrderApi from "../../api/detailOrderApi";
+
 /* ===== STATUS CONFIG ===== */
 const STATUS_META = {
   Paid: {
@@ -60,6 +63,11 @@ const STATUS_META = {
     label: "Từ chối",
     color: "bg-gray-50 text-gray-600 border-gray-200",
     icon: XCircle,
+  },
+  Needs_approval: {
+    label: "Cần duyệt thêm",
+    color: "bg-yellow-50 text-yellow-700 border-yellow-200",
+    icon: AlertCircle,
   },
 };
 
@@ -114,12 +122,40 @@ function Dashboard() {
         (a, b) => new Date(b.createAt) - new Date(a.createAt),
       );
 
+      console.log(sorted);
+
       setOrders(sorted);
     } catch (err) {
       console.error("Get orders error:", err);
     } finally {
       setLoading(false);
     }
+  };
+
+  /* ===== CHECK UNAPPROVED ITEMS ===== */
+  const hasUnapprovedItems = (order) => {
+    // Kiểm tra status không phải Paid, Pending_payment, Rejected
+    const excludedStatuses = ["Paid", "Pending_payment", "Rejected"];
+    if (excludedStatuses.includes(order.oderStatus)) {
+      return false;
+    }
+
+    // Kiểm tra có món nào isApproved === false
+    if (!order.detailOrders || order.detailOrders.length === 0) {
+      return false;
+    }
+
+    return order.detailOrders.some((detail) => detail.isApproved === false);
+  };
+
+  /* ===== GET DISPLAY STATUS ===== */
+  const getDisplayStatus = (order) => {
+    // Nếu có món chưa được duyệt, hiển thị "Cần duyệt thêm"
+    if (hasUnapprovedItems(order)) {
+      return "Needs_approval";
+    }
+    // Nếu không, hiển thị status gốc
+    return order.oderStatus;
   };
 
   /* ===== ACTIONS ===== */
@@ -133,6 +169,21 @@ function Dashboard() {
     } catch (err) {
       console.error("Approve order error:", err);
       alert("Duyệt đơn thất bại");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleApproveMore = async (orderId) => {
+    setProcessing(true);
+    try {
+      await detailOrderApi.approveNextTime(orderId);
+      toast.success("Đã duyệt món thêm cho đơn hàng");
+      setSelectedOrder(null);
+      fetchOrders();
+    } catch (err) {
+      console.error("Approve more order error:", err);
+      toast.error("Duyệt món thêm thất bại");
     } finally {
       setProcessing(false);
     }
@@ -158,9 +209,10 @@ function Dashboard() {
       await orderApi.updateStatus(orderId, { status: "Serving" });
       toast.success("Đang tiến hành phục vụ đơn hàng");
       setSelectedOrder(null);
+      fetchOrders();
     } catch (err) {
       console.error("Lỗi cập nhật trạng thái:", err);
-      setError("Không thể cập nhật trạng thái đơn hàng");
+      toast.error("Không thể cập nhật trạng thái đơn hàng");
     }
   };
 
@@ -299,7 +351,8 @@ function Dashboard() {
 
         <div className="grid gap-4">
           {filteredOrders.map((order) => {
-            const meta = STATUS_META[order.oderStatus];
+            const displayStatus = getDisplayStatus(order);
+            const meta = STATUS_META[displayStatus];
             const Icon = meta?.icon || Bell;
             const isNew = newOrderIds.has(order.orderId);
 
@@ -363,9 +416,11 @@ function Dashboard() {
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
           onApprove={handleApprove}
+          onApproveMore={handleApproveMore}
           onReject={handleReject}
           onServing={handleReciveAndServing}
           processing={processing}
+          hasUnapprovedItems={hasUnapprovedItems(selectedOrder)}
         />
       )}
     </div>

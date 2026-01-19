@@ -45,8 +45,8 @@ export default function ModifierModal({ item, groups, onConfirm, onClose }) {
   };
 
   return (
-    <Overlay onClose={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-[560px] max-w-[95%] max-h-[85vh] flex flex-col overflow-hidden">
+    <Overlay onClose={onClose} zindex={100}>
+      <div className="bg-white rounded-2xl shadow-2xl w-[560px] max-w-[95%] max-h-[85vh] flex flex-col overflow-hidden z-60">
         {/* HEADER */}
         <div className="p-5 shadow-md flex justify-between items-center">
           <div>

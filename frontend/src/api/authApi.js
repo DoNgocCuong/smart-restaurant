@@ -5,6 +5,8 @@ const authApi = {
   logout: () => axiosClient.post("/auth/log-out"),
   customerSignup: (tenantId, data) =>
     axiosClient.post(`/auth/signup/${tenantId}`, data),
+  loginWithGoogle: (tenantId, data) =>
+    axiosClient.post(`/auth/log-in/email/${tenantId}`, data),
 };
 
 export default authApi;

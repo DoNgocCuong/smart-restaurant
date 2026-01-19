@@ -1,4 +1,14 @@
-import { Plus, Search, Download, RefreshCcw, X } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Download,
+  RefreshCcw,
+  X,
+  CheckCircle2,
+  XCircle,
+  MinusCircle,
+} from "lucide-react";
+
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import jsPDF from "jspdf";
@@ -29,6 +39,7 @@ export default function TableManagement() {
     const fetchTables = async () => {
       try {
         const res = await tableApi.getAllTable();
+        console.log(res.result.content);
         setTables(res.result.content);
       } catch (error) {
         toast.error("Không thể tải danh sách bàn");
@@ -45,14 +56,14 @@ export default function TableManagement() {
   /* ================= GROUP STATUS (THEO TableCard LOGIC) ================= */
   const groupedTables = {
     available: filteredTables.filter(
-      (t) =>
-        t.is_active &&
-        (t.statusTable === "unoccupied" || t.statusTable === null),
+      (t) => t.is_active === true && t.statusTable === "unoccupied",
     ),
+
     occupied: filteredTables.filter(
-      (t) => t.is_active && t.statusTable === "occupied",
+      (t) => t.is_active === true && t.statusTable === "occupied",
     ),
-    inactive: filteredTables.filter((t) => !t.is_active),
+
+    inactive: filteredTables.filter((t) => t.is_active === false),
   };
 
   // ======= TẢI TẤT CẢ QR =======
@@ -133,7 +144,7 @@ export default function TableManagement() {
       for (const table of activeTables) {
         try {
           await qrApi.generateQrbyId(table.tableId);
-          console.log(`Đã tạo lại QR cho bàn ${table.tableName}`);
+          toast.success(`Đã tạo lại QR cho bàn ${table.tableName}`);
         } catch (err) {
           console.error(`Lỗi khi tạo lại QR bàn ${table.tableName}`, err);
         }
@@ -276,27 +287,44 @@ export default function TableManagement() {
         {[
           {
             key: "available",
-            title: "🟢 Có sẵn",
+            title: "Có sẵn",
+            icon: CheckCircle2,
+            color: "text-emerald-600",
+            bg: "bg-emerald-100",
             count: groupedTables.available.length,
           },
           {
             key: "occupied",
-            title: "🔴 Đã sử dụng",
+            title: "Đã sử dụng",
+            icon: XCircle,
+            color: "text-red-600",
+            bg: "bg-red-100",
             count: groupedTables.occupied.length,
           },
           {
             key: "inactive",
-            title: "⚪ Không hoạt động",
+            title: "Không hoạt động",
+            icon: MinusCircle,
+            color: "text-gray-500",
+            bg: "bg-gray-200",
             count: groupedTables.inactive.length,
           },
         ].map((group) => (
           <div key={group.key}>
-            <h2 className="mb-4 font-bold text-lg text-gray-800 flex items-center gap-2">
-              {group.title}
+            <h2 className="mb-4 flex items-center gap-3 font-bold text-lg text-gray-800">
+              <span
+                className={`w-9 h-9 flex items-center justify-center rounded-xl ${group.bg}`}
+              >
+                <group.icon size={20} className={group.color} />
+              </span>
+
+              <span>{group.title}</span>
+
               <span className="text-sm font-medium text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
                 {group.count}
               </span>
             </h2>
+
             <div className="flex flex-wrap gap-5">
               {groupedTables[group.key].length === 0 ? (
                 <p className="text-gray-400 italic text-sm w-full">

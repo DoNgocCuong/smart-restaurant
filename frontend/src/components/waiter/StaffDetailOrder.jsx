@@ -8,6 +8,7 @@ import {
   Utensils,
   AlertCircle,
   HandPlatter,
+  CheckCheck,
 } from "lucide-react";
 import { STATUS_META } from "../../utils/statusMeta";
 import { getTableNameById } from "../../utils/tableUtils";
@@ -25,9 +26,11 @@ function StaffDetailOrder({
   order,
   onClose,
   onApprove,
+  onApproveMore,
   onReject,
   onServing,
   processing,
+  hasUnapprovedItems,
 }) {
   const [tableName, setTableName] = useState("");
 
@@ -137,40 +140,77 @@ function StaffDetailOrder({
                   return (
                     <div
                       key={item.detailOrderId || index}
-                      className="p-4 bg-linear-to-r from-blue-50 to-white rounded-lg border-blue-100 transition-all duration-200 border hover:border-blue-300 hover:shadow-md"
+                      className={`p-4 rounded-lg border transition-all duration-200 ${
+                        item.isApproved === false
+                          ? "bg-linear-to-r from-amber-50 to-white border-amber-200 hover:border-amber-300"
+                          : "bg-linear-to-r from-blue-50 to-white border-blue-100 hover:border-blue-300"
+                      } hover:shadow-md`}
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <p className="font-semibold text-gray-900">
-                            {item.itemName || "Món ăn"}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-gray-900">
+                              {item.itemName || "Món ăn"}
+                            </p>
+                            {item.isApproved === false && (
+                              <span className="px-2 py-0.5 text-xs font-bold text-amber-700 bg-amber-100 rounded-full">
+                                Chưa duyệt
+                              </span>
+                            )}
+                          </div>
                           <p className="mt-1 text-sm text-gray-500">
                             {item.quantity || 0} ×{" "}
                             {(item.price || 0).toLocaleString()}đ
                           </p>
                         </div>
 
-                        <p className="font-bold text-blue-600 text-lg">
+                        <p
+                          className={`font-bold text-lg ${
+                            item.isApproved === false
+                              ? "text-amber-600"
+                              : "text-blue-600"
+                          }`}
+                        >
                           {itemTotal.toLocaleString()}đ
                         </p>
                       </div>
 
                       {/* Modifiers */}
                       {item.modifiers && item.modifiers.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-blue-100 space-y-2">
+                        <div
+                          className={`mt-3 pt-3 border-t space-y-2 ${
+                            item.isApproved === false
+                              ? "border-amber-100"
+                              : "border-blue-100"
+                          }`}
+                        >
                           {item.modifiers.map((m, mIndex) => (
                             <div
                               key={m.modifierOptionId || mIndex}
                               className="flex justify-between text-sm text-gray-600"
                             >
                               <span className="flex items-center gap-2">
-                                <span className="text-blue-500">+</span>
+                                <span
+                                  className={
+                                    item.isApproved === false
+                                      ? "text-amber-500"
+                                      : "text-blue-500"
+                                  }
+                                >
+                                  +
+                                </span>
                                 <span>
                                   {m.modifierGroupName}:{" "}
                                   <span className="font-medium">{m.name}</span>
                                 </span>
                               </span>
-                              <span className="font-semibold text-blue-600">
+                              <span
+                                className={`font-semibold ${
+                                  item.isApproved === false
+                                    ? "text-amber-600"
+                                    : "text-blue-600"
+                                }`}
+                              >
                                 +{(m.price || 0).toLocaleString()}đ
                               </span>
                             </div>
@@ -230,6 +270,22 @@ function StaffDetailOrder({
             >
               <Check size={20} strokeWidth={2.5} />
               {processing ? "Đang xử lý..." : "Chấp nhận"}
+            </button>
+          </div>
+        )}
+
+        {/* ===== APPROVE MORE BUTTON ===== */}
+        {hasUnapprovedItems && (
+          <div className="p-6 bg-white border-t border-amber-100">
+            <button
+              onClick={() => onApproveMore(order.orderId)}
+              disabled={processing}
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 text-white font-semibold 
+              bg-linear-to-r from-amber-600 to-amber-700 rounded-lg transition-all duration-200 hover:from-amber-700 hover:to-amber-800 
+              hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <CheckCheck size={20} strokeWidth={2.5} />
+              {processing ? "Đang xử lý..." : "Duyệt thêm món"}
             </button>
           </div>
         )}

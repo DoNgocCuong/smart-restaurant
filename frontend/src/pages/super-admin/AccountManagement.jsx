@@ -23,6 +23,7 @@ function AccountManagement() {
     setIsLoading(true);
     try {
       const res = await accountApi.getAllAdminAccount();
+      console.log(res);
       if (res.code === "1000") {
         const mapped = res.result.map((item, index) => ({
           id: `#${index + 1}`,

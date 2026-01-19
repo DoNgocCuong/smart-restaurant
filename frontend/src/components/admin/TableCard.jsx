@@ -1,7 +1,13 @@
-"use client";
-
 import { useState } from "react";
-import { Users, MapPin } from "lucide-react";
+import {
+  Users,
+  MapPin,
+  CheckCircle2,
+  XCircle,
+  MinusCircle,
+  Clock,
+} from "lucide-react";
+
 import TableDetailModal from "./TableDetailModal";
 
 // 🧩 Hàm xác định trạng thái bàn
@@ -28,7 +34,7 @@ export default function TableCard({ table, onEdit, onQR, onDownload }) {
   const statusConfig = {
     available: {
       label: "Có sẵn",
-      badge: "🟢",
+      Icon: CheckCircle2,
       border: "border-emerald-200 hover:border-emerald-300",
       bg: "bg-gradient-to-br from-emerald-50 to-white",
       text: "text-emerald-700",
@@ -38,7 +44,7 @@ export default function TableCard({ table, onEdit, onQR, onDownload }) {
     },
     occupied: {
       label: "Đã sử dụng",
-      badge: "🔴",
+      Icon: XCircle,
       border: "border-red-200 hover:border-red-300",
       bg: "bg-gradient-to-br from-red-50 to-white",
       text: "text-red-700",
@@ -48,7 +54,7 @@ export default function TableCard({ table, onEdit, onQR, onDownload }) {
     },
     inactive: {
       label: "Không hoạt động",
-      badge: "⚪",
+      Icon: MinusCircle,
       border: "border-gray-200 hover:border-gray-300",
       bg: "bg-gradient-to-br from-gray-50 to-white",
       text: "text-gray-500",
@@ -77,10 +83,19 @@ export default function TableCard({ table, onEdit, onQR, onDownload }) {
           <h3 className="text-lg font-bold text-gray-800 group-hover:text-blue-700 transition-colors">
             {table.tableName}
           </h3>
+
           <span
-            className={`text-xs font-bold px-3 py-1.5 rounded-full ${statusConfig[status].badgeBg} ${statusConfig[status].badgeText}`}
+            className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full 
+            ${statusConfig[status].badgeBg} ${statusConfig[status].badgeText}`}
           >
-            {statusConfig[status].badge} {statusConfig[status].label}
+            {statusConfig[status].icon === "CheckCircle2" ? (
+              <CheckCircle2 size={14} strokeWidth={2.5} />
+            ) : statusConfig[status].icon === "XCircle" ? (
+              <XCircle size={14} strokeWidth={2.5} />
+            ) : statusConfig[status].icon === "MinusCircle" ? (
+              <MinusCircle size={14} strokeWidth={2.5} />
+            ) : null}
+            {statusConfig[status].label}
           </span>
         </div>
 
@@ -115,10 +130,29 @@ export default function TableCard({ table, onEdit, onQR, onDownload }) {
 
         {/* Status indicator */}
         <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className={`text-xs font-semibold ${statusConfig[status].text}`}>
-            {status === "available" && "✓ Sẵn sàng cho khách"}
-            {status === "occupied" && "⏱ Khách đang sử dụng"}
-            {status === "inactive" && "✕ Tạm không hoạt động"}
+          <div
+            className={`flex items-center gap-1.5 text-xs font-semibold ${statusConfig[status].text}`}
+          >
+            {status === "available" && (
+              <>
+                <CheckCircle2 size={14} strokeWidth={2.5} />
+                Sẵn sàng cho khách
+              </>
+            )}
+
+            {status === "occupied" && (
+              <>
+                <Clock size={14} strokeWidth={2.5} />
+                Khách đang sử dụng
+              </>
+            )}
+
+            {status === "inactive" && (
+              <>
+                <MinusCircle size={14} strokeWidth={2.5} />
+                Tạm không hoạt động
+              </>
+            )}
           </div>
         </div>
       </div>

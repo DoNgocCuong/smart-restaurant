@@ -5,38 +5,39 @@ import orderApi from "../../api/orderApi";
 import { STATUS_META } from "../../utils/statusMeta";
 import { isGuest } from "../../utils/jwt";
 import toast from "react-hot-toast";
+import { getUsernameFromToken } from "../../utils/jwt";
 
-export default function OrderHistoryModal({ onClose }) {
+export default function OrderHistoryModal({ onClose, orderId }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const isGuestTenant = isGuest();
 
   const fetchOrders = async () => {
     try {
-      const res = await orderApi.getMyOrder();
+      // Nếu là guest - lấy đơn hàng theo ID
+      if (isGuestTenant) {
+        try {
+          const resId = await orderApi.getById(orderId);
+          console.log(resId);
+          setOrders([resId.result] || []);
+        } catch (errId) {
+          console.error("Không thể lấy theo id");
+          toast.error("Không thể lấy theo id");
+          setOrders([]);
+        }
+      } else {
+        // Nếu không phải guest - lấy tất cả đơn hàng của user
+        const res = await orderApi.getMyOrder();
 
-      let sortedOrders = (res.result || []).sort(
-        (a, b) => new Date(b.createAt) - new Date(a.createAt),
-      );
-
-      // 👉 Nếu là guest
-      if (isGuest()) {
-        const now = Date.now();
-        const TWO_HOURS = 2 * 60 * 60 * 1000;
-
-        // Lọc các order trong vòng 2 giờ
-        const recentOrders = sortedOrders.filter(
-          (order) => now - new Date(order.createAt).getTime() <= TWO_HOURS,
+        let sortedOrders = (res.result || []).sort(
+          (a, b) => new Date(b.createAt) - new Date(a.createAt),
         );
 
-        // Chỉ giữ order gần nhất
-        sortedOrders = recentOrders.slice(0, 1);
+        setOrders(sortedOrders);
       }
-
-      console.log(sortedOrders);
-
-      setOrders(sortedOrders);
     } catch (error) {
       console.error("Lỗi lấy lịch sử đơn hàng:", error);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -44,7 +45,7 @@ export default function OrderHistoryModal({ onClose }) {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [orderId]);
 
   const handleRequestPayment = async (orderId) => {
     try {
@@ -55,7 +56,7 @@ export default function OrderHistoryModal({ onClose }) {
       fetchOrders();
     } catch (err) {
       console.error("Lỗi cập nhật trạng thái:", err);
-      setError("Không thể yêu cầu thanh toán");
+      toast.error("Không thể yêu cầu thanh toán");
     }
   };
 
@@ -183,7 +184,8 @@ export default function OrderHistoryModal({ onClose }) {
                         {total.toLocaleString()} đ
                       </span>
                     </div>
-                    {/* 👉 Button yêu cầu thanh toán */}
+
+                    {/* Button yêu cầu thanh toán */}
                     {order.oderStatus === "Serving" && (
                       <div className="mt-4 flex justify-end">
                         <button

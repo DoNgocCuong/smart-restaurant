@@ -6,6 +6,8 @@ const orderApi = {
   updateStatus: (id, data) => axiosClient.patch(`/orders/status/${id}`, data),
   getById: (id) => axiosClient.get(`/orders/${id}`),
   getMyOrder: () => axiosClient.get(`/orders/me`),
+  customerUpdate: (orderId, data) =>
+    axiosClient.put(`/orders/${orderId}`, data),
 };
 
 export default orderApi;

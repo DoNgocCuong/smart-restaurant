@@ -20,8 +20,6 @@ export default function TableDetailModal({ table, onClose, onEdit }) {
   const [showDownloadOptions, setShowDownloadOptions] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  console.log(table);
-
   // 🧩 Hàm tải QR dưới dạng PNG
   const handleDownloadPNG = async (table) => {
     try {

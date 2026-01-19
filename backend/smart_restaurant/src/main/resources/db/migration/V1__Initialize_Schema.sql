@@ -48,6 +48,7 @@ CREATE TABLE Category (
     categoryId INT AUTO_INCREMENT PRIMARY KEY,
     categoryName VARCHAR(255),
     tenant_id INT,
+    is_active BOOLEAN,
     FOREIGN KEY (tenant_id) REFERENCES Tenant(tenantId)
 );
 
@@ -67,6 +68,7 @@ CREATE TABLE modifier_group (
     name VARCHAR(255),
     selection_type VARCHAR(255),
     is_required BOOLEAN,
+    is_active BOOLEAN,
     tenant_id INT,
     FOREIGN KEY (tenant_id) REFERENCES Tenant(tenantId)
 );
@@ -142,6 +144,7 @@ CREATE TABLE modifier_option (
     modifierOptionId INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255),
     price DOUBLE,
+    is_active BOOLEAN,
     modifier_group_id INT,
     FOREIGN KEY (modifier_group_id) REFERENCES modifier_group(modifierGroupId)
 );
