@@ -19,9 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class CustomerController {
     CustomerService customerService;
     @PostMapping
-    public ApiResponse<CustomerResponseDto> createCustomer(@RequestBody CustomerRequest customerRequest){
+    public ApiResponse<CustomerResponseDto> createCustomer(@RequestBody CustomerRequest customerRequest, JwtAuthenticationToken jwtAuthenticationToken){
         return ApiResponse.<CustomerResponseDto>builder()
-                .result(customerService.createCustomer(customerRequest))
+                .result(customerService.createCustomer(customerRequest,jwtAuthenticationToken))
                 .build();
     }
 }
+
