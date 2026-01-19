@@ -5,6 +5,7 @@ import com.smart_restaurant.demo.Repository.TenantRepository;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.ModifierGroupService;
 import com.smart_restaurant.demo.dto.Request.ModifierGroupRequest;
+import com.smart_restaurant.demo.dto.Request.UpdateModifierGroupIsActiveRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateModifierGroupRequest;
 import com.smart_restaurant.demo.dto.Response.ModifierGroupResponse;
 import com.smart_restaurant.demo.dto.Response.ModifierOptionSimpleResponse;
@@ -211,4 +212,39 @@ public class ModifierGroupServiceImpl implements ModifierGroupService {
 
         modifierGroupRepository.deleteById(modifierGroupId);
     }
+
+    @Override
+    public ModifierGroupResponse updateIsActiveModifierGroup(Integer modifierGroupId, UpdateModifierGroupIsActiveRequest updateModifierGroupIsActiveRequest, JwtAuthenticationToken jwtAuthenticationToken) {
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = accountService.getTenantIdByUsername(username);
+
+        ModifierGroup modifierGroup = modifierGroupRepository.findById(modifierGroupId)
+                .orElseThrow(() -> new AppException(ErrorCode.MODIFIER_GROUP_NOT_FOUND));
+
+        // Kiểm tra xem modifier group này thuộc tenant của user không
+        if (!modifierGroup.getTenant().getTenantId().equals(tenantId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        modifierGroup.setIsActive(updateModifierGroupIsActiveRequest.getIsActive());
+        ModifierGroup updatedModifierGroup = modifierGroupRepository.save(modifierGroup);
+
+        // Tra response
+        ModifierGroupResponse response = modifierGroupMapper.toModifierGroupResponse(updatedModifierGroup);
+        List<Integer> itemIds = updatedModifierGroup.getItems().stream()
+                .map(Item::getItemId)
+                .toList();
+        response.setItem(itemIds);
+
+        List<ModifierOptionSimpleResponse> simpleOptions = updatedModifierGroup.getOptions().stream()
+                .map(modifierOptionMapper::toModifierOptionSimpleResponse)
+                .toList();
+        response.setOptions(simpleOptions);
+
+        response.setTenantId(updatedModifierGroup.getTenant().getTenantId());
+
+        return response;
+    }
+
+
 }

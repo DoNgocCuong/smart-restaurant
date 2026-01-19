@@ -12,6 +12,7 @@ public class ModifierOptionResponse {
     Integer modifierOptionId;
     String name;
     Double price;
+    Boolean isActive;
     Integer modifierGroupId;
     String modifierGroupName;
 }

@@ -21,6 +21,7 @@ public class ModifierGroupResponse {
     String name;
     private SelectionType selectionType;
     private Boolean isRequired;
+    private Boolean isActive;
     @JsonManagedReference
     List<Integer> item;
     @JsonManagedReference

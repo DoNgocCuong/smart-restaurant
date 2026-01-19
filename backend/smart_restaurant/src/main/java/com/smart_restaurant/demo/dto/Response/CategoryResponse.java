@@ -13,5 +13,6 @@ import lombok.experimental.FieldDefaults;
 public class CategoryResponse {
     Integer categoryId;
     String categoryName;
+    Boolean isActive;
     Integer tenantId;
 }

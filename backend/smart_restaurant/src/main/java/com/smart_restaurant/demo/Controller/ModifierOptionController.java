@@ -2,6 +2,8 @@ package com.smart_restaurant.demo.Controller;
 
 import com.smart_restaurant.demo.Service.ModifierOptionService;
 import com.smart_restaurant.demo.dto.Request.ModifierOptionRequest;
+import com.smart_restaurant.demo.dto.Request.UpdateModifierGroupIsActiveRequest;
+import com.smart_restaurant.demo.dto.Request.UpdateModifierOptionIsActiveRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateModifierOptionRequest;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.ModifierOptionResponse;
@@ -79,6 +81,19 @@ public class ModifierOptionController {
 
         return ApiResponse.<ModifierOptionResponse>builder()
                 .message("ModifierOption updated successfully")
+                .result(response)
+                .build();
+    }
+
+    @PatchMapping("/isActive/{modifierOptionId}")
+    public ApiResponse<ModifierOptionResponse> updateIsActiveModifierOption(
+            @PathVariable Integer modifierOptionId,
+            @Valid @RequestBody UpdateModifierOptionIsActiveRequest request,
+            JwtAuthenticationToken jwtAuthenticationToken) {
+        ModifierOptionResponse response = modifierOptionService.updateIsActiveModifierOption(modifierOptionId, request, jwtAuthenticationToken);
+
+        return ApiResponse.<ModifierOptionResponse>builder()
+                .message("Xoa thanh cong modifierOption")
                 .result(response)
                 .build();
     }

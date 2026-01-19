@@ -31,6 +31,9 @@ public class ModifierGroup {
     @Column(name = "is_required")
     private Boolean isRequired;
 
+    @Column(name = "is_active")
+    private Boolean isActive;
+
     @JsonBackReference
     @ManyToMany(mappedBy = "modifierGroups", fetch = FetchType.LAZY)
     private List<Item> items = new ArrayList<>();

@@ -21,6 +21,9 @@ public class Category {
 
     String categoryName;
 
+    @Column(name = "is_active")
+    private Boolean isActive;
+
     @ManyToOne
     @JoinColumn(name = "tenant_id")
     Tenant tenant;
