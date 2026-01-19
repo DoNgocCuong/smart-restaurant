@@ -79,7 +79,7 @@ public class MomoPaymentController {
 
     }
 
-    @GetMapping("/ipn-handler")
+    @GetMapping("/ipn")
     public String ipnHandler(@RequestParam Map<String, String> momoResponse) {
         log.info("Received MoMo IPN callback: {}", momoResponse);
 

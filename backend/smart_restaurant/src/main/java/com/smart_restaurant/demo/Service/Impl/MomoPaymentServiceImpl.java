@@ -91,7 +91,7 @@ public class MomoPaymentServiceImpl implements MomoPaymentService {
         // Save payment record with PENDING status
         if (response != null && response.getResultCode() == 0) {
             try {
-                paymentService.createPayment(orderId, amount, requestId);
+                paymentService.createPayment(orderId, amount, requestId, momoOrderId);
                 log.info("Payment record created successfully for orderId: {}", orderId);
             } catch (Exception e) {
                 log.error("Error creating payment record: ", e);

@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -42,9 +43,23 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public Payment createPayment(Integer orderId, Long amount, String momoRequestId) {
+    public Payment createPayment(Integer orderId, Long amount, String momoRequestId, String momoOrderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
+
+        // ✅ CHECK PAYMENT ĐÃ TỒN TẠI CHƯA
+        Optional<Payment> existingPayment = paymentRepository.findByOrder_OrderId(orderId);
+
+        if (existingPayment.isPresent()) {
+            // Payment đã tồn tại, update thay vì insert
+            Payment payment = existingPayment.get();
+            payment.setAmount(amount.doubleValue());
+            payment.setMomoRequestId(momoRequestId);
+            payment.setMomoOrderId(momoOrderId);
+
+            log.info("✅ Payment updated for orderId: {}", orderId);
+            return paymentRepository.save(payment);
+        }
 
         // Lấy status "PENDING" và type payment "MOMO"
         Status pendingStatus = statusRepository.findByOrderStatus(OrderStatus.Pending_payment)
@@ -57,10 +72,12 @@ public class PaymentServiceImpl implements PaymentService {
                 .order(order)
                 .amount(amount.doubleValue())
                 .momoRequestId(momoRequestId)
+                .momoOrderId(momoOrderId)
                 .status(pendingStatus)
                 .typePayment(momoType)
                 .build();
 
+        log.info("✅ Payment created for orderId: {}", orderId);
         return paymentRepository.save(payment);
 
 
@@ -69,10 +86,13 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public Payment updatePaymentStatus(Map<String, String> momoResponse) {
         String requestId = momoResponse.get(MomoParameter.REQUEST_ID);
+        String momoOrderId = momoResponse.get(MomoParameter.ORDER_ID);
         String transId = momoResponse.get(MomoParameter.TRANS_ID);
         Integer resultCode = Integer.valueOf(momoResponse.get(MomoParameter.RESULT_CODE));
 
-        Payment payment = paymentRepository.findByMomoRequestId(requestId)
+        // ⭐ TÌM THEO momoOrderId HOẶC requestId
+        Payment payment = paymentRepository.findByMomoOrderId(momoOrderId)
+                .or(() -> paymentRepository.findByMomoRequestId(requestId))
                 .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND_WITH_REQUEST_ID));
 
         // Update MoMo transaction ID
