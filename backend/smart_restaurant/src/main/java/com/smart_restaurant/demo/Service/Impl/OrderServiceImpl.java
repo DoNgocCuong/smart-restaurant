@@ -249,6 +249,7 @@ public class OrderServiceImpl implements OrderService {
         order.setIsHaveName(isHaveName);
         order.setCustomerName(customerName);
         order.setTable(restaurantTable);
+        order.setSubtotal(subTotal);
         order.setCustomer(customer);
 
         System.out.println("📝 Lưu order - isHaveName: " + isHaveName + ", customerName: " + customerName
