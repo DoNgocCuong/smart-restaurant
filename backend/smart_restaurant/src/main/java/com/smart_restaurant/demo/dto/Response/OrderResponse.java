@@ -17,6 +17,7 @@ public class OrderResponse {
     private String customerName;
     private Integer tableId;
     private Float subtotal;
+//    private Float total;
     private LocalDateTime createAt;
     private List<DetailOrderResponse> detailOrders;
     private String special;

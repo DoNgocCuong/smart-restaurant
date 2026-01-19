@@ -15,6 +15,7 @@ public interface ModifierOptionMapper {
     ModifierOption toModifierOption(ModifierOptionRequest request);
 
     @Mapping(source = "modifierGroup.modifierGroupId", target = "modifierGroupId")
+    @Mapping(source = "modifierGroup.name", target = "modifierGroupName")
     ModifierOptionResponse toModifierOptionResponse(ModifierOption modifierOption);
 
     void updateModifierOption(UpdateModifierOptionRequest request, @MappingTarget ModifierOption modifierOption);
