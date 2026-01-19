@@ -35,4 +35,13 @@ public class CustomerServiceImpl implements CustomerService {
         accountRepository.save(account);
         return customerMapper.toCustomerResponseDto(customerRepository.save(customer));
     }
+
+    @Override
+    public CustomerResponseDto getProfile(JwtAuthenticationToken jwtAuthenticationToken) {
+        Account account=accountRepository.findByUsername(jwtAuthenticationToken.getName()).orElseThrow(()-> new AppException(ErrorCode.ACCOUNT_NOT_EXITS));
+        Customer customer=customerRepository.findByAccount_Username(jwtAuthenticationToken.getName()).orElseThrow(()-> new AppException(ErrorCode.CUSTOMER_NOT_FOUND));
+        if(!account.getIsCustomer())
+            throw new AppException(ErrorCode.CUSTOMER_NOT_FOUND);
+        return customerMapper.toCustomerResponseDto(customer);
+    }
 }

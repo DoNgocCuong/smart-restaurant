@@ -8,10 +8,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/customer")
@@ -23,6 +20,12 @@ public class CustomerController {
     public ApiResponse<CustomerResponseDto> createCustomer(@RequestBody CustomerRequest customerRequest, JwtAuthenticationToken jwtAuthenticationToken){
         return ApiResponse.<CustomerResponseDto>builder()
                 .result(customerService.createCustomer(customerRequest,jwtAuthenticationToken))
+                .build();
+    }
+    @GetMapping
+    public  ApiResponse<CustomerResponseDto> getProfile(JwtAuthenticationToken jwtAuthenticationToken){
+        return  ApiResponse.<CustomerResponseDto>builder()
+                .result(customerService.getProfile(jwtAuthenticationToken))
                 .build();
     }
 }
