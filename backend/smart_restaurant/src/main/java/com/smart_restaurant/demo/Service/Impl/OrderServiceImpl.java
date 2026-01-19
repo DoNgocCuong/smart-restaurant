@@ -26,6 +26,7 @@ import com.smart_restaurant.demo.enums.OrderStatus;
 import com.smart_restaurant.demo.mapper.DetailOrderMapper;
 
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -181,6 +182,7 @@ public class OrderServiceImpl implements OrderService {
 
             // Lấy tên từ Customer
             customerName = customer.getName();
+
             System.out.println("✅ CustomerId: " + customer.getCustomerId());
             System.out.println("✅ CustomerName từ DB: " + customerName);
         }
@@ -288,6 +290,7 @@ public class OrderServiceImpl implements OrderService {
         response.setSubtotal(subTotal);
         response.setOderStatus(savedOrder.getStatus().getOrderStatus());
         response.setCustomerName(savedOrder.getCustomerName());
+        response.setCustomerId(savedOrder.getCustomer().getCustomerId());
         response.setTableId(savedOrder.getTable().getTableId());
         response.setDetailOrders(toDetailOrderResponses(detailOrders));
 
@@ -481,6 +484,16 @@ public class OrderServiceImpl implements OrderService {
                     detailOrder.setIsApproved(true);
                     detailOrderRepository.save(detailOrder);
                 });
+            }
+        }
+
+        // Nếu status là Rejected thì chuyển statusTable về unoccupied
+        if (OrderStatus.Rejected.equals(updateOrderStatusRequest.getStatus())) {
+            RestaurantTable table = order.getTable();
+            if (table != null) {
+                table.setStatusTable(StatusTable.unoccupied);
+                tableRepository.save(table);
+                System.out.println("🔄 Bàn " + table.getTableId() + " chuyển về unoccupied");
             }
         }
 
@@ -711,6 +724,10 @@ public class OrderServiceImpl implements OrderService {
     private OrderResponse toFullOrderResponse(Order order) {
         OrderResponse response = orderMapper.toOrderResponse(order);
         response.setCustomerName(order.getCustomerName());
+        // ✅ Set customerId
+        if (order.getCustomer() != null) {
+            response.setCustomerId(order.getCustomer().getCustomerId());
+        }
 
         // Set tableId (vì mapper cơ bản có thể không map trường này)
         if (order.getTable() != null) {

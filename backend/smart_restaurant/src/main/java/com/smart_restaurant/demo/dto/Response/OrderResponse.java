@@ -15,9 +15,9 @@ import java.util.List;
 public class OrderResponse {
     private Integer orderId;
     private String customerName;
+    private Integer customerId;
     private Integer tableId;
     private Float subtotal;
-//    private Float total;
     private LocalDateTime createAt;
     private List<DetailOrderResponse> detailOrders;
     private String special;
