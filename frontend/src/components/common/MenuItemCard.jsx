@@ -1,9 +1,15 @@
 import { Plus, Minus } from "lucide-react";
 
-export default function MenuItemCard({ item, quantity, onAdd, onRemove }) {
+export default function MenuItemCard({
+  item,
+  quantity,
+  onAdd,
+  onRemove,
+  onViewDetail,
+}) {
   return (
     <div
-      onClick={onAdd}
+      onClick={onViewDetail}
       className="cursor-pointer group bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-xl hover:border-gray-300 transition-all duration-300"
     >
       {/* IMAGE */}
@@ -63,7 +69,10 @@ export default function MenuItemCard({ item, quantity, onAdd, onRemove }) {
             </div>
           ) : (
             <button
-              onClick={onAdd}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAdd();
+              }}
               className="flex items-center gap-2 px-4 py-2.5 bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 text-sm font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
             >
               <Plus size={18} />
