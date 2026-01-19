@@ -62,7 +62,7 @@ public enum ErrorCode {
     REQUIRED_MODIFIER_GROUP_NOT_SELECTED("1043", "Người dùng chưa chọn nhóm modifier bắt buộc", HttpStatus.BAD_REQUEST),
     MODIFIER_GROUP_ONLY_SINGLE_SELECTION("1044", "Người dùng đã chọn quá nhiều tùy chọn trong một nhóm mà chỉ được chọn 1", HttpStatus.BAD_REQUEST),
     UNAUTHORIZED_ORDER_ACCESS("1045", "Order không thuọc quyền của bạn", HttpStatus.BAD_REQUEST),
-    INVALID_ORDER_STATUS("1046", "OrderStatus không phai là Pendding_payment, Order phải ở trạng thái chưa thanh toán mới có quyền thêm", HttpStatus.BAD_REQUEST),
+    INVALID_ORDER_STATUS("1046", "OrderStatus không phai là Pendding_payment/Paid, Order phải ở trạng thái chưa thanh toán mới có quyền thêm", HttpStatus.BAD_REQUEST),
     TABLE_NOT_AVAILABLE("1047",  "Table đã ngừng hoat dong", HttpStatus.BAD_REQUEST),
     INVALID_QUANTITY("1048", "Quatity phải > 0", HttpStatus.BAD_REQUEST),
     CANNOT_DECREASE_QUANTITY("4001", "Không thể giảm số lượng. Chỉ có thể thêm hoặc tăng quantity.", HttpStatus.BAD_REQUEST),

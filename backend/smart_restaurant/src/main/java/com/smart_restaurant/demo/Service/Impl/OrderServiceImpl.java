@@ -606,11 +606,10 @@ public class OrderServiceImpl implements OrderService {
             throw new AppException(ErrorCode.UNAUTHORIZED_ORDER_ACCESS);
         }
 
-        // 4. Validate: Order KHÔNG được ở trạng thái Pending_payment, Paid, Pending_approval
+        // 4. Validate: Order KHÔNG được ở trạng thái Pending_payment, Paid
         OrderStatus currentStatus = order.getStatus().getOrderStatus();
         if (OrderStatus.Pending_payment.equals(currentStatus) ||
-                OrderStatus.Paid.equals(currentStatus) ||
-                OrderStatus.Pending_approval.equals(currentStatus)) {
+                OrderStatus.Paid.equals(currentStatus)) {
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
         }
 
