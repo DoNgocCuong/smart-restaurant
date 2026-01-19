@@ -551,9 +551,11 @@ public class OrderServiceImpl implements OrderService {
                 if(PaymentType.Tranfer.equals(order.getPaymentType())){
                     orderNotification.setMessage("khách hàng yêu cầu thanh toán tiền mặt hãy đến thu tiền.");
                     notificationService.notifyNewOrder(orderNotification);
-                }
-                orderNotification.setMessage("khách hàng thanh toán bằng momo.");
+                }else{
+                    orderNotification.setMessage("khách hàng thanh toán bằng momo.");
                 notificationService.notifyNewOrder(orderNotification);
+                }
+                
             }
             case "Serving"->{
                 orderNotification.setMessage("Đơn hàng đã được phục vụ");
