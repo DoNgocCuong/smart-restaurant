@@ -1,7 +1,7 @@
 import Overlay from "../common/Overlay";
 import { X, Minus, Plus, ShoppingCart } from "lucide-react";
 import orderApi from "../../api/orderApi";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { getUsernameFromToken } from "../../utils/jwt";
 
@@ -23,6 +23,10 @@ export default function CartModal({
 
   const username = getUsernameFromToken();
   const isGuestTenant = username?.includes("guest_tenant");
+
+  useEffect(() => {
+    console.log(isGuestTenant);
+  }, []);
 
   /* ================== TÍNH GIÁ ================== */
   const calcItemTotal = (item) => {
