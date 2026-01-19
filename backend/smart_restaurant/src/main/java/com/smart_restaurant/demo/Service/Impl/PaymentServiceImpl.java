@@ -9,6 +9,7 @@ import com.smart_restaurant.demo.dto.Response.PaymentHistoryResponse;
 import com.smart_restaurant.demo.dto.Response.PaymentResponse;
 import com.smart_restaurant.demo.entity.*;
 import com.smart_restaurant.demo.enums.OrderStatus;
+import com.smart_restaurant.demo.enums.PaymentType;
 import com.smart_restaurant.demo.enums.StatusTable;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
@@ -65,7 +66,9 @@ public class PaymentServiceImpl implements PaymentService {
         Status pendingStatus = statusRepository.findByOrderStatus(OrderStatus.Pending_payment)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_STATUS_PENDING));
 
-        TypePayment momoType = typePaymentRepository.findByName("MOMO")
+
+        TypePayment momoType = typePaymentRepository
+                .findByName(PaymentType.Momo.name())
                 .orElseThrow(() -> new AppException(ErrorCode.TYPE_MOMO_NOT_FOUND));
 
         Payment payment = Payment.builder()
