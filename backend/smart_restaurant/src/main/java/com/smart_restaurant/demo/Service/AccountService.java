@@ -8,15 +8,17 @@ import com.smart_restaurant.demo.dto.Response.ConfirmEmailResponse;
 import com.smart_restaurant.demo.dto.Response.SignupResponse;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.ParseException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface AccountService {
     public Integer getTenantIdByUsername(String username);
 
     SignupResponse createAccountCustomer(SignupCustomerRequest signupRequest, Integer tenantId) throws JOSEException, MessagingException;
-    ConfirmEmailResponse verifyEmail(String token) throws ParseException, java.text.ParseException, JOSEException;
+    ConfirmEmailResponse verifyEmail(String token, HttpServletResponse response) throws ParseException, java.text.ParseException, JOSEException, IOException;
     SignupResponse createAccountAdmin(SignupRequest signupRequest) throws JOSEException, MessagingException;
     SignupResponse createAccountStaff(SignupStaffRequest signupStaffRequest, JwtAuthenticationToken jwtAuthenticationToken) throws JOSEException, MessagingException;
     SignupResponse createAccountKitchen(SignupKitchenRequest signupKitchenRequest, JwtAuthenticationToken jwtAuthenticationToken) throws JOSEException, MessagingException;

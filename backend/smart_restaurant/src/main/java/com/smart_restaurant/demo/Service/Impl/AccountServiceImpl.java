@@ -26,6 +26,7 @@ import com.smart_restaurant.demo.mapper.EmployeeMapper;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.ParseException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -39,6 +40,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -96,11 +98,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public ConfirmEmailResponse verifyEmail(String token) throws ParseException, java.text.ParseException, JOSEException {
+    public ConfirmEmailResponse verifyEmail(String token, HttpServletResponse response) throws ParseException, java.text.ParseException, JOSEException, IOException {
         boolean confirm=verifyEmailToken(token);
         SignedJWT signedJWT=SignedJWT.parse(token);
         Account account=accountRepository.findByUsername(signedJWT.getJWTClaimsSet().getSubject()).get();
         account.setIsEmailVerify(true);
+        response.sendRedirect("http://localhost:5173/email-verified");
         accountRepository.save(account);
         return ConfirmEmailResponse.builder()
                 .confirm_email(true)
