@@ -200,6 +200,7 @@ CREATE TABLE orders (
     table_id INT,
     status_id INT,
     customerId INT,
+    paymentType VARCHAR(255),
     FOREIGN KEY (table_id) REFERENCES restaurant_table(tableId),
     FOREIGN KEY (status_id) REFERENCES Status(statusId),
     FOREIGN KEY (customerId) REFERENCES Customer(customerId)

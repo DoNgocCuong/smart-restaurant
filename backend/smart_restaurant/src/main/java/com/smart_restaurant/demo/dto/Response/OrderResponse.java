@@ -1,6 +1,7 @@
 package com.smart_restaurant.demo.dto.Response;
 
 import com.smart_restaurant.demo.enums.OrderStatus;
+import com.smart_restaurant.demo.enums.PaymentType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -22,5 +23,6 @@ public class OrderResponse {
     private List<DetailOrderResponse> detailOrders;
     private String special;
     private OrderStatus oderStatus;
+    private PaymentType paymentType;
 
 }
