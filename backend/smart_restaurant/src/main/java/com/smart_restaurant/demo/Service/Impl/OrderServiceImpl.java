@@ -563,21 +563,38 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public OrderResponse updateOrderAddItems(Integer orderId, List<UpdateDetailOrderRequest> detailOrderRequests, JwtAuthenticationToken jwtAuthenticationToken) {
-        // 1. Lấy Customer từ JWT
-        String username = null;
+        // 1. Lấy username từ JWT
+        String username = jwtAuthenticationToken.getName();
+
+        if (username == null || username.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_TOKEN_FORMAT);
+        }
+
+        // 2. Tìm Account bằng username
+        Account account = accountRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+        String customerName = null;
         Customer customer = null;
+        boolean isHaveName = false;
 
-        if (jwtAuthenticationToken != null) {
-            username = jwtAuthenticationToken.getName();
-            if (username == null || username.isEmpty()) {
-                throw new AppException(ErrorCode.INVALID_TOKEN_FORMAT);
-            }
+        // ===== KIỂM TRA NẾU LÀ ACCOUNT MÃNG LAI =====
+        if (username.contains("guest_tenant")) {
+            System.out.println("🏪 Account mãng lai");
+            // Không cần validate customer cho account mãng lai
+            isHaveName = true;
 
-            Account account = accountRepository.findByUsername(username)
-                    .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
+        } else {
+            // ===== ACCOUNT THỰC TẾ =====
+            System.out.println("👤 Account thực");
 
+            // Tìm Customer bằng Account ID
             customer = customerRepository.findByAccountAccountId(account.getAccountId())
                     .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+            customerName = customer.getName();
+            isHaveName = false;
+            System.out.println("✅ CustomerId: " + customer.getCustomerId());
         }
 
         // 2. Kiểm tra order tồn tại
@@ -589,11 +606,10 @@ public class OrderServiceImpl implements OrderService {
             throw new AppException(ErrorCode.UNAUTHORIZED_ORDER_ACCESS);
         }
 
-        // 4. Validate: Order KHÔNG được ở trạng thái Pending_payment, Paid, Pending_approval
+        // 4. Validate: Order KHÔNG được ở trạng thái Pending_payment, Paid
         OrderStatus currentStatus = order.getStatus().getOrderStatus();
         if (OrderStatus.Pending_payment.equals(currentStatus) ||
-                OrderStatus.Paid.equals(currentStatus) ||
-                OrderStatus.Pending_approval.equals(currentStatus)) {
+                OrderStatus.Paid.equals(currentStatus)) {
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
         }
 
