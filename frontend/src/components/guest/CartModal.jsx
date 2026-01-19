@@ -7,8 +7,8 @@ import { getUsernameFromToken } from "../../utils/jwt";
 
 export default function CartModal({
   cart,
-  orderedItems = [], // ✅ item đã order trước đó
-  orderId, // ✅ nếu tồn tại → gọi customerUpdate
+  orderedItems = [],
+  orderId,
   onUpdateQty,
   onClose,
   onOrderSuccess,
@@ -123,7 +123,7 @@ export default function CartModal({
 
     try {
       const res = await orderApi.makeOrder(payload);
-
+      console.log(res);
       onOrderSuccess?.(safeCart, res?.result?.orderId);
       toast.success("Đơn hàng được gửi đi, vui lòng chờ nhân viên xử lý!");
       onClose();

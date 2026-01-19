@@ -529,7 +529,10 @@ export default function Menu() {
       )}
 
       {isHistoryOpen && (
-        <OrderHistoryModal onClose={() => setIsHistoryOpen(false)} />
+        <OrderHistoryModal
+          onClose={() => setIsHistoryOpen(false)}
+          orderId={orderId}
+        />
       )}
 
       {isRegisterOpen && (
