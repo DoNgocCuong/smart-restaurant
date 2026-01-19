@@ -1,23 +1,50 @@
 import { X, Download } from "lucide-react";
 import Overlay from "../common/Overlay";
-
+import orderApi from "../../api/orderApi";
+import momoPaymentApi from "../../api/momoPaymentApi";
+import { useNavigate } from "react-router";
+import toast from "react-hot-toast";
 export default function InvoiceModal({ invoice, onClose }) {
+  const navigate = useNavigate();
   if (!invoice) return null;
 
   const handlePrint = () => {
     window.print();
   };
 
-  const handleDownload = () => {
-    // Implement PDF download logic here
-    alert("Tính năng tải xuống sẽ được cập nhật");
+  const handleCashPayment = async () => {
+    try {
+      await orderApi.updateStatus(invoice.orderId, {
+        status: "Pending_payment",
+      });
+      toast.success("Đã chuyển sang trạng thái chờ thanh toán");
+      onClose();
+    } catch (err) {
+      console.error("Lỗi cập nhật trạng thái đơn hàng:", err);
+      toast.error("Cập nhật trạng thái đơn hàng thất bại");
+    }
+  };
+
+  const handleMomoPayment = async () => {
+    try {
+      const res = await momoPaymentApi.createMomo(
+        Number(invoice.orderId),
+        "Thanh toán cho đơn hàng",
+      );
+      console.log("Res Momo:", res);
+      // mở trang mới
+      window.open(res.result.payUrl, "_blank");
+    } catch (err) {
+      console.error("Lỗi tạo yêu cầu thanh toán MoMo:", err);
+      toast.error("Tạo yêu cầu thanh toán MoMo thất bại");
+    }
   };
 
   return (
     <Overlay onClose={onClose}>
       <div className="bg-white w-[90vw] max-w-3xl rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex items-center justify-between">
+        <div className="bg-linear-to-r from-blue-600 to-blue-700 px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-bold text-white">Hóa Đơn</h2>
           <button
             onClick={onClose}
@@ -172,19 +199,25 @@ export default function InvoiceModal({ invoice, onClose }) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4 justify-end pt-6 border-t border-gray-200">
+          <div className="flex flex-col gap-4 justify-end pt-6 border-t border-gray-200">
             <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-lg transition"
-            >
-              In
-            </button>
-            <button
-              onClick={handleDownload}
+              //   onClick={handleDownload}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition"
             >
               <Download className="w-4 h-4" />
               Tải xuống
+            </button>
+            <button
+              onClick={handleCashPayment}
+              className="flex items-center gap-2 px-4 py-2 bg-green-200 hover:bg-green-300 text-gray-800 font-semibold rounded-lg transition"
+            >
+              Thanh toán tiền mặt
+            </button>
+            <button
+              onClick={handleMomoPayment}
+              className="flex text-white items-center gap-2 px-4 py-2 bg-pink-500 hover:bg-pink-600 font-semibold rounded-lg transition"
+            >
+              Thanh toán MoMo
             </button>
           </div>
         </div>
