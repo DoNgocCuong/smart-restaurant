@@ -3,6 +3,7 @@ package com.smart_restaurant.demo.Controller;
 
 import com.smart_restaurant.demo.Service.ModifierGroupService;
 import com.smart_restaurant.demo.dto.Request.ModifierGroupRequest;
+import com.smart_restaurant.demo.dto.Request.UpdateModifierGroupIsActiveRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateModifierGroupRequest;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.ModifierGroupResponse;
@@ -66,6 +67,19 @@ public class ModifierGroupController {
 
         return ApiResponse.<ModifierGroupResponse>builder()
                 .message("ModifierGroup updated successfully")
+                .result(modifierGroupResponse)
+                .build();
+    }
+
+    @PatchMapping("/isActive/{modifierGroupId}")
+    public ApiResponse<ModifierGroupResponse> updateModifierGroupIsActive(
+            @PathVariable Integer modifierGroupId,
+            @Valid @RequestBody UpdateModifierGroupIsActiveRequest updateRequest,
+            JwtAuthenticationToken jwtAuthenticationToken) {
+        ModifierGroupResponse modifierGroupResponse = modifierGroupService.updateIsActiveModifierGroup(modifierGroupId, updateRequest, jwtAuthenticationToken);
+
+        return ApiResponse.<ModifierGroupResponse>builder()
+                .message("Xoa thanh cong modifierGroup")
                 .result(modifierGroupResponse)
                 .build();
     }

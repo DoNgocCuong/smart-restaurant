@@ -5,6 +5,7 @@ import com.smart_restaurant.demo.Repository.ModifierOptionRepository;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.ModifierOptionService;
 import com.smart_restaurant.demo.dto.Request.ModifierOptionRequest;
+import com.smart_restaurant.demo.dto.Request.UpdateModifierOptionIsActiveRequest;
 import com.smart_restaurant.demo.dto.Request.UpdateModifierOptionRequest;
 import com.smart_restaurant.demo.dto.Response.ModifierOptionResponse;
 import com.smart_restaurant.demo.entity.ModifierGroup;
@@ -167,4 +168,32 @@ public class ModifierOptionServiceImpl implements ModifierOptionService {
 
         modifierOptionRepository.deleteById(modifierOptionId);
     }
+
+    @Override
+    public ModifierOptionResponse updateIsActiveModifierOption(Integer modifierOptionId, UpdateModifierOptionIsActiveRequest updateModifierOptionIsActiveRequest, JwtAuthenticationToken jwtAuthenticationToken) {
+
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = accountService.getTenantIdByUsername(username);
+
+        // Kiem tra ModifireOption co ton tai khong
+        ModifierOption modifierOption= modifierOptionRepository.findById(modifierOptionId)
+                .orElseThrow(()-> new AppException(ErrorCode.MODIFIER_OPTION_NOT_FOUND));
+
+        // Kiểm tra xem option có thuộc tenant của user không
+        modifierOption = modifierOptionRepository.findByModifierOptionIdAndModifierGroup_Tenant_TenantId(modifierOptionId, tenantId)
+                .orElseThrow(() -> new AppException(ErrorCode.MODIFIER_OPTION_NOT_IN_TENANT));
+
+        modifierOption.setIsActive(updateModifierOptionIsActiveRequest.getIsActive());
+        ModifierOption updatedOption = modifierOptionRepository.save(modifierOption);
+
+        // Tra ve reposne
+        ModifierOptionResponse response = modifierOptionMapper.toModifierOptionResponse(updatedOption);
+        response.setModifierGroupId(updatedOption.getModifierGroup().getModifierGroupId());
+        response.setModifierGroupName(updatedOption.getModifierGroup().getName());
+        return response;
+
+
+    }
+
+
 }

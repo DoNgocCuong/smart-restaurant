@@ -22,6 +22,10 @@ public class ModifierOption {
 
     String name;
     Double price;
+
+    @Column(name = "is_active")
+    private Boolean isActive;
+
     @ManyToOne
     @JoinColumn(name = "modifier_group_id")
     private ModifierGroup modifierGroup;

@@ -3,6 +3,7 @@ package com.smart_restaurant.demo.Controller;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.CategoryService;
 import com.smart_restaurant.demo.dto.Request.CategoryRequest;
+import com.smart_restaurant.demo.dto.Request.UpdateCategoryIsActiveRequest;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.CategoryResponse;
 import com.smart_restaurant.demo.entity.Account;
@@ -73,6 +74,20 @@ public ApiResponse<CategoryResponse> createCategory(
 
         return ApiResponse.<CategoryResponse>builder()
                 .message("Category updated successfully")
+                .result(category)
+                .build();
+    }
+
+    @PatchMapping("/isActive/{categoryId}")
+    public ApiResponse<CategoryResponse> updateIsActiveCategory(
+            @PathVariable Integer categoryId,
+            @Valid @RequestBody UpdateCategoryIsActiveRequest request,
+            JwtAuthenticationToken jwtAuthenticationToken) {
+
+        CategoryResponse category = categoryService.updateIsActiveCategory(categoryId, request, jwtAuthenticationToken);
+
+        return ApiResponse.<CategoryResponse>builder()
+                .message("Xoa thanh cong Category")
                 .result(category)
                 .build();
     }

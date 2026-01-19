@@ -6,6 +6,8 @@ import com.smart_restaurant.demo.Repository.TenantRepository;
 import com.smart_restaurant.demo.Service.AccountService;
 import com.smart_restaurant.demo.Service.CategoryService;
 import com.smart_restaurant.demo.dto.Request.CategoryRequest;
+import com.smart_restaurant.demo.dto.Request.UpdateCategoryIsActiveRequest;
+import com.smart_restaurant.demo.dto.Request.UpdateItemStatusRequest;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.CategoryResponse;
 import com.smart_restaurant.demo.entity.Category;
@@ -33,51 +35,6 @@ public class CategoryServiceImpl implements CategoryService {
     TenantRepository tenantRepository;
     AccountService accountService;
 
-//    @Override
-//    public CategoryResponse createCategory(CategoryRequest request, Integer tenant_id) {
-//
-//        Tenant tenant = tenantRepository.findById(tenant_id)
-//                .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
-//
-//
-//        boolean exists = categoryRepository.existsByCategoryNameAndTenantTenantId(request.getCategoryName(), tenant_id);
-//        if (exists) {
-//            throw new AppException(ErrorCode.CATEGORY_ALREADY_EXISTS_FOR_TENANT);
-//        }
-//
-//        Category category = categoryMapper.toCategory(request);
-//        category.setTenant(tenant);
-//        Category savedCategory = categoryRepository.save(category);
-//
-//
-//        CategoryResponse response = categoryMapper.toCategoryResponse(savedCategory);
-//        response.setCategoryName(savedCategory.getCategoryName());
-//        response.setTenantId(savedCategory.getTenant().getTenantId());
-//
-//        return response;
-//
-//    }
-//
-//    @Override
-//    public List<CategoryResponse> getAllCategories(Integer tenant_id) {
-//
-//        // Kiểm tra tenant tồn tại
-//        tenantRepository.findById(tenant_id)
-//                .orElseThrow(() -> new AppException(ErrorCode.TENANT_NOT_FOUND));
-//
-//        // Lấy danh sách category theo tenant-id
-//        var categories = categoryRepository.findAllByTenant_TenantId(tenant_id);
-//
-//        // Map thủ công sang DTO
-//        return categories.stream()
-//                .map(cat -> {
-//                    CategoryResponse dto = new CategoryResponse();
-//                    dto.setCategoryName(cat.getCategoryName());
-//                    dto.setTenantId(cat.getTenant().getTenantId());
-//                    return dto;
-//                })
-//                .toList();
-//    }
 
     @Override
     public CategoryResponse createCategory(CategoryRequest request, JwtAuthenticationToken jwtAuthenticationToken) {
@@ -99,6 +56,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         CategoryResponse response = categoryMapper.toCategoryResponse(savedCategory);
         response.setCategoryName(savedCategory.getCategoryName());
+        response.setIsActive(savedCategory.getIsActive());
         response.setTenantId(savedCategory.getTenant().getTenantId());
 
         return response;
@@ -121,6 +79,7 @@ public class CategoryServiceImpl implements CategoryService {
                     CategoryResponse dto = new CategoryResponse();
                     dto.setCategoryId(cat.getCategoryId());
                     dto.setCategoryName(cat.getCategoryName());
+                    dto.setIsActive(cat.getIsActive());
                     dto.setTenantId(cat.getTenant().getTenantId());
                     return dto;
                 })
@@ -143,6 +102,7 @@ public class CategoryServiceImpl implements CategoryService {
         CategoryResponse response = new CategoryResponse();
         response.setCategoryId(category.getCategoryId());
         response.setCategoryName(category.getCategoryName());
+        response.setIsActive(category.getIsActive());
         response.setTenantId(category.getTenant().getTenantId());
 
         return response;
@@ -176,6 +136,7 @@ public class CategoryServiceImpl implements CategoryService {
         CategoryResponse response = new CategoryResponse();
         response.setCategoryId(updatedCategory.getCategoryId());
         response.setCategoryName(updatedCategory.getCategoryName());
+        response.setIsActive(updatedCategory.getIsActive());
         response.setTenantId(updatedCategory.getTenant().getTenantId());
 
         return response;
@@ -197,5 +158,34 @@ public class CategoryServiceImpl implements CategoryService {
 
         categoryRepository.deleteById(categoryId);
     }
+
+    @Override
+    public CategoryResponse updateIsActiveCategory(Integer categoryId, UpdateCategoryIsActiveRequest updateCategoryIsActiveRequest, JwtAuthenticationToken jwtAuthenticationToken) {
+        String username = jwtAuthenticationToken.getName();
+        Integer tenantId = accountService.getTenantIdByUsername(username);
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        // Kiểm tra category có thuộc tenant hiện tại không
+        if (!category.getTenant().getTenantId().equals(tenantId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        category.setIsActive(updateCategoryIsActiveRequest.getIsActive());
+        Category updatedCategory = categoryRepository.save(category);
+
+        CategoryResponse response = new CategoryResponse();
+        response.setCategoryId(updatedCategory.getCategoryId());
+        response.setCategoryName(updatedCategory.getCategoryName());
+        response.setIsActive(updatedCategory.getIsActive());
+        response.setTenantId(updatedCategory.getTenant().getTenantId());
+
+        return response;
+
+
+    }
+
+
 
 }
