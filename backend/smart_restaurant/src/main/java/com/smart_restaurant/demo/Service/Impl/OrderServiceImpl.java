@@ -32,6 +32,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.result.UpdateCountOutput;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
@@ -542,15 +543,19 @@ public class OrderServiceImpl implements OrderService {
             }
 
             case "Pending_approval" -> {
-                orderNotification.setMessage("khách hàng yêu cầu thanh toán.");
+                orderNotification.setMessage("Có đơn hàng cần phê duyệt.");
                 notificationService.notifyNewOrder(orderNotification);
             }
 
             case "Pending_payment" -> {
-                orderNotification.setMessage("Bạn đã thanh toán thành công.");
-                notificationService.notifyAcceptOrderCustomer(orderNotification);
-                orderNotification.setMessage("Khách hàng thanh toán thành công.");
+                if(PaymentType.Tranfer.equals(order.getPaymentType())){
+                    orderNotification.setMessage("khách hàng yêu cầu thanh toán tiền mặt hãy đến thu tiền.");
+                    notificationService.notifyNewOrder(orderNotification);
+                }else{
+                    orderNotification.setMessage("khách hàng thanh toán bằng momo.");
                 notificationService.notifyNewOrder(orderNotification);
+                }
+                
             }
             case "Serving"->{
                 orderNotification.setMessage("Đơn hàng đã được phục vụ");
@@ -1029,4 +1034,10 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    @Override
+    public OrderResponse updatePaymentType(Integer orderId,PaymentTypeOrderRequest paymentTypeOrderRequest) {
+        Order order=orderRepository.findById(orderId).orElseThrow(()->new AppException(ErrorCode.ORDER_NOT_EXISTED));
+        order.setPaymentType(paymentTypeOrderRequest.getPaymentType());
+        return  orderMapper.toOrderResponse(orderRepository.save(order));
+    }
 }

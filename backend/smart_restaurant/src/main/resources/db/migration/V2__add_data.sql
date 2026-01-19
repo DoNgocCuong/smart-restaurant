@@ -61,8 +61,7 @@ INSERT INTO status VALUES
 -- =========================
 INSERT INTO type_payment VALUES
 (1,'Tranfer'),
-(2,'Cash'),
-(3,'momoOrderId');
+(2,'Momo');
 
 
 -- ACCOUNT (20 records)
@@ -325,16 +324,16 @@ INSERT INTO Employee_table VALUES
 
 -- ORDERS (10 records)
 INSERT INTO orders VALUES
-(1,'Nguyen A',1,'No spicy',0,100000,10,110000,NOW(),NOW(),1,1,1),
-(2,'Trần Văn B',1,'Extra spicy',5000,150000,15,160000,NOW(),NOW(),2,2,2),
-(3,'Lê Thị C',1,'No MSG',0,200000,20,220000,NOW(),NOW(),3,1,3),
-(4,'Phạm Văn D',1,'Less salt',10000,120000,12,122000,NOW(),NOW(),4,3,4),
-(5,'Hoàng Thị E',1,'Well done',0,180000,18,198000,NOW(),NOW(),5,4,5),
-(6,'Vũ Văn F',1,'No onion',8000,95000,10,103000,NOW(),NOW(),1,1,6),
-(7,'Anonymous',0,'',0,75000,8,83000,NOW(),NOW(),6,2,NULL),
-(8,'Bùi Văn H',1,'Extra sauce',0,165000,17,182000,NOW(),NOW(),7,5,2),
-(9,'Ngô Thị I',1,'Hot',12000,140000,14,142000,NOW(),NOW(),8,6,3),
-(10,'Đinh Văn J',1,'Medium',0,210000,21,231000,NOW(),NOW(),9,1,4);
+(1,'Nguyen A',1,'No spicy',0,100000,10,110000,NOW(),NOW(),1,1,1,'Momo'),
+(2,'Trần Văn B',1,'Extra spicy',5000,150000,15,160000,NOW(),NOW(),2,2,2,'Tranfer'),
+(3,'Lê Thị C',1,'No MSG',0,200000,20,220000,NOW(),NOW(),3,1,3,'Tranfer'),
+(4,'Phạm Văn D',1,'Less salt',10000,120000,12,122000,NOW(),NOW(),4,3,4,'Momo'),
+(5,'Hoàng Thị E',1,'Well done',0,180000,18,198000,NOW(),NOW(),5,4,5,'Momo'),
+(6,'Vũ Văn F',1,'No onion',8000,95000,10,103000,NOW(),NOW(),1,1,6,'Momo'),
+(7,'Anonymous',0,'',0,75000,8,83000,NOW(),NOW(),6,2,NULL,'Momo'),
+(8,'Bùi Văn H',1,'Extra sauce',0,165000,17,182000,NOW(),NOW(),7,5,2,'Tranfer'),
+(9,'Ngô Thị I',1,'Hot',12000,140000,14,142000,NOW(),NOW(),8,6,3,'Momo'),
+(10,'Đinh Văn J',1,'Medium',0,210000,21,231000,NOW(),NOW(),9,1,4,'Momo');
 
 -- DETAIL_ORDER (20 records)
 INSERT INTO detail_order VALUES

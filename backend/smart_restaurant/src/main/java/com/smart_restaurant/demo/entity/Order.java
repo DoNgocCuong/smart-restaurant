@@ -1,6 +1,7 @@
 package com.smart_restaurant.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.smart_restaurant.demo.enums.PaymentType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -61,4 +62,6 @@ public class Order {
 
     @OneToOne(mappedBy = "order")
     Payment payments;
+    @Enumerated(EnumType.STRING)
+    PaymentType paymentType;
 }
