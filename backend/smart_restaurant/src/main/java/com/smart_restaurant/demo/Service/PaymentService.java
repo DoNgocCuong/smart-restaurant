@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface PaymentService {
-    Payment createPayment(Integer orderId, Long amount, String momoRequestId);
+    Payment createPayment(Integer orderId, Long amount, String momoRequestId, String momoOrderId);
     Payment updatePaymentStatus(Map<String, String> momoResponse);
     Payment findByOrderId(Integer orderId);
     PaymentResponse updatePaymentType(TypePaymentResquest typePaymentResquest, Integer orderId);

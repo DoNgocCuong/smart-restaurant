@@ -32,7 +32,7 @@ public class MomoPaymentServiceImpl implements MomoPaymentService {
     @Value("${momo.endpoint}")
     private String ENDPOINT;
 
-    @Value("http://localhost:8080/")
+    @Value("${momo.return-url}")
     private String REDIRECT_URL;
 
     @Value("${momo.ipn-url}")
@@ -91,7 +91,7 @@ public class MomoPaymentServiceImpl implements MomoPaymentService {
         // Save payment record with PENDING status
         if (response != null && response.getResultCode() == 0) {
             try {
-                paymentService.createPayment(orderId, amount, requestId);
+                paymentService.createPayment(orderId, amount, requestId, momoOrderId);
                 log.info("Payment record created successfully for orderId: {}", orderId);
             } catch (Exception e) {
                 log.error("Error creating payment record: ", e);

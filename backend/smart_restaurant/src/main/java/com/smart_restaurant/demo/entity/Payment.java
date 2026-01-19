@@ -21,11 +21,11 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer paymentId;
     Double amount;
-    @JoinColumn(name = "momo_trans_id")
+    @Column(name = "momo_trans_id")
     String momoTransId;
-    @JoinColumn(name = "momo_request_id")
+    @Column(name = "momo_request_id")
     String momoRequestId;
-    @JoinColumn(name = "momo_order_id")
+    @Column(name = "momo_order_id")
     private String momoOrderId;
 
     @CreationTimestamp

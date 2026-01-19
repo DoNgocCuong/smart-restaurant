@@ -30,6 +30,7 @@ public interface OrderService {
     List<OrderResponse> getAllOrderTenantStatusPendingApprovalByStaff(JwtAuthenticationToken jwtToken);
     List<OrderResponse> getAllTenantOrderByStaff(JwtAuthenticationToken jwtAuthenticationToken);
 
+
     byte[] generateInvoicePdf(Integer orderId,JwtAuthenticationToken jwtAuthenticationToken);
 
     OrderResponse updateOrderStatus(Integer id, @RequestBody UpdateOrderStatusRequest updateOrderStatusRequest);

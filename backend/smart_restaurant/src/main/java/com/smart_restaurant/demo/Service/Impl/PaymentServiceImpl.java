@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -42,25 +43,41 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public Payment createPayment(Integer orderId, Long amount, String momoRequestId) {
+    public Payment createPayment(Integer orderId, Long amount, String momoRequestId, String momoOrderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // CHECK PAYMENT ĐÃ TỒN TẠI CHƯA
+        Optional<Payment> existingPayment = paymentRepository.findByOrder_OrderId(orderId);
+
+        if (existingPayment.isPresent()) {
+
+            Payment payment = existingPayment.get();
+            payment.setAmount(amount.doubleValue());
+            payment.setMomoRequestId(momoRequestId);
+            payment.setMomoOrderId(momoOrderId);
+
+            log.info("Payment updated for orderId: {}", orderId);
+            return paymentRepository.save(payment);
+        }
 
         // Lấy status "PENDING" và type payment "MOMO"
         Status pendingStatus = statusRepository.findByOrderStatus(OrderStatus.Pending_payment)
-                .orElseThrow(() -> new RuntimeException("Status PENDING not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_STATUS_PENDING));
 
         TypePayment momoType = typePaymentRepository.findByName("MOMO")
-                .orElseThrow(() -> new RuntimeException("TypePayment MOMO not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.TYPE_MOMO_NOT_FOUND));
 
         Payment payment = Payment.builder()
                 .order(order)
                 .amount(amount.doubleValue())
                 .momoRequestId(momoRequestId)
+                .momoOrderId(momoOrderId)
                 .status(pendingStatus)
                 .typePayment(momoType)
                 .build();
 
+        log.info("Payment created for orderId: {}", orderId);
         return paymentRepository.save(payment);
 
 
@@ -69,10 +86,12 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public Payment updatePaymentStatus(Map<String, String> momoResponse) {
         String requestId = momoResponse.get(MomoParameter.REQUEST_ID);
+        String momoOrderId = momoResponse.get(MomoParameter.ORDER_ID);
         String transId = momoResponse.get(MomoParameter.TRANS_ID);
         Integer resultCode = Integer.valueOf(momoResponse.get(MomoParameter.RESULT_CODE));
 
-        Payment payment = paymentRepository.findByMomoRequestId(requestId)
+        Payment payment = paymentRepository.findByMomoOrderId(momoOrderId)
+                .or(() -> paymentRepository.findByMomoRequestId(requestId))
                 .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND_WITH_REQUEST_ID));
 
         // Update MoMo transaction ID
@@ -87,17 +106,15 @@ public class PaymentServiceImpl implements PaymentService {
 
         payment.setStatus(status);
 
-        // Update order status if payment success
+
         if (resultCode == 0) {
             Order order = payment.getOrder();
 
-            // ✅ SỬA: PAID thay vì PENDING_PAYMENT
             Status orderPaidStatus = statusRepository.findByOrderStatus(OrderStatus.Paid)
                     .orElseThrow(() -> new AppException(ErrorCode.STATUS_PAID_NOT_FOUND));
             order.setStatus(orderPaidStatus);
             orderRepository.save(order);
 
-            // ✅ THÊM: Set bàn thành trống
             RestaurantTable table = order.getTable();
             if (table != null) {
                 table.setStatusTable(StatusTable.unoccupied);
