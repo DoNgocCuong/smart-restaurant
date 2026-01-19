@@ -707,7 +707,12 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toList()));
 
         System.out.println("✅ Thêm " + newDetailOrders.size() + " DetailOrder vào order " + orderId);
-
+        OrderNotification orderNotification=OrderNotification.builder()
+                .orderId(orderId)
+                .tableId(order.getTable().getTableId())
+                .message("Khách yêu cầu thêm món ăn cho đơn hàng.")
+                .build();
+        notificationService.notifyNewOrder(orderNotification);
         return response;
     }
 
