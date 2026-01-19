@@ -66,8 +66,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/log-in/email/{tenantId}")
-    ApiResponse<AuthenticationResponse> authenticatedEmail (@RequestBody GoogleLoginRequest googleLoginRequest ,@PathVariable Integer tenantId){
-        AuthenticationResponse result=authenticationService.loginWithGoogle(googleLoginRequest.getToken(),tenantId);
+    ApiResponse<AuthenticationResponse> authenticatedEmail (@RequestBody GoogleLoginRequest googleLoginRequest ,@PathVariable Integer tenantId,HttpServletResponse response){
+        AuthenticationResponse result=authenticationService.loginWithGoogle(googleLoginRequest.getToken(),tenantId, response);
         return ApiResponse.<AuthenticationResponse>builder()
                 .result(result)
                 .build();

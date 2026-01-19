@@ -304,7 +304,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public AuthenticationResponse loginWithGoogle(String googleToken,Integer tenantId) {
+    public AuthenticationResponse loginWithGoogle(String googleToken,Integer tenantId,HttpServletResponse response) {
 
         // 1. verify token google
         GoogleIdToken.Payload payload = verifyGoogleToken(googleToken);
@@ -327,6 +327,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         // 4. generate JWT hệ thống
         String accessToken = generalToken(account);
+        String refreshToken=generateRefreshToken(account);
+        setRefreshCookie(response,refreshToken);
         AuthenticationResponse authenticationResponse= AuthenticationResponse.builder()
                 .acessToken(accessToken)
                 .isFirstActivity(account.getIsFirstActivity())

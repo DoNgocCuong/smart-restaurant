@@ -19,6 +19,6 @@ public interface AuthenticationService {
     void logout(HttpServletRequest request,HttpServletResponse response) throws ParseException, JOSEException;
     AuthenticationResponse refreshToken(HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException;
     String generalToken(Account account);
-    AuthenticationResponse loginWithGoogle(String googleToken,Integer tenantId);
+    AuthenticationResponse loginWithGoogle(String googleToken,Integer tenantId,HttpServletResponse response);
 }
 
