@@ -6,12 +6,14 @@ import { STATUS_META } from "../../utils/statusMeta";
 import { isGuest } from "../../utils/jwt";
 import toast from "react-hot-toast";
 import { getUsernameFromToken } from "../../utils/jwt";
+import InvoiceModal from "./InvoiceModal";
 
 export default function OrderHistoryModal({ onClose, orderId }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const isGuestTenant = isGuest();
-
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [invoiceData, setInvoiceData] = useState(null);
   const fetchOrders = async () => {
     try {
       // Nếu là guest - lấy đơn hàng theo ID
@@ -49,14 +51,14 @@ export default function OrderHistoryModal({ onClose, orderId }) {
 
   const handleRequestPayment = async (orderId) => {
     try {
-      await orderApi.updateStatus(orderId, { status: "Pending_payment" });
-      toast.success(
-        "Yêu cầu thanh toán thành công, vui lòng đợi trong giây lát",
-      );
-      fetchOrders();
+      const res = await orderApi.createInvoice(orderId);
+      console.log("Res invoice:", res);
+      setInvoiceData(res.result); // Lưu dữ liệu hóa đơn
+      setShowInvoice(true); // Hiển thị modal
+      toast.success("Yêu cầu thanh toán thành công");
     } catch (err) {
-      console.error("Lỗi cập nhật trạng thái:", err);
-      toast.error("Không thể yêu cầu thanh toán");
+      console.error("Lỗi tạo hóa đơn:", err);
+      toast.error("Không thể tạo hóa đơn");
     }
   };
 
@@ -203,6 +205,12 @@ export default function OrderHistoryModal({ onClose, orderId }) {
           )}
         </div>
       </div>
+      {showInvoice && (
+        <InvoiceModal
+          invoice={invoiceData}
+          onClose={() => setShowInvoice(false)}
+        />
+      )}
     </Overlay>
   );
 }
