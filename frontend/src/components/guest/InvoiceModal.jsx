@@ -16,9 +16,14 @@ export default function InvoiceModal({ invoice, onClose }) {
 
   const handleCashPayment = async () => {
     try {
-      await orderApi.updateStatus(invoice.orderId, {
+      // logic sai nên Tranfer là tiền mặt
+      const res1 = await orderApi.updatePaymentType(invoice.orderId, {
+        paymentType: "Tranfer",
+      });
+      const res12 = await orderApi.updateStatus(invoice.orderId, {
         status: "Pending_payment",
       });
+
       toast.success("Đã chuyển sang trạng thái chờ thanh toán");
       onClose();
     } catch (err) {

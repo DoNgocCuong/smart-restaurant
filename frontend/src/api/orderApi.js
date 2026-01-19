@@ -9,6 +9,8 @@ const orderApi = {
   customerUpdate: (orderId, data) =>
     axiosClient.put(`/orders/${orderId}`, data),
   createInvoice: (orderId) => axiosClient.post(`orders/${orderId}`),
+  updatePaymentType: (orderId, data) =>
+    axiosClient.put(`/orders/payment-type/${orderId}`, data),
 };
 
 export default orderApi;
