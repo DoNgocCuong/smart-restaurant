@@ -1,14 +1,10 @@
 package com.smart_restaurant.demo.Service;
 
 
+import com.smart_restaurant.demo.dto.Request.*;
 import com.smart_restaurant.demo.dto.Response.InvoiceResponse;
 
 
-import com.smart_restaurant.demo.dto.Request.DetailOrderRequest;
-
-import com.smart_restaurant.demo.dto.Request.OrderRequest;
-import com.smart_restaurant.demo.dto.Request.UpdateDetailOrderRequest;
-import com.smart_restaurant.demo.dto.Request.UpdateOrderStatusRequest;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.OrderResponse;
 import com.smart_restaurant.demo.entity.Order;
@@ -35,5 +31,5 @@ public interface OrderService {
 
     OrderResponse updateOrderStatus(Integer id, @RequestBody UpdateOrderStatusRequest updateOrderStatusRequest);
     OrderResponse updateOrderAddItems(Integer orderId, List<UpdateDetailOrderRequest> detailOrderRequests, JwtAuthenticationToken jwtAuthenticationToken);
-
+    OrderResponse updatePaymentType(Integer orderId, PaymentTypeOrderRequest paymentTypeOrderRequest);
 }

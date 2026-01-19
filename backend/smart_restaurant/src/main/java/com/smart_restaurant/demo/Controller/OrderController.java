@@ -1,10 +1,7 @@
 package com.smart_restaurant.demo.Controller;
 
 import com.smart_restaurant.demo.Service.OrderService;
-import com.smart_restaurant.demo.dto.Request.DetailOrderRequest;
-import com.smart_restaurant.demo.dto.Request.OrderRequest;
-import com.smart_restaurant.demo.dto.Request.UpdateDetailOrderRequest;
-import com.smart_restaurant.demo.dto.Request.UpdateOrderStatusRequest;
+import com.smart_restaurant.demo.dto.Request.*;
 import com.smart_restaurant.demo.dto.Response.ApiResponse;
 import com.smart_restaurant.demo.dto.Response.InvoiceResponse;
 import com.smart_restaurant.demo.dto.Response.OrderResponse;
@@ -180,6 +177,12 @@ public class OrderController {
                         "attachment; filename=invoice_" + orderId + ".pdf")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfBytes);
+    }
+    @PutMapping("/payment-type/{orderId}")
+    public  ApiResponse<OrderResponse> updatePaymentType(@PathVariable Integer orderId, @RequestBody PaymentTypeOrderRequest paymentTypeOrderRequest){
+        return  ApiResponse.<OrderResponse>builder()
+                .result(orderService.updatePaymentType(orderId,paymentTypeOrderRequest))
+                .build();
     }
 
 
