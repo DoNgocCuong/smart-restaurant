@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = `http://${import.meta.env.VITE_SERVER_DOMAIN}:${import.meta.env.VITE_SERVER_PORT}/api`;
+const BASE_URL = `${import.meta.env.VITE_SERVER_DOMAIN}/api`;
 
 /* ================= CLIENT ================= */
 const axiosClient = axios.create({

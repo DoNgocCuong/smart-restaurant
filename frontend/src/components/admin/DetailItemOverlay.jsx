@@ -1,15 +1,26 @@
 import { useEffect, useState } from "react";
-import { X, Pencil, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  X,
+  Pencil,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  MessageSquare,
+  User,
+  Calendar,
+} from "lucide-react";
 import Overlay from "../common/Overlay";
 import UpdateItemOverlay from "./UpdateItemOverlay";
 import UploadImagesOverlay from "./UploadImagesOverlay";
 
 import modifierGroupApi from "../../api/modifierGroupApi";
 import imageApi from "../../api/imageApi";
+import reviewApi from "../../api/reviewApi";
 
 function DetailItemOverlay({ item, onClose, onUpdate }) {
   const [modifierGroups, setModifierGroups] = useState([]);
   const [images, setImages] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
 
@@ -54,6 +65,22 @@ function DetailItemOverlay({ item, onClose, onUpdate }) {
     fetchImages();
   }, [item]);
 
+  /* ================= FETCH REVIEWS ================= */
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (!item?.itemId) return;
+
+      try {
+        const res = await reviewApi.getByItemId(item.itemId);
+        setReviews(res?.result || []);
+      } catch (err) {
+        console.error("Fetch reviews failed:", err);
+      }
+    };
+
+    fetchReviews();
+  }, [item]);
+
   if (!item) return null;
 
   /* ================= SLIDESHOW DATA ================= */
@@ -76,6 +103,18 @@ function DetailItemOverlay({ item, onClose, onUpdate }) {
 
   const handleNext = () => {
     changeSlide(currentIndex === allImages.length - 1 ? 0 : currentIndex + 1);
+  };
+
+  /* ================= FORMAT DATE ================= */
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   return (
@@ -202,8 +241,14 @@ function DetailItemOverlay({ item, onClose, onUpdate }) {
                 <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
                   {item.description}
                 </p>
-                <div className="text-2xl font-bold text-blue-600">
-                  {item.price?.toLocaleString()} ₫
+                <div className="flex flex-col">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {item.price?.toLocaleString()} ₫
+                  </div>
+                  {/* Số lượng đã bán */}
+                  <p className="text-sm  text-gray-500">
+                    Đã bán: {item.quantitySold || 0}
+                  </p>
                 </div>
               </div>
 
@@ -282,7 +327,7 @@ function DetailItemOverlay({ item, onClose, onUpdate }) {
 
             {/* ================= MODIFIER GROUPS ================= */}
             {modifierGroups.length > 0 && (
-              <div className="mt-8">
+              <div className="mb-8">
                 <h3 className="text-lg sm:text-xl font-bold bg-linear-to-r from-blue-700 to-blue-600 bg-clip-text text-transparent mb-4">
                   Tùy chọn thêm
                 </h3>
@@ -340,6 +385,66 @@ function DetailItemOverlay({ item, onClose, onUpdate }) {
                 </div>
               </div>
             )}
+
+            {/* ================= REVIEWS ================= */}
+            <div className="mt-8">
+              <div className="flex items-center gap-2 mb-4">
+                <MessageSquare
+                  size={20}
+                  className="text-blue-600"
+                  strokeWidth={2.5}
+                />
+                <h3 className="text-lg sm:text-xl font-bold bg-linear-to-r from-blue-700 to-blue-600 bg-clip-text text-transparent">
+                  Đánh giá từ khách hàng
+                </h3>
+              </div>
+              {reviews.length > 0 ? (
+                <div className="flex flex-col gap-4">
+                  {reviews.map((review) => (
+                    <div
+                      key={review.reviewId}
+                      className="
+                        border-2 border-blue-100
+                        rounded-2xl
+                        p-4 sm:p-5
+                        bg-linear-to-br from-blue-50 to-white
+                        hover:border-blue-200 hover:shadow-md
+                        transition-all duration-300
+                      "
+                    >
+                      {/* Review Header */}
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
+                            <User
+                              size={20}
+                              className="text-white"
+                              strokeWidth={2.5}
+                            />
+                          </div>
+                          <div>
+                            <div className="font-bold text-gray-800">
+                              {review.customer?.name || "Khách hàng"}
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <Calendar size={12} />
+                              <span>{formatDate(review.createAt)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Review Message */}
+                      <p className="text-gray-700 text-sm sm:text-base leading-relaxed pl-13">
+                        {review.message}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-600 italic">Chưa có đánh giá nào.</p>
+              )}
+            </div>
           </div>
         </div>
       </Overlay>

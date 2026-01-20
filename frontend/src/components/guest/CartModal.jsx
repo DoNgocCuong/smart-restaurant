@@ -100,7 +100,8 @@ export default function CartModal({
     if (
       orderId &&
       orderStatus !== "Pendding_payment" &&
-      orderStatus !== "Paid"
+      orderStatus !== "Paid" &&
+      orderStatus !== "Rejected"
     ) {
       const detailOrders = mapCartToDetailOrders(safeCart);
       const mergedItems = mergeItems(safeOrderedItems, safeCart);

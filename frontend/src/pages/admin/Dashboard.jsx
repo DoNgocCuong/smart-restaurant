@@ -39,7 +39,7 @@ function Dashboard() {
   if (!tenantProfile) return null;
 
   return (
-    <div className="col-start-2 col-end-12 space-y-8 py-8 bg-linear-to-br from-slate-50 via-blue-50 to-white min-h-screen">
+    <div className="col-start-2 col-end-12 space-y-8 py-8  min-h-screen">
       {/* Header */}
       <div className="bg-white rounded-3xl shadow-sm border border-blue-100 p-8 flex items-center gap-8 hover:shadow-md transition-shadow duration-300">
         <img

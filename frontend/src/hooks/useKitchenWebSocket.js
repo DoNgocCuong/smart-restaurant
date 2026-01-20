@@ -9,9 +9,7 @@ export default function useKitchenWebSocket({ onKitchenUpdate, serverPort }) {
   const [newOrderIds, setNewOrderIds] = useState(new Set());
 
   useEffect(() => {
-    const socket = new SockJS(
-      `http://${import.meta.env.VITE_SERVER_DOMAIN}:${serverPort}/ws`,
-    );
+    const socket = new SockJS(`${import.meta.env.VITE_SERVER_DOMAIN}/ws`);
 
     const stompClient = new Client({
       webSocketFactory: () => socket,

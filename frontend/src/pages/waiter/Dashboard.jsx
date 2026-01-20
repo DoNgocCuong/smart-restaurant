@@ -12,15 +12,18 @@ import {
   User,
   X,
   AlertCircle,
+  Users,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import authApi from "../../api/authApi";
 import StaffDetailOrder from "../../components/waiter/StaffDetailOrder";
 import tenantApi from "../../api/tenantApi";
 import orderApi from "../../api/orderApi";
+import employeeApi from "../../api/employeeApi";
 import useOrderWebSocket from "../../hooks/useOrderWebSocket";
 import toast from "react-hot-toast";
 import detailOrderApi from "../../api/detailOrderApi";
+import { getTableNameById } from "../../utils/tableUtils";
 
 /* ===== STATUS CONFIG ===== */
 const STATUS_META = {
@@ -73,15 +76,16 @@ const STATUS_META = {
 
 function Dashboard() {
   const [orders, setOrders] = useState([]);
+  const [myTables, setMyTables] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingTables, setLoadingTables] = useState(true);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [tenant, setTenant] = useState(null);
   const [userName, setUserName] = useState("");
-
+  const [tableNameMap, setTableNameMap] = useState({});
   const navigate = useNavigate();
-
   /* ===== USER ===== */
   useEffect(() => {
     const storedUserName = localStorage.getItem("userName");
@@ -92,6 +96,7 @@ function Dashboard() {
   useEffect(() => {
     fetchTenantProfile();
     fetchOrders();
+    fetchMyTables();
   }, []);
 
   /* ===== WEBSOCKET (HOOK) ===== */
@@ -107,6 +112,7 @@ function Dashboard() {
   const fetchTenantProfile = async () => {
     try {
       const res = await tenantApi.getTenantProfile();
+      console.log(res.result);
       setTenant(res.result);
     } catch (err) {
       console.error("Tenant error:", err);
@@ -124,6 +130,16 @@ function Dashboard() {
 
       console.log(sorted);
 
+      // Lấy tên bàn cho tất cả order
+      const tableMap = {};
+      for (const order of sorted) {
+        if (order.tableId && !tableMap[order.tableId]) {
+          const tableName = await getTableNameById(order.tableId);
+          tableMap[order.tableId] = tableName;
+        }
+      }
+      setTableNameMap(tableMap);
+
       setOrders(sorted);
     } catch (err) {
       console.error("Get orders error:", err);
@@ -132,15 +148,25 @@ function Dashboard() {
     }
   };
 
+  const fetchMyTables = async () => {
+    setLoadingTables(true);
+    try {
+      const res = await employeeApi.getMyTables();
+      setMyTables(res.result || []);
+    } catch (err) {
+      console.error("Get my tables error:", err);
+    } finally {
+      setLoadingTables(false);
+    }
+  };
+
   /* ===== CHECK UNAPPROVED ITEMS ===== */
   const hasUnapprovedItems = (order) => {
-    // Kiểm tra status không phải Paid, Pending_payment, Rejected
     const excludedStatuses = ["Paid", "Pending_payment", "Rejected"];
     if (excludedStatuses.includes(order.oderStatus)) {
       return false;
     }
 
-    // Kiểm tra có món nào isApproved === false
     if (!order.detailOrders || order.detailOrders.length === 0) {
       return false;
     }
@@ -150,11 +176,9 @@ function Dashboard() {
 
   /* ===== GET DISPLAY STATUS ===== */
   const getDisplayStatus = (order) => {
-    // Nếu có món chưa được duyệt, hiển thị "Cần duyệt thêm"
     if (hasUnapprovedItems(order)) {
       return "Needs_approval";
     }
-    // Nếu không, hiển thị status gốc
     return order.oderStatus;
   };
 
@@ -246,13 +270,18 @@ function Dashboard() {
   };
 
   /* ===== FILTER ===== */
+  const myTableIds = new Set(myTables.map((t) => t.tableId));
+
   const filteredOrders =
     statusFilter === "ALL"
-      ? orders
-      : orders.filter((o) => o.oderStatus === statusFilter);
+      ? orders.filter((o) => myTableIds.has(o.tableId))
+      : orders.filter(
+          (o) => o.oderStatus === statusFilter && myTableIds.has(o.tableId),
+        );
 
   const countByStatus = (status) =>
-    orders.filter((o) => o.oderStatus === status).length;
+    orders.filter((o) => o.oderStatus === status && myTableIds.has(o.tableId))
+      .length;
 
   /* ===== UI ===== */
   return (
@@ -265,14 +294,16 @@ function Dashboard() {
               <div className="overflow-hidden w-14 h-14 bg-slate-100 rounded-2xl shrink-0 sm:w-16">
                 {tenant?.logoUrl ? (
                   <img
-                    src={tenant.logoUrl}
-                    alt={tenant.nameTenant}
+                    src={tenant?.logoUrl || tenant?.logoUrl === ""}
+                    alt={tenant?.nameTenant}
                     className="object-cover w-full h-full"
                   />
                 ) : (
-                  <div className="flex items-center justify-center w-full h-full text-white bg-linear-to-br from-indigo-500 to-indigo-600">
-                    <UtensilsCrossed size={28} />
-                  </div>
+                  <img
+                    src="https://res.cloudinary.com/dznocieoi/image/upload/v1766172366/ip2iiuvukezrvn95dshe.png"
+                    alt={tenant?.nameTenant}
+                    className="object-cover w-full h-full"
+                  />
                 )}
               </div>
 
@@ -358,6 +389,48 @@ function Dashboard() {
           })}
         </div>
 
+        {/* ===== MY TABLES SECTION ===== */}
+        <div className="p-6 bg-white rounded-2xl shadow">
+          <div className="flex items-center gap-2 mb-4">
+            <Users size={24} className="text-indigo-600" />
+            <h2 className="text-xl font-bold text-slate-800">Bàn của tôi</h2>
+          </div>
+
+          {loadingTables ? (
+            <p className="text-slate-500">Đang tải danh sách bàn...</p>
+          ) : myTables.length > 0 ? (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+              {myTables.map((table) => (
+                <div
+                  key={table.tableId}
+                  className="p-4 border-2 border-indigo-200 bg-indigo-50 rounded-xl text-center hover:shadow-md transition-all"
+                >
+                  <p className="font-bold text-lg text-indigo-700">
+                    {table.tableName}
+                  </p>
+                  <p className="text-xs text-indigo-600 mt-1">
+                    Khu {table.section}
+                  </p>
+                  <p className="text-xs text-indigo-500 mt-2 flex items-center justify-center gap-1">
+                    <Users size={12} />
+                    {table.capacity} chỗ
+                  </p>
+                  {!table.is_active && (
+                    <p className="text-xs text-red-600 mt-2 font-semibold">
+                      Không hoạt động
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-slate-400">
+              <UtensilsCrossed size={40} className="mx-auto mb-2 opacity-50" />
+              <p>Chưa có bàn được gán</p>
+            </div>
+          )}
+        </div>
+
         {/* ===== LIST ===== */}
         {loading && <p>Đang tải đơn hàng...</p>}
 
@@ -400,7 +473,7 @@ function Dashboard() {
                         Order #{order.orderId}
                       </strong>
                       <p className="text-sm text-slate-500">
-                        Bàn {order.tableId}
+                        Bàn {tableNameMap[order.tableId] || order.tableId}
                       </p>
                     </div>
                   </div>

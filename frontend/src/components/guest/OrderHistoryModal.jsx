@@ -55,6 +55,7 @@ export default function OrderHistoryModal({ onClose, orderId }) {
 
       setInvoiceData(res.result); // Lưu dữ liệu hóa đơn
       setShowInvoice(true); // Hiển thị modal
+      fetchOrders();
       toast.success("Yêu cầu thanh toán thành công");
     } catch (err) {
       console.error("Lỗi tạo hóa đơn:", err);
