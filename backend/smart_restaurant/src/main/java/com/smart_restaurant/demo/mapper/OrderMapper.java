@@ -17,6 +17,7 @@ public interface OrderMapper {
     @Mapping(target = "customerId", source = "customer.customerId")
     @Mapping(target = "tableId", source = "table.tableId")
     @Mapping(target = "oderStatus", source = "status.orderStatus")
+    @Mapping(target = "paymentType", source = "paymentType")
     OrderResponse toOrderResponse(Order order);
 
     @Mapping(target = "customerName", ignore = true)

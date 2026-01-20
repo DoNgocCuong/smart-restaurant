@@ -30,7 +30,7 @@ export default function OrderHistoryModal({ onClose, orderId }) {
       } else {
         // Nếu không phải guest - lấy tất cả đơn hàng của user
         const res = await orderApi.getMyOrder();
-
+        console.log(res);
         let sortedOrders = (res.result || []).sort(
           (a, b) => new Date(b.createAt) - new Date(a.createAt),
         );
@@ -52,7 +52,7 @@ export default function OrderHistoryModal({ onClose, orderId }) {
   const handleRequestPayment = async (orderId) => {
     try {
       const res = await orderApi.createInvoice(orderId);
-      console.log("Res invoice:", res);
+
       setInvoiceData(res.result); // Lưu dữ liệu hóa đơn
       setShowInvoice(true); // Hiển thị modal
       toast.success("Yêu cầu thanh toán thành công");

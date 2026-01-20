@@ -216,6 +216,18 @@ function Dashboard() {
     }
   };
 
+  const handlePaid = async (orderId) => {
+    try {
+      await orderApi.updateStatus(orderId, { status: "Paid" });
+      toast.success("Đơn hàng đã được thanh toán");
+      setSelectedOrder(null);
+      fetchOrders();
+    } catch (err) {
+      console.error("Lỗi cập nhật trạng thái:", err);
+      toast.error("Không thể cập nhật trạng thái đơn hàng");
+    }
+  };
+
   const handleOrderClick = (order) => {
     clearNewOrder(order.orderId);
     setSelectedOrder(order);
@@ -419,6 +431,7 @@ function Dashboard() {
           onApproveMore={handleApproveMore}
           onReject={handleReject}
           onServing={handleReciveAndServing}
+          onPaid={handlePaid}
           processing={processing}
           hasUnapprovedItems={hasUnapprovedItems(selectedOrder)}
         />

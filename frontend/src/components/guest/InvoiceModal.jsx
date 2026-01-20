@@ -4,15 +4,17 @@ import orderApi from "../../api/orderApi";
 import momoPaymentApi from "../../api/momoPaymentApi";
 import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
+import React from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
+import RobotoRegular from "../../utils/pdf/font/Roboto-Regular.ttf";
+
 export default function InvoiceModal({ invoice, onClose }) {
   const navigate = useNavigate();
   if (!invoice) return null;
 
   console.log(invoice);
-
-  const handlePrint = () => {
-    window.print();
-  };
 
   const handleCashPayment = async () => {
     try {
@@ -20,11 +22,11 @@ export default function InvoiceModal({ invoice, onClose }) {
       const res1 = await orderApi.updatePaymentType(invoice.orderId, {
         paymentType: "Tranfer",
       });
-      const res12 = await orderApi.updateStatus(invoice.orderId, {
+      const res2 = await orderApi.updateStatus(invoice.orderId, {
         status: "Pending_payment",
       });
 
-      toast.success("Đã chuyển sang trạng thái chờ thanh toán");
+      toast.success("Yêu cầu thanh toán thành công, vui lòng chờ xử lý!");
       onClose();
     } catch (err) {
       console.error("Lỗi cập nhật trạng thái đơn hàng:", err);
@@ -40,10 +42,184 @@ export default function InvoiceModal({ invoice, onClose }) {
       );
       console.log("Res Momo:", res);
       // mở trang mới
-      window.open(res.result.payUrl, "_blank");
+      window.open(res.payUrl, "_blank");
     } catch (err) {
       console.error("Lỗi tạo yêu cầu thanh toán MoMo:", err);
       toast.error("Tạo yêu cầu thanh toán MoMo thất bại");
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      const doc = new jsPDF();
+
+      // Load font Roboto và ĐỢI nó load xong hoàn toàn
+      const response = await fetch(RobotoRegular);
+      const fontBlob = await response.blob();
+      const reader = new FileReader();
+
+      // Đợi font load xong
+      await new Promise((resolve) => {
+        reader.onload = function () {
+          const base64Font = reader.result.split(",")[1];
+          doc.addFileToVFS("Roboto-Regular.ttf", base64Font);
+          doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+          resolve();
+        };
+        reader.readAsDataURL(fontBlob);
+      });
+
+      // BẮT BUỘC set font trước khi vẽ bất cứ thứ gì
+      doc.setFont("Roboto", "normal");
+
+      // Header
+      doc.setFontSize(20);
+      doc.text("HÓA ĐƠN", 105, 20, { align: "center" });
+
+      doc.setFontSize(10);
+      doc.text(`#${invoice.orderId}`, 105, 28, { align: "center" });
+
+      // Customer Info
+      doc.setFontSize(11);
+      doc.text("Thông tin khách hàng", 20, 45);
+      doc.setFontSize(10);
+      doc.text(invoice.customerName, 20, 52);
+      doc.text(`Bàn: ${invoice.tableName}`, 20, 58);
+
+      // Date
+      doc.setFontSize(11);
+      doc.text("Ngày tạo", 140, 45);
+      doc.setFontSize(10);
+      const dateStr = new Date().toLocaleString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      doc.text(dateStr, 140, 52);
+
+      // Items Table
+      const tableData = [];
+      invoice.detailOrders.forEach((item) => {
+        const modifierTotal =
+          item.modifiers?.reduce((sum, m) => sum + m.price, 0) || 0;
+        const itemTotal = item.price + modifierTotal;
+        const rowTotal = itemTotal * item.quantity;
+
+        tableData.push([
+          item.itemName,
+          item.quantity.toString(),
+          `${itemTotal.toLocaleString()} đ`,
+          `${rowTotal.toLocaleString()} đ`,
+        ]);
+
+        if (item.modifiers && item.modifiers.length > 0) {
+          item.modifiers.forEach((modifier) => {
+            tableData.push([
+              `  - ${modifier.modifierGroupName}: ${modifier.name}`,
+              "",
+              `+${modifier.price.toLocaleString()} đ`,
+              "",
+            ]);
+          });
+        }
+      });
+
+      // Set font trước khi vẽ bảng
+      doc.setFont("Roboto", "normal");
+
+      autoTable(doc, {
+        startY: 70,
+        head: [["Sản phẩm", "SL", "Đơn giá", "Thành tiền"]],
+        body: tableData,
+        theme: "grid",
+        headStyles: {
+          fillColor: [255, 255, 255],
+          textColor: [0, 0, 0],
+          fontSize: 10,
+          fontStyle: "normal", // Đổi từ "bold" sang "normal"
+          lineWidth: 0.5,
+          lineColor: [0, 0, 0],
+          halign: "center",
+        },
+        styles: {
+          fontSize: 9,
+          cellPadding: 3,
+          textColor: [0, 0, 0],
+          lineWidth: 0.1,
+          lineColor: [200, 200, 200],
+          font: "Roboto",
+          fontStyle: "normal",
+        },
+        columnStyles: {
+          0: { cellWidth: 80, halign: "left" },
+          1: { halign: "center", cellWidth: 20 },
+          2: { halign: "right", cellWidth: 40 },
+          3: { halign: "right", cellWidth: 40 },
+        },
+        alternateRowStyles: {
+          fillColor: [245, 245, 245],
+        },
+        didDrawPage: function (data) {
+          // Set lại font sau mỗi trang
+          doc.setFont("Roboto", "normal");
+        },
+      });
+
+      let finalY = doc.lastAutoTable.finalY + 10;
+
+      // Set font lại trước phần totals
+      doc.setFont("Roboto", "normal");
+
+      if (invoice.special) {
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.5);
+        doc.rect(20, finalY, 170, 12);
+        doc.setFontSize(9);
+        doc.text("Ghi chú: ", 25, finalY + 7);
+        doc.text(invoice.special, 45, finalY + 7);
+        finalY += 18;
+      }
+
+      doc.setFontSize(10);
+      doc.text("Tạm tính:", 120, finalY);
+      doc.text(`${invoice.subtotal.toLocaleString()} đ`, 190, finalY, {
+        align: "right",
+      });
+      finalY += 7;
+
+      if (invoice.discount > 0) {
+        doc.text("Giảm giá:", 120, finalY);
+        doc.text(`-${invoice.discount.toLocaleString()} đ`, 190, finalY, {
+          align: "right",
+        });
+        finalY += 7;
+      }
+
+      if (invoice.tax > 0) {
+        doc.text("Thuế VAT:", 120, finalY);
+        doc.text(`+${invoice.tax.toLocaleString()} đ`, 190, finalY, {
+          align: "right",
+        });
+        finalY += 7;
+      }
+
+      doc.setLineWidth(0.5);
+      doc.line(120, finalY, 190, finalY);
+      finalY += 5;
+
+      doc.setFontSize(12);
+      doc.text("Tổng cộng:", 120, finalY);
+      doc.text(`${invoice.total.toLocaleString()} đ`, 190, finalY, {
+        align: "right",
+      });
+
+      doc.save(`invoice_${invoice.orderId}.pdf`);
+      toast.success("Tải xuống hóa đơn thành công!");
+    } catch (err) {
+      console.error("Lỗi tải hóa đơn:", err);
+      toast.error("Tải hóa đơn thất bại");
     }
   };
 
@@ -123,7 +299,7 @@ export default function InvoiceModal({ invoice, onClose }) {
                   const rowTotal = itemTotal * item.quantity;
 
                   return (
-                    <div key={item.detailOrderId}>
+                    <React.Fragment key={item.detailOrderId}>
                       <tr className="border-b border-gray-200">
                         <td className="py-3 text-sm text-gray-800">
                           {item.itemName}
@@ -153,7 +329,7 @@ export default function InvoiceModal({ invoice, onClose }) {
                           </td>
                         </tr>
                       )}
-                    </div>
+                    </React.Fragment>
                   );
                 })}
               </tbody>
@@ -208,7 +384,7 @@ export default function InvoiceModal({ invoice, onClose }) {
           {/* Action Buttons */}
           <div className="flex flex-col gap-4 justify-end pt-6 border-t border-gray-200">
             <button
-              //   onClick={handleDownload}
+              onClick={handleDownload}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition"
             >
               <Download className="w-4 h-4" />

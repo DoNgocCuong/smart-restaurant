@@ -11,6 +11,8 @@ const orderApi = {
   createInvoice: (orderId) => axiosClient.post(`orders/${orderId}`),
   updatePaymentType: (orderId, data) =>
     axiosClient.put(`/orders/payment-type/${orderId}`, data),
+  downloadInvoice: (orderId) =>
+    axiosClient.get(`/orders/${orderId}/invoice/pdf`, { responseType: "blob" }),
 };
 
 export default orderApi;

@@ -4,7 +4,7 @@ import orderApi from "../../api/orderApi";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { getUsernameFromToken } from "../../utils/jwt";
-
+import { getOrderStatusById } from "../../utils/orderStatus";
 export default function CartModal({
   cart,
   orderedItems = [],
@@ -23,6 +23,18 @@ export default function CartModal({
 
   const username = getUsernameFromToken();
   const isGuestTenant = username?.includes("guest_tenant");
+
+  const [orderStatus, setOrderStatus] = useState(null);
+
+  useEffect(() => {
+    const fetchOrderStatus = async () => {
+      if (orderId) {
+        const status = await getOrderStatusById(orderId);
+        setOrderStatus(status);
+      }
+    };
+    fetchOrderStatus();
+  }, [orderId]);
 
   useEffect(() => {
     console.log(isGuestTenant);
@@ -85,14 +97,16 @@ export default function CartModal({
     if (safeCart.length === 0) return;
 
     // ===== GỌI THÊM MÓN =====
-    if (orderId) {
-      // ✅ Gửi chỉ items mới (safeCart)
+    if (
+      orderId &&
+      orderStatus !== "Pendding_payment" &&
+      orderStatus !== "Paid"
+    ) {
       const detailOrders = mapCartToDetailOrders(safeCart);
       const mergedItems = mergeItems(safeOrderedItems, safeCart);
 
       try {
         await orderApi.customerUpdate(orderId, detailOrders);
-
         toast.success("Đã gửi thêm món cho nhà bếp");
         onOrderSuccess?.(mergedItems);
         onClose();
@@ -119,16 +133,13 @@ export default function CartModal({
       special: special.trim(),
       detailOrders: mapCartToDetailOrders(safeCart),
     };
-    console.log(payload);
 
     try {
       const res = await orderApi.makeOrder(payload);
-      console.log(res);
       onOrderSuccess?.(safeCart, res?.result?.orderId);
       toast.success("Đơn hàng được gửi đi, vui lòng chờ nhân viên xử lý!");
       onClose();
     } catch (err) {
-      console.error("Make order failed:", err);
       if (err?.response?.data?.message === "TABLE_ALREADY_HAS_ORDER") {
         toast.error("Bàn đang có đơn hàng chưa xử lý");
       } else {

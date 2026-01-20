@@ -29,6 +29,7 @@ function StaffDetailOrder({
   onApproveMore,
   onReject,
   onServing,
+  onPaid,
   processing,
   hasUnapprovedItems,
 }) {
@@ -289,6 +290,23 @@ function StaffDetailOrder({
             </button>
           </div>
         )}
+
+        {/* Pending_payment & Tranfer */}
+        {order.oderStatus === "Pending_payment" &&
+          order.paymentType === "Tranfer" && (
+            <div className="p-6 bg-white border-t border-emerald-100">
+              <button
+                onClick={() => onPaid(order.orderId)}
+                disabled={processing}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 text-white font-semibold 
+              bg-linear-to-r from-emerald-600 to-emerald-700 rounded-lg transition-all duration-200 hover:from-emerald-700 hover:to-emerald-800 
+              hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {/* <HandPlatter size={20} strokeWidth={2.5} /> */}
+                {processing ? "Đang xử lý..." : "Xác nhận đã thanh toán"}
+              </button>
+            </div>
+          )}
 
         {/* ===== COOKED ===== */}
         {order.oderStatus === "Cooked" && (

@@ -10,7 +10,8 @@ import TenantAdminRoutes from "./roles/TenantAdminRoutes";
 import GuestRoutes from "./roles/GuestRoutes";
 import WaiterRoutes from "./roles/WaiterRoutes";
 import KitchenRoutes from "./roles/KitchenRoutes";
-
+import VerifiedEmail from "../pages/guest/VerifiedEmail";
+import PaymentSuccess from "../pages/guest/PaymentSuccess";
 export default function AppRouter() {
   return (
     <Routes>
@@ -31,6 +32,12 @@ export default function AppRouter() {
 
       {/* 404 */}
       <Route path="*" element={<NotFoundPage />} />
+
+      {/* Xác thực email thành công */}
+      <Route path="/email-verified" element={<VerifiedEmail />} />
+
+      {/* Thanh toán momo thành công */}
+      <Route path="/payment-successfully" element={<PaymentSuccess />} />
     </Routes>
   );
 }
