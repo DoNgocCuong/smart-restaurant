@@ -37,7 +37,7 @@ export default function AppRouter() {
       <Route path="/email-verified" element={<VerifiedEmail />} />
 
       {/* Thanh toán momo thành công */}
-      <Route path="/payment-successfully" element={<PaymentSuccess />} />
+      <Route path="/paid-successfully" element={<PaymentSuccess />} />
     </Routes>
   );
 }
