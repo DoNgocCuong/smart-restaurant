@@ -14,14 +14,20 @@ import com.smart_restaurant.demo.enums.StatusTable;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import com.smart_restaurant.demo.mapper.PaymentMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +39,11 @@ import java.util.Optional;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 
 public class PaymentServiceImpl implements PaymentService {
+
+    @NonFinal
+    @Value(("${qr.FE_URL}"))
+    protected String fe_url;
+
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final StatusRepository statusRepository;
@@ -41,6 +52,8 @@ public class PaymentServiceImpl implements PaymentService {
     PaymentMapper paymentMapper;
     CustomerRepository customerRepository;
     TableRepository tableRepository;
+
+
 
     @Override
     @Transactional
@@ -87,7 +100,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public Payment updatePaymentStatus(Map<String, String> momoResponse) {
+    public void updatePaymentStatus(Map<String, String> momoResponse, HttpServletResponse response) throws IOException {
         String requestId = momoResponse.get(MomoParameter.REQUEST_ID);
         String momoOrderId = momoResponse.get(MomoParameter.ORDER_ID);
         String transId = momoResponse.get(MomoParameter.TRANS_ID);
@@ -125,7 +138,6 @@ public class PaymentServiceImpl implements PaymentService {
             }
         }
 
-        return paymentRepository.save(payment);
     }
 
 
