@@ -23,7 +23,7 @@ public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS = {
             "/users/save", "/api/auth/log-in", "/api/auth/log-out","/api/auth/introspect","/api/auth/refresh-token" ,
             "/api/auth/signup","/api/auth/verify-email/**","/swagger-ui.html", "/swagger-ui/**","/v3/api-docs/**","/api/qr/verify","/api/orders/*/invoice/pdf",
-            "/api/orders", "/api/orders/**", "/api/payment/**", "/api/payment", "/api/momo/**","/ws/**","/api/reviews/**", "/api/detail-orders/**", "/api/auth/log-in/email/**",
+            "/api/orders", "/api/orders/**", "/api/payment/**", "/api/payment", "/api/momo/**","/ws/**","/api/reviews/**", "/api/detail-orders/**", "/api/auth/log-in/email/**","/api/momo/ipn"
     };
     private CustomJwtDecoder customJwtDecoder;
 

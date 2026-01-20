@@ -13,13 +13,17 @@ import com.smart_restaurant.demo.enums.OrderStatus;
 import com.smart_restaurant.demo.exception.AppException;
 import com.smart_restaurant.demo.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +33,9 @@ import java.util.Map;
 @RequestMapping("/api/momo")
 @RequiredArgsConstructor
 public class MomoPaymentController {
+    @NonFinal
+    @Value(("${qr.FE_URL}"))
+    protected String fe_url;
 
     private final MomoPaymentService momoPaymentService;
     private final OrderService orderService;
@@ -80,25 +87,29 @@ public class MomoPaymentController {
     }
 
     @PostMapping("/ipn")
-    public String ipnHandler(@RequestBody Map<String, String> momoResponse) {
+    public String ipnHandler(@RequestBody Map<String, String> momoResponse, HttpServletResponse response) {
         log.info("Received MoMo IPN callback: {}", momoResponse);
 
         try {
             Integer resultCode = Integer.valueOf(momoResponse.get(MomoParameter.RESULT_CODE));
-            Payment payment = paymentService.updatePaymentStatus(momoResponse);
-
-            if (resultCode == 0) {
-                log.info("Payment successful for orderId: {}", payment.getOrder().getOrderId());
-                return "success";
-            } else {
-                log.warn("Payment failed for orderId: {}, reason: {}",
-                        payment.getOrder().getOrderId(),
-                        momoResponse.get(MomoParameter.MESSAGE));
-                return "failed";
-            }
+            paymentService.updatePaymentStatus(momoResponse,response);
+            return "success";
         } catch (Exception e) {
             log.error("Error processing MoMo IPN: ", e);
             return "error";
+        }
+    }
+
+    @GetMapping("/return")
+    public void returnHandler(
+            @RequestParam String orderId,
+            @RequestParam Integer resultCode,
+            HttpServletResponse response) throws IOException {
+
+        if (resultCode == 0) {
+            response.sendRedirect(fe_url + "/paid-successfully");
+        } else {
+            response.sendRedirect(fe_url + "/payment-failed");
         }
     }
 
