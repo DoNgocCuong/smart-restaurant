@@ -199,7 +199,7 @@ export default function LoginModal({
               className="absolute left-4 top-1/2 text-gray-400 -translate-y-1/2"
             />
             <input
-              type="email"
+              type="text"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
