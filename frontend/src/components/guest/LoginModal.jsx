@@ -68,6 +68,8 @@ export default function LoginModal({
 
       const googleToken = response.credential;
 
+      console.log(googleToken)
+      
       // Gửi token lên backend
       const res = await authApi.loginWithGoogle(tenantId, {
         token: googleToken,
