@@ -93,7 +93,7 @@ export default function CustomerInfoModal({ onSuccess, onClose }) {
               className="absolute left-4 top-1/2 text-gray-400 -translate-y-1/2 pointer-events-none"
             />
             <input
-              type="tel"
+              type="number"
               placeholder="Số điện thoại"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}

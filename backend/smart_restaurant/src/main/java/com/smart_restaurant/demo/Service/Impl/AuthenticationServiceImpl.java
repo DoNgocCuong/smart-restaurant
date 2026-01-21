@@ -281,8 +281,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             GoogleIdTokenVerifier verifier =
                     new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-                            // .setAudience(Collections.singletonList(googleClientId))
-                            .setAudience(Collections.singletonList("955403983411-1bp707jbei53tthatuk0863enivvu5f3.apps.googleusercontent.com"))
+                             .setAudience(Collections.singletonList(googleClientId))
+//                            .setAudience(Collections.singletonList("955403983411-1bp707jbei53tthatuk0863enivvu5f3.apps.googleusercontent.com"))
                             .build();
 
             GoogleIdToken idToken = verifier.verify(token);

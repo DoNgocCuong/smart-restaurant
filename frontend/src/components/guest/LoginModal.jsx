@@ -201,7 +201,6 @@ export default function LoginModal({
             />
             <input
               type="text"
-              type="text"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
