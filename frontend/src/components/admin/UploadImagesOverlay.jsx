@@ -196,23 +196,6 @@ function UploadImagesOverlay({ itemId, onClose, onSuccess }) {
                   </button>
 
                   {/* Avatar badge */}
-                  {idx === 0 && (
-                    <span
-                      className="
-                        absolute
-                        bottom-2 left-2
-                        bg-linear-to-r from-blue-600 to-blue-700
-                        text-white
-                        text-[10px]
-                        font-bold
-                        px-2 py-1
-                        rounded-lg
-                        shadow-md
-                      "
-                    >
-                      ⭐ Avatar
-                    </span>
-                  )}
                 </div>
               ))}
             </div>
@@ -221,7 +204,7 @@ function UploadImagesOverlay({ itemId, onClose, onSuccess }) {
 
         {urls.length === 0 && !uploading && (
           <div className="text-center py-8 text-gray-400">
-            <p className="text-sm">📸 Chưa có ảnh nào được thêm</p>
+            <p className="text-sm">Chưa có ảnh nào được thêm</p>
           </div>
         )}
 

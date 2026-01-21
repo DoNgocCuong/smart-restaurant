@@ -44,6 +44,7 @@ export default function LoginModal({
       window.google.accounts.id.initialize({
         client_id:
           "315292685589-c003buqq43ad0a35laoq80kelu45i6bf.apps.googleusercontent.com",
+        // deploy 955403983411-1bp707jbei53tthatuk0863enivvu5f3.apps.googleusercontent.com
         callback: handleGoogleCredentialResponse,
       });
 
@@ -67,6 +68,8 @@ export default function LoginModal({
       setError("");
 
       const googleToken = response.credential;
+
+      console.log("Google Token:", googleToken);
 
       // Gửi token lên backend
       const res = await authApi.loginWithGoogle(tenantId, {
@@ -197,7 +200,7 @@ export default function LoginModal({
               className="absolute left-4 top-1/2 text-gray-400 -translate-y-1/2"
             />
             <input
-              type="email"
+              type="text"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
