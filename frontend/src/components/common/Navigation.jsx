@@ -58,7 +58,6 @@ function Navigation() {
     { to: "dashboard", label: "Trang chủ" },
     { to: "menu-management", label: "Thực đơn" },
     { to: "table-management", label: "Bàn & QR" },
-    { to: "order-management", label: "Đơn hàng" },
     { to: "revenue", label: "Doanh thu" },
     { to: "staff-management", label: "Nhân viên" },
   ];
