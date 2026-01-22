@@ -79,6 +79,10 @@ function Report() {
       const revenue = revenueResponse?.result || [];
       const items = itemsResponse?.result || [];
 
+      console.log(revenue);
+      console.log(items);
+      
+      
       setRevenueData(revenue);
       setItemsData(items);
 
